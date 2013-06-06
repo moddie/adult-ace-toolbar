@@ -1,6 +1,6 @@
 /application/config/general.php
+/application/config/database.php
 /application/bootstrap.php
-/modules/database/config/database.php
 /nbproject
 .idea
 *~
