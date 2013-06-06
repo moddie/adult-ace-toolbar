@@ -21,7 +21,7 @@ return array
 			'username'   => 'user_for_work',
 			'password'   => 'password',
 			'persistent' => FALSE,
-			'database'   => 'elcats_parser',
+			'database'   => 'adult_ace_toolbar',
 		),
 		'table_prefix' => '',
 		'charset'      => 'utf8',
@@ -40,7 +40,7 @@ return array
 			 * boolean  persistent
 			 * string   identifier
 			 */
-			'dsn'        => 'mysql:host=localhost;dbname=elcats_parser',
+			'dsn'        => 'mysql:host=localhost;dbname=adult_ace_toolbar',
 			'username'   => 'root',
 			'password'   => 'r00tdb',
 			'persistent' => FALSE,

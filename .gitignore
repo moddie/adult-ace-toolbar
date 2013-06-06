@@ -1,6 +1,7 @@
 /application/config/general.php
 /application/config/database.php
 /application/bootstrap.php
+/application/logs/*
 /nbproject
 .idea
 *~
