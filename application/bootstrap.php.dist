@@ -91,6 +91,7 @@ if (isset($_SERVER['KOHANA_ENV']))
  */
 Kohana::init(array(
 	'base_url'   => '/adult_ace_toolbar/',
+    'index_file' => FALSE,
 ));
 
 /**
@@ -120,7 +121,7 @@ Kohana::modules(array(
 	// 'minion'     => MODPATH.'minion',     // CLI Tasks
 	 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
-	 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+	// 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
 	));
 
 /**
@@ -132,6 +133,13 @@ Route::set('api', 'api/(<controller>(/<action>))', array('directory' => 'api'))
 	->defaults(array(
         'directory' => 'api',
 		'controller' => 'index',
+		'action'     => 'index',
+	));
+
+Route::set('admin', 'admin/(<controller>(/<action>))', array('directory' => 'admin'))
+	->defaults(array(
+        'directory' => 'admin',
+		'controller' => 'login',
 		'action'     => 'index',
 	));
 
