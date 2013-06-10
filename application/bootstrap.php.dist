@@ -129,14 +129,14 @@ Kohana::modules(array(
  * defaults for the URI.
  */
 
-Route::set('api', 'api/(<controller>(/<action>))', array('directory' => 'api'))
+Route::set('api', 'api(/<controller>(/<action>))', array('directory' => 'api'))
 	->defaults(array(
         'directory' => 'api',
 		'controller' => 'index',
 		'action'     => 'index',
 	));
 
-Route::set('admin', 'admin/(<controller>(/<action>))', array('directory' => 'admin'))
+Route::set('admin', 'admin(/<controller>(/<action>))', array('directory' => 'admin'))
 	->defaults(array(
         'directory' => 'admin',
 		'controller' => 'login',
