@@ -88,7 +88,7 @@
 <?php } ?>
 
     <form method="post" action='<?php echo URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'Delete')) ?>?website=<?php echo urlencode($website) ?>'>
-    <table class="table table-hover">
+    <table class="table table-hover ads">
         <tr>
             <td><input class="checkall" type="checkbox" /></td>
             <td><?php echo __('Website') ?></td>
@@ -113,7 +113,7 @@
         </tr>
         <?php } ?>
     </table>
-    <input type="button" id="delete" value="<?php echo __('Delete') ?>" class="btn btn-danger" />
+    <button id="delete" class="btn btn-danger disabled"><?php echo __('Delete') ?></button>
 </form>
 
 <form id='move' name='move_position' method="post" action=''></form>
@@ -121,6 +121,8 @@
 <?php echo $pagination ?>
 <script>
     $(document).ready(function(){
+       
+        $(':checkbox').prop('checked', 0);
        
         $('#filter_website').change(function(){
             $(this).closest('form').submit(); 
@@ -138,12 +140,28 @@
         });
        
         $('#delete').click(function(){
-            $(this).closest('form').submit(); 
+            if (!$(this).hasClass('disabled'))
+            {
+                $(this).closest('form').submit(); 
+            }
+            return false;
         });
         
         $('.checkall').on('click', function () {
             $(this).closest('table').find(':checkbox').prop('checked', this.checked);
         });
+        
+        $('.ads :checkbox').on('click', function () {
+            if ($(this).closest('table').find(':checkbox:checked').length)
+            {
+                $('#delete').removeClass('disabled');
+            }
+            else
+            {
+                $('#delete').addClass('disabled');
+            }
+        });
+        
        
     });
 </script>
