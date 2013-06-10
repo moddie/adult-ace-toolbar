@@ -6,8 +6,9 @@
 <!--    <link href="<?php echo URL::base(true) ?>css/common.css" type="text/css" rel="Stylesheet">
     <link href="<?php echo URL::base(true) ?>css/reset.css" type="text/css" rel="Stylesheet">
     <link href="<?php echo URL::base(true) ?>css/styles.css" type="text/css" rel="Stylesheet">
+-->
 
-    <script src="<?php echo URL::base(true) ?>js/jquery-1.8.2.min.js"></script>-->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 </head>
     <body>
         

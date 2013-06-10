@@ -19,7 +19,7 @@ class Controller_Admin_Login extends Controller_Auth {
         if ($success)
         {
             // Login successful, send to app
-            Controller::redirect( Route::get('admin')->uri(array('controller' => 'login', 'action' => 'index')) );
+            Controller::redirect( Route::get('admin')->uri(array('controller' => 'ads', 'action' => 'index')) );
         }
         else
         {
