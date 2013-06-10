@@ -90,7 +90,7 @@
     <form method="post" action='<?php echo URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'Delete')) ?>?website=<?php echo urlencode($website) ?>'>
     <table class="table table-hover">
         <tr>
-            <td></td>
+            <td><input class="checkall" type="checkbox" /></td>
             <td><?php echo __('Website') ?></td>
             <td><?php echo __('Open URL') ?></td>
             <td><?php echo __('Country') ?></td>
@@ -139,6 +139,10 @@
        
         $('#delete').click(function(){
             $(this).closest('form').submit(); 
+        });
+        
+        $('.checkall').on('click', function () {
+            $(this).closest('table').find(':checkbox').prop('checked', this.checked);
         });
        
     });
