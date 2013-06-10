@@ -2,6 +2,6 @@
 
 return array(
 
-    'site_name'   => 'Kohana',
+    'site_name'   => 'AdultAceToolbar',
     
 );
