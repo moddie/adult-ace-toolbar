@@ -5,16 +5,18 @@ u[o]&&(delete u[o],c?delete n[l]:typeof n.removeAttribute!==i?n.removeAttribute(
 
 
 var checkAat,
-    aatIsExpanded = false;
+    aatIsExpanded = false,
+    aatSearchResults;
 
 function aatPlugin(){};
 aatPlugin.prototype = {
     cookieManagerUrl: '//pmeshkov.dev/aat/cookie_manager.php',
+    apiUrl: '//pmeshkov.dev/aat/api/videos/get',
     init: function()
     {
         if( (top === self) && ('undefined' === typeof window.checkAat) )
         {
-            window.check_ytfd = true;
+            window.checkAat = true;
             this.indexAction();
         }
     },
@@ -31,6 +33,9 @@ aatPlugin.prototype = {
         var selfPlugin = this;
 
         jQueryAat('head').append('<style>\n\
+#aatComponentLogo, #aatSearchResultsContainer {\n\
+    font-family: Verdana, Geneva, sans-serif;\n\
+}\n\
 #aatComponent {\n\
     position: fixed;\n\
     border-color: ActiveBorder;\n\
@@ -48,12 +53,12 @@ aatPlugin.prototype = {
     width: auto !important;\n\
     left: 0;\n\
     right: 0;\n\
+    min-width: 500px;\n\
 }\n\
 #aatComponentLogo {\n\
     float: left;\n\
     display: none;\n\
     margin-top: 4px;\n\
-    font-family: Verdana, Geneva, sans-serif;\n\
     font-size: 16px;\n\
 }\n\
 #aatComponentSearchWrapper, #aatComponentToggle {\n\
@@ -93,11 +98,135 @@ aatPlugin.prototype = {
 .aatExpanded {\n\
     background-position: -24px 0 !important;\n\
 }\n\
+#aatOverlay {\n\
+    background-color: rgba(0,0,0,0.75);\n\
+    position: fixed;\n\
+    overflow: auto;\n\
+    top: 0;\n\
+    bottom: 0;\n\
+    left: 0;\n\
+    right: 0;\n\
+    zindex: 999998;\n\
+    display: none;\n\
+}\n\
+#aatSearchResultsContainerWrapper {\n\
+    margin: 50px;\n\
+}\n\
+#aatSearchResultsContainer {\n\
+    margin: auto;\n\
+    min-width: 400px;\n\
+    color: #FFFFFF;\n\
+    font-size: 14px;\n\
+}\n\
+#aatSearchResultsTopBar, #aatSearchResultsBottomBar, #aatSearchResultsContent {\n\
+    margin: 20px 10px;\n\
+}\n\
+.aatFloatl, #aatSearchResultsPrevButton, .aatSearchResultElement {\n\
+    float: left;\n\
+}\n\
+.aatFloatr, #aatSearchResultsNextButton {\n\
+    float: right;\n\
+}\n\
+.aatClearFix {\n\
+    clear: both;\n\\n\
+    height:0\n\
+}\n\
+.aatSearchResultElement {\n\
+    margin: 2px 2px 15px;\n\
+    padding: 8px;\n\
+    border: 1px solid transparent;\n\
+    cursor: pointer;\n\
+    width: 182px;\n\
+}\n\
+.aatSearchResultElement:hover {\n\
+    background-color:  rgba(180,180,180,0.7);\n\
+    border-color:  rgba(100,100,100,1);\n\
+}\n\
+.aatSearchResultElement:active, .aatSearchResultElementSelected {\n\
+    border-color:  rgba(50,50,255,1) !important;\n\
+    background-color:  rgba(180,180,255,0.7);\n\
+}\n\
+.aatSearchResultThumbWrapper > img {\n\
+    width: 182px;\n\
+}\n\
+.aatSearchResultThumbWrapper {\n\
+    width: 182px;\n\
+    height: 137px;\n\
+    margin-bottom: 5px;\n\
+    background: #000000;\n\
+    overflow: hidden;\n\
+    vertical-align:middle;\n\
+    display: table-cell;;\n\
+}\n\
+.aatSearchResultElementTitle {\n\
+    font-weight: bold;\n\
+    font-size: 14px;\n\
+    white-space: nowrap;\n\
+    overflow: hidden;\n\
+}\n\
+.aatSearchResultElementSite {\n\
+    font-size: 11px;\n\
+    white-space: nowrap;\n\
+    left: 0;\n\
+    bottom: 0;\n\
+    position: relative;\n\
+    line-height: 21px;\n\
+    float: left;\n\
+}\n\
+.aatSearchResultElementLength {\n\
+    font-size: 12px;\n\
+    white-space: nowrap;\n\
+    right: 0;\n\
+    bottom: 0;\n\
+    position: relative;\n\
+    line-height: 21px;\n\
+    float: right;\n\
+}\n\
+#aatPlayerWrapper{\n\
+    width: 80%;\n\
+    height: 80%;\n\
+    top: 10%;\n\
+    left: 10%;\n\
+    border: 2px solid #FFFFFF;\n\
+    background: rgba(0,0,0,0.85);\n\
+    box-shadow: 3px 2px 20px #000000;\n\
+    margin: auto;\n\
+    position: fixed;\n\
+}\n\
+#aatPlayerContainer {\n\
+    width: 100%;\n\
+    height: 100%;\n\
+    border: none;\n\
+}\n\
 </style>');
         componentExpandedClass = aatIsExpanded ? ' class="aatComponentExpanded"' : '';
         togglerExpandedClass   = aatIsExpanded ? ' class="aatExpanded"' : '';
 
-        jQueryAat('body').append('<div id="aatComponent"' + componentExpandedClass + '>\n\
+        jQueryAat('body').append('<div id="aatOverlay">\n\
+    <div id="aatSearchResultsContainerWrapper">\n\
+        <div id="aatSearchResultsContainer">\n\
+            <div id="aatSearchResultsTopBar">\n\
+                <div class="aatFloatl">21-40 results of 150</div>\n\
+                <div class="aatFloatr">\n\
+                    Min time length:&nbsp;<input id="aatSearchTimeLengthInput" type="text" placeholder="00:00" />&nbsp;&nbsp;\n\
+                    Site:&nbsp;<select id="aatSearchSiteInput"><option value="">All</option></select>\n\
+                </div>\n\
+                <div class="aatClearFix"></div>\n\
+            </div>\n\
+            <div id="aatSearchResultsContent"></div>\n\
+            <div class="aatClearFix"></div>\n\
+            <div id="aatSearchResultsBottomBar">\n\
+                <button id="aatSearchResultsPrevButton" disabled>Prev</button>\n\
+                <button id="aatSearchResultsNextButton" disabled>Next</button>\n\
+                <div class="aatClearFix"></div>\n\
+            </div>\n\
+        </div>\n\
+    </div>\n\
+    <div id="aatPlayerWrapper">\n\
+        <iframe id="aatPlayerContainer"></iframe>\n\
+    </div>\n\
+</div>\n\
+<div id="aatComponent"' + componentExpandedClass + '>\n\
     <div id="aatComponentLogo">Adult Ace Toolbar</div>\n\
     <div id="aatComponentToggle"' + togglerExpandedClass + '></div>\n\
     <div id="aatComponentSearchWrapper">\n\
@@ -112,8 +241,118 @@ aatPlugin.prototype = {
             jQueryAat('#aatComponent').toggleClass('aatComponentExpanded');
 
             aatIsExpanded = self.hasClass('aatExpanded');
+            if(! aatIsExpanded)
+            {
+                jQueryAat('#aatOverlay').hide();
+            }
             jQueryAat.getScript(selfPlugin.cookieManagerUrl + '?is_expanded=' + aatIsExpanded);
         });
+        jQueryAat('#aatComponentSearchButton').click(function(){
+            selfPlugin.newSearch();
+        });
+        jQueryAat('#aatComponentPlayButton').click(function(){
+            selfPlugin.playButtonAction();
+        });
+    },
+    showSearchResults: function() {
+        var resultsContainer = jQueryAat('#aatSearchResultsContent'),
+            sitesSelect      = jQueryAat('#aatSearchSiteInput');
+        resultsContainer.empty();
+
+        var ResultsCnt = aatSearchResults.videos.length;
+        if(ResultsCnt > 0)
+        {
+            for(var i = 0; i < ResultsCnt; i++)
+            {
+                var video = aatSearchResults.videos[i],
+                    videoLength = this.formatTime(video.length);
+
+                resultsContainer.append('<div class="aatSearchResultElement" data-link="' + video.url + '" title="' + video.title + '">\n\
+                    <div class="aatSearchResultThumbWrapper">\n\
+                        <img src="' + video.thumbnail + '" alt="' + video.title + '" />\n\
+                    </div>\n\
+                    <div class="aatSearchResultElementTitle">' + video.title + '</div>\n\
+                    <span class="aatSearchResultElementSite">' + video.site + '</span>\n\
+                    <span class="aatSearchResultElementLength">' + videoLength + '</span>\n\
+                    <div class="aatClearFix"></div>\n\
+                </div>');
+            }
+            var playButton = jQueryAat('#aatComponentPlayButton');
+            jQueryAat('.aatSearchResultElement', resultsContainer).click(function(){
+                jQueryAat(this).toggleClass('aatSearchResultElementSelected');
+
+                if(jQueryAat('.aatSearchResultElementSelected').length > 0)
+                {
+                    playButton.attr('disabled', null);
+                }
+                else
+                {
+                    playButton.attr('disabled', true);
+                }
+            });
+        }
+
+        sitesSelect
+            .empty()
+            .append('<option value="">All</option>');
+        var SitesCnt = aatSearchResults.sites.length;
+        if(SitesCnt > 0)
+        {
+            for(var i = 0; i < SitesCnt; i++)
+            {
+                sitesSelect.append('<option>' + aatSearchResults.sites[i] + '</option>');
+            }
+        }
+        jQueryAat('#aatOverlay').show();
+    },
+    newSearch: function() {
+        var selfPlugin = this,
+            keyword    = jQueryAat('#aatComponentSearchInput').val(),
+            site       = jQueryAat('#aatSearchSiteInput').val(),
+            timeLength = jQueryAat('#aatSearchTimeLengthInput').val(),
+            page       = 1;
+        /*if(keyword === '')
+        {
+            alert('Please, enter search keyword');
+            return false;
+        }*/
+        jQueryAat.getScript(selfPlugin.apiUrl + '?keyword=' + keyword + '&site=' + site + '&length=' + timeLength + '&page=' + page, function()
+        {
+            selfPlugin.showSearchResults();
+        });
+    },
+    formatTime: function(seconds, separator) {
+        var seconds   = seconds || 0;
+            separator = separator || ':';
+            hours     = parseInt( seconds / 3600 ) % 24,
+            minutes   = parseInt( seconds / 60 ) % 60,
+            seconds   = seconds % 60,
+            result    = '';
+
+        if(hours)
+        {
+            result = (hours < 10 ? '0' + hours : hours) + separator;
+        }
+        if(minutes)
+        {
+            result = result + (minutes < 10 ? '0' + minutes : minutes) + separator;
+        }
+        else if(hours)
+        {
+            result = result + '00' + separator;
+        }
+        result = result + (seconds  < 10 ? '0' + seconds : seconds);
+
+        return result;
+    },
+    playButtonAction: function() {
+        var selectedVideos = jQueryAat('.aatSearchResultElementSelected');
+        if(selectedVideos.length > 0)
+        {
+            currentVideo =  selectedVideos.first();
+            console.log( currentVideo);
+            jQueryAat('#aatPlayerContainer').attr('src', currentVideo.data('link'));
+        }
     }
 };
 
@@ -129,4 +368,17 @@ function getIsExpandedFromCookie(data)
         aatIsExpanded = data;
     }
 } // end getIsExpandedFromCookie
+
+/**
+ * Callback for retrieving search results
+ *
+ * @param array data
+ */
+function getSearchResults(data)
+{
+    if(data && typeof(data) === 'object')
+    {
+        aatSearchResults = data;
+    }
+} // end getSearchResults
 
