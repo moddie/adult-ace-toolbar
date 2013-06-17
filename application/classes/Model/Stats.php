@@ -16,8 +16,10 @@ class Model_Stats extends ORM {
         foreach ($params as $param => $val)
         {
             $this->where($param, '=', $val);
-            $this->order_by('position', 'ASC');
         }
+        
+        $this->order_by('date', 'DESC');
+        $this->order_by('amount_users', 'DESC');
         
         if ($page < 1)
         {
@@ -32,35 +34,13 @@ class Model_Stats extends ORM {
         return $this->with('countries')->find_all();
     }
     
-    public function count_by_params($website)
+    public function count_by_params($params)
     {
-        if ($website)
+        foreach ($params as $param => $val)
         {
-            $this->where('website', '=', $website);
+            $this->where($param, '=', $val);
         }
                 
         return $this->with('countries')->count_all();
-    }
-    
-    public function get_websites()
-    {
-        return $this->group_by('website')->find_all();
-    }
-    
-    public function add_new()
-    {
-        $pos = 1;
-        $position = ORM::factory('Ads')->where('website', '=', $this->website)->order_by('position', 'DESC')->find();
-        if ($position->pk())
-        {
-            $this->position = $position->position + $pos;
-        }
-        
-        return $this->save();
-    }
-    
-    public function find_by_website_pos($website, $pos)
-    {
-        return $this->where('website', '=', $website)->where('position', '=', $pos)->find();
     }
 }

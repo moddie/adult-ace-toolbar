@@ -10,6 +10,8 @@
 
     <!-- jQuery -->
     <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/ui-lightness/jquery-ui.min.css" rel="stylesheet" media="screen">
     <!-- Bootstrap -->
     <link href="<?php echo URL::base(true) ?>bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <script src="<?php echo URL::base(true) ?>bootstrap/js/bootstrap.min.js"></script>
@@ -24,10 +26,10 @@
                     <?php if (Auth::instance()->logged_in('admin')) { ?>
                     <ul class="nav">
                         <li <?php if (Request::$current->controller() == 'Ads') echo 'class="active"' ?> >
-                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'ads', 'action' => 'index')) ?>"><?php echo __('Ads') ?></a>
+                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index')) ?>"><?php echo __('Ads') ?></a>
                         </li>
                         <li <?php if (Request::$current->controller() == 'Stats') echo 'class="active"' ?>>
-                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'stats', 'action' => 'logout')) ?>"><?php echo __('Stats') ?></a>
+                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Stats', 'action' => 'index')) ?>"><?php echo __('Stats') ?></a>
                         </li>
                     </ul>
                     <form class="navbar-form pull-right">
