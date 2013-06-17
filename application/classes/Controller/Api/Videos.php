@@ -1,20 +1,20 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Api_Videos extends Controller_Base {
-
+class Controller_Api_Videos extends Controller_Base
+{
     public $template = 'layouts/empty';
 
     public function action_get()
 	{
-        $keyword = Arr::get($_GET, 'keyword', NULL);
-        $site = Arr::get($_GET, 'site', NULL);
-        $length = intval(Arr::get($_GET, 'length', 0));
-        $page = intval(Arr::get($_GET, 'page', 1));
+        $keyword  = Arr::get($_GET, 'keyword', NULL);
+        $site     = Arr::get($_GET, 'site', NULL);
+        $length   = intval(Arr::get($_GET, 'length', 0));
+        $page     = intval(Arr::get($_GET, 'page', 1));
         $per_page = intval(Arr::get($_GET, 'per_page', 20));
 
         $result = array(
             'videos' => array(),
-            'sites' => array(),
+            'sites'  => array(),
         );
 
         $videos = ORM::factory('Videos')->find_by_params($keyword, $length, $site, $page, $per_page);
@@ -41,10 +41,10 @@ class Controller_Api_Videos extends Controller_Base {
             }
 
             $result['videos'][] = array(
-                'title' => $video->title,
-                'site' => $siteName,
-                'url' => $video->link,
-                'length' => $video->vid_length,
+                'title'     => $video->title,
+                'site'      => $siteName,
+                'url'       => $video->link,
+                'length'    => $video->vid_length,
                 'thumbnail' => $thumb,
             );
 
