@@ -12,6 +12,9 @@ function aatPlugin(){};
 aatPlugin.prototype = {
     cookieManagerUrl: '//pmeshkov.dev/aat/cookie_manager.php',
     apiUrl: '//pmeshkov.dev/aat/api/videos/get',
+    selectedSite: '',
+    currentVideo: null,
+    currentVideoIndex: null,
     init: function()
     {
         if( (top === self) && ('undefined' === typeof window.checkAat) )
@@ -33,8 +36,17 @@ aatPlugin.prototype = {
         var selfPlugin = this;
 
         jQueryAat('head').append('<style>\n\
-#aatComponentLogo, #aatSearchResultsContainer {\n\
+/*#aatComponentLogo, #aatSearchResultsContainer {\n\
+}*/\n\
+#aatComponent *, #aatOverlay * {\n\
     font-family: Verdana, Geneva, sans-serif;\n\
+    font-weight: normal;\n\
+    font-size: 12px;\n\
+    color: #FFFFFF;\n\
+    text-align: left;\n\
+}\n\
+#aatComponent *, #aatOverlay select, #aatOverlay input, #aatOverlay select *  {\n\
+    color: #000000;\n\
 }\n\
 #aatComponent {\n\
     position: fixed;\n\
@@ -106,7 +118,7 @@ aatPlugin.prototype = {
     bottom: 0;\n\
     left: 0;\n\
     right: 0;\n\
-    zindex: 999998;\n\
+    z-index: 999997;\n\
     display: none;\n\
 }\n\
 #aatSearchResultsContainerWrapper {\n\
@@ -192,8 +204,60 @@ aatPlugin.prototype = {
     box-shadow: 3px 2px 20px #000000;\n\
     margin: auto;\n\
     position: fixed;\n\
+    display: none;\n\
+}\n\
+#aatPlayerPrevButton, #aatPlayerNextButton {\n\
+    width: 10%;\n\
+    height: 100%;\n\
+    position: absolute;\n\
+    top: 0;\n\
+    cursor: pointer;\n\
+    background-position: 50% 50%;\n\
+    background-repeat: no-repeat;\n\
+}\n\
+#aatPlayerCloseButton {\n\
+    width: 32px;\n\
+    height: 32px;\n\
+    position: absolute;\n\
+    cursor: pointer;\n\
+    top: -16px;\n\
+    right: -16px;\n\
+    z-index: 999998;\n\
+    border-radius: 16px;\n\
+    border: 2px solid #000000;\n\
+    background-color: #FFFFFF;\n\
+    background-position: 50% 50%;\n\
+    background-repeat: no-repeat;\n\
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABsUlEQVR4Xu2Xy2rCQBSGm2hETI1Kk3hZ6HsUpNtin8JS270P4r5U+hKl4rYU+hYudOElaRdJjYj10v8s7IRAxDAppTADA8M5x/k/Dv+coLTb7U7+csnY/wtAAAgAAaCqqh6Wy2Qyxq8CpFKpJkQGiUSiHsxRDHAD1LRiBmDi1Wq1i61VKpWeH4LOFEMuW6vV7qNAHDWKIX4N4YdcLvcDbFnWfDweN+hM4qZpnu5zruvuhsPh7Wq16nJ3AC0/0zSt4xenRYLlcrnHxNlCvYT6TjqdNmPpQDKZPC+VSv1isZg9pq22bXvoztV6vX6JxQO46G06nV6i7Z+RxfkBGMRkMmEQHOI8c0CRJCkUGobe4vAV7zNkPriA4Z4Nw1DDamDGLIzZJ89EAOAXD0LAsAyCF4CeUqFQePKL+2fBbDabB+P0WvL5fI+eMDfAcrm0HMdp03BhUTaIYMwGnf051G9R314sFh+xeIAmGibbHUH4xTebzSttOlNsLz4ajW7wm8fD0sy5R29FUVq6rruyLNeDOYoh56CmGeHO8El46JOL1tphn2rP896j3Cf+FwgAASAAvgEVJSOJLXL1AwAAAABJRU5ErkJggg==);\n\
+}\n\
+#aatPlayerCloseButton:hover {\n\
+    background-color: #CCCCCC\n\
+}\n\
+#aatPlayerPrevButton:hover, #aatPlayerNextButton:hover {\n\
+    background-color: rgba(180,180,180,0.7);\n\
+}\n\
+#aatPlayerPrevButton{\n\
+    background-image: url(data:image/png;base64,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);\n\
+    right: 100%;\n\
+}\n\
+#aatPlayerNextButton{\n\
+    background-image: url(data:image/png;base64,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);\n\
+    left: 100%;\n\
+}\n\
+#aatPlayerTitle {\n\
+    height: 20px;\n\
+    font-size: 15px;\n\
+    font-weight: bold;\n\
+    padding: 5px;\n\
 }\n\
 #aatPlayerContainer {\n\
+    left: 0;\n\
+    top: 31px;\n\
+    bottom: 0;\n\
+    right: 0;\n\
+    position: absolute;\n\
+}\n\
+#aatPlayerIframe {\n\
     width: 100%;\n\
     height: 100%;\n\
     border: none;\n\
@@ -223,7 +287,13 @@ aatPlugin.prototype = {
         </div>\n\
     </div>\n\
     <div id="aatPlayerWrapper">\n\
-        <iframe id="aatPlayerContainer"></iframe>\n\
+        <div id="aatPlayerCloseButton" title="Close Player">&nbsp;</div>\n\
+        <div id="aatPlayerPrevButton" title="Previous video">&nbsp;</div>\n\
+        <div id="aatPlayerNextButton" title="Next video">&nbsp;</div>\n\
+        <div id="aatPlayerTitle">Video Title</div>\n\
+        <div id="aatPlayerContainer">\n\
+            <iframe id="aatPlayerIframe"></iframe>\n\
+        </div>\n\
     </div>\n\
 </div>\n\
 <div id="aatComponent"' + componentExpandedClass + '>\n\
@@ -244,6 +314,7 @@ aatPlugin.prototype = {
             if(! aatIsExpanded)
             {
                 jQueryAat('#aatOverlay').hide();
+                selfPlugin.closePlayer();
             }
             jQueryAat.getScript(selfPlugin.cookieManagerUrl + '?is_expanded=' + aatIsExpanded);
         });
@@ -253,10 +324,25 @@ aatPlugin.prototype = {
         jQueryAat('#aatComponentPlayButton').click(function(){
             selfPlugin.playButtonAction();
         });
+        jQueryAat('#aatPlayerPrevButton').click(function(){
+            selfPlugin.prevButtonAction();
+        });
+        jQueryAat('#aatPlayerNextButton').click(function(){
+            selfPlugin.nextButtonAction();
+        });
+        jQueryAat('#aatPlayerCloseButton').click(function(){
+            selfPlugin.closePlayer();
+        });
+        jQueryAat('#aatSearchSiteInput').change(function(){
+            selfPlugin.selectedSite = jQueryAat(this).val();
+            selfPlugin.newSearch();
+        });
     },
     showSearchResults: function() {
         var resultsContainer = jQueryAat('#aatSearchResultsContent'),
-            sitesSelect      = jQueryAat('#aatSearchSiteInput');
+            sitesSelect      = jQueryAat('#aatSearchSiteInput'),
+            selfPlugin       = this;
+
         resultsContainer.empty();
 
         var ResultsCnt = aatSearchResults.videos.length;
@@ -281,7 +367,8 @@ aatPlugin.prototype = {
             jQueryAat('.aatSearchResultElement', resultsContainer).click(function(){
                 jQueryAat(this).toggleClass('aatSearchResultElementSelected');
 
-                if(jQueryAat('.aatSearchResultElementSelected').length > 0)
+                selfPlugin.selectedVideos = jQueryAat('.aatSearchResultElementSelected');
+                if(selfPlugin.selectedVideos.length > 0)
                 {
                     playButton.attr('disabled', null);
                 }
@@ -300,7 +387,8 @@ aatPlugin.prototype = {
         {
             for(var i = 0; i < SitesCnt; i++)
             {
-                sitesSelect.append('<option>' + aatSearchResults.sites[i] + '</option>');
+                var selected = (this.selectedSite === aatSearchResults.sites[i]) ? ' selected' : '';
+                sitesSelect.append('<option' + selected + '>' + aatSearchResults.sites[i] + '</option>');
             }
         }
         jQueryAat('#aatOverlay').show();
@@ -346,13 +434,53 @@ aatPlugin.prototype = {
         return result;
     },
     playButtonAction: function() {
-        var selectedVideos = jQueryAat('.aatSearchResultElementSelected');
-        if(selectedVideos.length > 0)
+        if(this.selectedVideos.length == 0)
         {
-            currentVideo =  selectedVideos.first();
-            console.log( currentVideo);
-            jQueryAat('#aatPlayerContainer').attr('src', currentVideo.data('link'));
+            alert('Please, select at least one video first');
+            return false;
         }
+
+
+
+        this._startPlayVideo();
+    },
+    prevButtonAction: function() {
+        if(this.selectedVideos.length < 2)
+        {
+            return false;
+        }
+        this.currentVideo = this.selectedVideos.eq(this.currentVideoIndex - 1);
+        this.currentVideoIndex = this.selectedVideos.index(this.currentVideo);
+
+        this._startPlayVideo();
+    },
+    nextButtonAction: function() {
+        if(this.selectedVideos.length < 2)
+        {
+            return false;
+        }
+        this.currentVideo = this.selectedVideos.eq(this.currentVideoIndex + 1);
+        this.currentVideoIndex = this.selectedVideos.index(this.currentVideo);
+
+        this._startPlayVideo();
+    },
+    _startPlayVideo: function() {
+        if(this.selectedVideos.length == 0)
+        {
+            alert('Noting to play');
+        }
+        if(this.currentVideo == null)
+        {
+            this.currentVideo      = this.selectedVideos.first();
+            this.currentVideoIndex = this.selectedVideos.index(this.currentVideo);
+        }
+        jQueryAat('#aatPlayerTitle').html(jQueryAat('.aatSearchResultElementTitle', this.currentVideo).html());
+        jQueryAat('#aatPlayerWrapper').show();
+        jQueryAat('#aatPlayerIframe').attr('src', this.currentVideo.data('link'));
+    }
+    ,closePlayer: function() {
+        jQueryAat('#aatPlayerWrapper').hide();
+        jQueryAat('#aatPlayerIframe').attr('src', '');
     }
 };
 

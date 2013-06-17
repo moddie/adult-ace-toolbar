@@ -21,7 +21,7 @@ class Model_Videos extends ORM {
 
         if ($site)
         {
-            $this->where('site_name', '=', $site);
+            $this->where('site_name', 'like', '%' . $site);
         }
 
         if ($per_page > 500)
