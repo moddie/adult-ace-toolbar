@@ -90,12 +90,12 @@
     <form method="post" action='<?php echo URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'Delete')) ?>?website=<?php echo urlencode($website) ?>'>
     <table class="table table-hover ads">
         <tr>
-            <td><input class="checkall" type="checkbox" /></td>
-            <td><?php echo __('Website') ?></td>
-            <td><?php echo __('Open URL') ?></td>
-            <td><?php echo __('Country') ?></td>
+            <th><input class="checkall" type="checkbox" /></th>
+            <th><?php echo __('Website') ?></th>
+            <th><?php echo __('Open URL') ?></th>
+            <th><?php echo __('Country') ?></th>
             <?php if ($website) { ?>
-            <td><?php echo __('Position') ?></td>
+            <th><?php echo __('Position') ?></th>
             <?php } ?>
         </tr>
         <?php foreach ($ads as $ad) { ?>
