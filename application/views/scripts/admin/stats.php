@@ -5,10 +5,12 @@
     <div class="control-group">
         <label class="control-label" for="date"><?php echo __('Date') ?></label>
         <div class="controls">
-            <div class="input-append">
-                <input type="text" class="span2" name="date" id="date" value="<?php echo $date ?>" />
-                 <button class="btn" type="button" id="reset_date"><?php echo __('Reset') ?></button>
-            </div>
+            <input type="text" class="span2" name="date" id="date" value="<?php echo $date ?>" />
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button class="btn" type="button" id="reset_date"><?php echo __('Reset filter') ?></button>
         </div>
     </div>
 </form>
