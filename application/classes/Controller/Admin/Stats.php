@@ -35,23 +35,4 @@ class Controller_Admin_Stats extends Controller_Auth {
 		$this->display($view);
 	}
     
-    public function action_delete()
-	{
-        $view = View::factory('scripts/admin/ads');
-        
-        $website = Arr::get($_GET, 'website', NULL);
-        
-        $ids = Arr::get($_POST, 'ids');
-        if (is_array($ids))
-        {
-            foreach ($ids as $id) 
-            {
-                ORM::factory('Ads', $id)->delete();
-            }
-        }
-        
-        Session::instance()->set('delete_message', __('Deleted succesfully'));
-        
-        Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'ads', 'action' => 'index')) . '?filter_website=' . $website );
-    }
 }

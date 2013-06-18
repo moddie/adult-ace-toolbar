@@ -15,7 +15,7 @@ $pages_count = ceil($count_all / $perpage);
             if ( abs($page - $i) < 5 ) {
                 ?>
                 <li class="<?php echo ($i == $page) ? 'active' : '' ?>" ><a data-id="<?php echo $i ?>"
-                   href="?page=<?php echo $i ?>&filter_website=<?php echo $website ?>"><?php echo $i ?></a></li>
+                   href="?page=<?php echo $i ?>&filter_website=<?php echo urlencode($website) ?>"><?php echo $i ?></a></li>
                    <?php
                }
            }
@@ -35,10 +35,10 @@ $pages_count = ceil($count_all / $perpage);
         var perpage = '<?php echo $perpage ?>';
         var website = '<?php echo $website ?>';
 <?php if ( $page > 1 ) { ?>
-            jQuery('.prev').attr('href', '?page=<?php echo ($page - 1) ?>&filter_website=<?php echo $website ?>');
+            jQuery('.prev').attr('href', '?page=<?php echo ($page - 1) ?>&filter_website=<?php echo urlencode($website) ?>');
 <?php } ?>
 <?php if ( $page < $pages_count ) { ?>
-            jQuery('.next').attr('href', '?page=<?php echo ($page + 1) ?>&filter_website=<?php echo $website ?>');
+            jQuery('.next').attr('href', '?page=<?php echo ($page + 1) ?>&filter_website=<?php echo urlencode($website) ?>');
 <?php } ?>
     });
 </script>

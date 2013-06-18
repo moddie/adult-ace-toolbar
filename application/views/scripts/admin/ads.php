@@ -48,11 +48,11 @@
                 <div class="alert alert-success"><?php echo $messages['settings'] ?></div>
             <?php } ?>
             <?php foreach ($settings as $setting) { ?>
-            <div class="control-group">
+            <div class="control-group <?php if (isset($errors[$setting->name])) echo 'error'; ?>">
                 <label class="control-label" for="inputEmail"><?php echo __(ucfirst($setting->name)) ?></label>
                 <div class="controls">
                     <input type="text" name="<?php echo $setting->name ?>" value="<?php echo $setting->value ?>" class='settings' />
-                    <div><?php if (isset($errors[$setting->name])) echo $errors[$setting->name]; ?></div>
+                    <div class="help-inline"><?php if (isset($errors[$setting->name])) echo $errors[$setting->name]; ?></div>
                 </div>
             </div>
             <?php } ?>
@@ -154,7 +154,8 @@
         
             var dir = $(this).data('dir');
             var id = $(this).data('id');
-           
+//           console.log("<?php echo URL::base(TRUE, TRUE) . Route::get('admin')->uri(array('controller' => 'ads', 'action' => 'move')) ?>?website=<?php echo urlencode($website) ?>&page=<?php echo $page ?>&id="+id+"&direction="+dir);
+//           return false;
             $('#move').attr('action', "<?php echo URL::base(TRUE, TRUE) . Route::get('admin')->uri(array('controller' => 'ads', 'action' => 'move')) ?>?website=<?php echo urlencode($website) ?>&page=<?php echo $page ?>&id="+id+"&direction="+dir);
             $('#move').submit(); 
             
