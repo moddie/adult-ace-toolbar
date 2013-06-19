@@ -34,8 +34,14 @@ class Controller_Admin_Ads extends Controller_Auth {
         if (isset($_POST['limit']))
         {            
             $limit = Arr::get($_POST, 'limit');
-            $limit = filter_input(INPUT_POST, 'limit', FILTER_VALIDATE_INT);
-            if (!$limit)
+            $int_options = array(
+                "options" => array(
+                    "min_range" => 0, 
+                    "max_range" => 1000000,
+                )
+            );
+            $limit = filter_input(INPUT_POST, 'limit', FILTER_VALIDATE_INT, $int_options);
+            if ($limit === FALSE)
             {
                 $errors['limit'] = __('Limit must be integer!'); 
             }
@@ -112,27 +118,19 @@ class Controller_Admin_Ads extends Controller_Auth {
         if ($advertisement->loaded())
         {
             $pos = $advertisement->position;
-            if ($direction == 'up')
+            
+            $change_advertisement = ORM::factory('Ads')->find_by_website_pos($website, $pos, $direction);
+            if ($change_advertisement->pk())
             {
-                $new_pos = $pos - 1;
-            }
-            else
-            {
-                $new_pos = $pos + 1;
+                $new_pos = $change_advertisement->position;
+                
+                $advertisement->position = $new_pos;
+                $advertisement->save();
+
+                $change_advertisement->position = $pos;
+                $change_advertisement->save();
             }
             
-            if ($pos > 0)
-            {
-                $change_advertisement = ORM::factory('Ads')->find_by_website_pos($website, $new_pos);
-                if ($change_advertisement->pk())
-                {
-                    $advertisement->position = $new_pos;
-                    $advertisement->save();
-
-                    $change_advertisement->position = $pos;
-                    $change_advertisement->save();
-                }
-            }
         }
         
         Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'ads', 'action' => 'index')) . '?page=' . $page . '&filter_website=' . urlencode($website) );

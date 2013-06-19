@@ -4,6 +4,10 @@
             
             <legend><?php echo __('Admin login'); ?></legend>
             
+            <?php if (isset($error)) { ?>
+                <div class="alert alert-error"><?php echo $error ?></div>
+            <?php } ?>
+            
             <div class="control-group">
                 <label class="control-label" for="inputEmail"><?php echo __('Login') ?></label>
                 <div class="controls">

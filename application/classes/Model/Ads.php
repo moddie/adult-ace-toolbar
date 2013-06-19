@@ -91,18 +91,28 @@ class Model_Ads extends ORM {
     
     public function add_new()
     {
-        $pos = 1;
+        $this->position = 1;
+        
         $position = ORM::factory('Ads')->where('website', '=', $this->website)->order_by('position', 'DESC')->find();
         if ($position->pk())
         {
-            $this->position = $position->position + $pos;
-        }
+            $this->position += $position->position;
+        }        
         
         return $this->save();
     }
     
-    public function find_by_website_pos($website, $pos)
+    public function find_by_website_pos($website, $pos, $direction)
     {
-        return $this->where('website', '=', $website)->where('position', '=', $pos)->find();
+        if ($direction == 'up')
+        {
+            $this->where('position', '<', $pos)->order_by('position', 'DESC');
+        }
+        else
+        {
+            $this->where('position', '>', $pos)->order_by('position', 'ASC');
+        }
+            
+        return $this->where('website', '=', $website)->find();
     }
 }

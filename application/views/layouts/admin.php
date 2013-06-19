@@ -18,10 +18,9 @@
 </head>
     <body>
         
-        <div class="container">
-            
-            <div class="navbar">
-                <div class="navbar-inner">
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
                     <a class="brand" href="#"><?php echo Kohana::$config->load('general')->get('site_name') ?></a>
                     <?php if (Auth::instance()->logged_in('admin')) { ?>
                     <ul class="nav">
@@ -40,6 +39,9 @@
                     <?php } ?>
                 </div>
             </div>
+        </div>
+        
+        <div class="container" style='margin-top: 40px'>
             
             <?php echo $content ?>
 

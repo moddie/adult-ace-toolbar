@@ -12,19 +12,22 @@ class Controller_Admin_Login extends Controller_Auth {
         }
         
         $view = View::factory('scripts/admin/login');
-        
-        $post = $this->request->post();
-        $success = Auth::instance()->login(Arr::get($post, 'username'), Arr::get($post, 'password'));
 
-        if ($success)
+        $post = $this->request->post();
+        if ($post)
         {
-            // Login successful, send to app
-            Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index')) );
-        }
-        else
-        {
-            // Login failed, send back to form with error message
-            $view->error = 'Unable to login';
+            $success = Auth::instance()->login(Arr::get($post, 'username'), Arr::get($post, 'password'));
+
+            if ($success)
+            {
+                // Login successful, send to app
+                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index')) );
+            }
+            else
+            {
+                // Login failed, send back to form with error message
+                $view->error = __('Unable to login');
+            }
         }
         
 		$this->display($view);
