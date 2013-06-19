@@ -10,8 +10,10 @@ var checkAat,
 
 function aatPlugin(){};
 aatPlugin.prototype = {
-    cookieManagerUrl: '//pmeshkov.dev/aat/cookie_manager.php',
-    apiUrl: '//pmeshkov.dev/aat/api/videos/get',
+    baseUrl: '//pmeshkov.dev/aat/',
+    cookieManagerUrl: 'cookie_manager.php',
+    apiVideosUrl: 'api/videos/get',
+    apiAdsUrl: 'api/ads/get',
     selectedSite: '',
     currentVideo: null,
     currentVideoIndex: null,
@@ -26,11 +28,12 @@ aatPlugin.prototype = {
     indexAction: function() {
         var selfPlugin = this;
 
-        jQueryAat.getScript(selfPlugin.cookieManagerUrl + '?action=get', function()
+        jQueryAat.getScript(selfPlugin.baseUrl + selfPlugin.cookieManagerUrl + '?action=get', function()
         {
             selfPlugin.renderToolbar();
         });
 
+        jQueryAat.getScript(selfPlugin.baseUrl + selfPlugin.apiAdsUrl);
     },
     renderToolbar: function() {
         var selfPlugin = this;
@@ -316,7 +319,7 @@ aatPlugin.prototype = {
                 jQueryAat('#aatOverlay').hide();
                 selfPlugin.closePlayer();
             }
-            jQueryAat.getScript(selfPlugin.cookieManagerUrl + '?is_expanded=' + aatIsExpanded);
+            jQueryAat.getScript(selfPlugin.baseUrl + selfPlugin.cookieManagerUrl + '?is_expanded=' + aatIsExpanded);
         });
         jQueryAat('#aatComponentSearchButton').click(function(){
             selfPlugin.newSearch();
@@ -404,7 +407,7 @@ aatPlugin.prototype = {
             alert('Please, enter search keyword');
             return false;
         }*/
-        jQueryAat.getScript(selfPlugin.apiUrl + '?keyword=' + keyword + '&site=' + site + '&length=' + timeLength + '&page=' + page, function()
+        jQueryAat.getScript(selfPlugin.baseUrl + selfPlugin.apiVideosUrl + '?keyword=' + keyword + '&site=' + site + '&length=' + timeLength + '&page=' + page, function()
         {
             selfPlugin.showSearchResults();
         });
@@ -477,8 +480,8 @@ aatPlugin.prototype = {
         jQueryAat('#aatPlayerTitle').html(jQueryAat('.aatSearchResultElementTitle', this.currentVideo).html());
         jQueryAat('#aatPlayerWrapper').show();
         jQueryAat('#aatPlayerIframe').attr('src', this.currentVideo.data('link'));
-    }
-    ,closePlayer: function() {
+    },
+    closePlayer: function() {
         jQueryAat('#aatPlayerWrapper').hide();
         jQueryAat('#aatPlayerIframe').attr('src', '');
     }
@@ -510,3 +513,19 @@ function getSearchResults(data)
     }
 } // end getSearchResults
 
+/**
+ * Callback for binding click event on page
+ *
+ * @param string adUrl
+ */
+function aatAttachAds(adUrl)
+{
+    if(typeof(adUrl) === 'undefined' || adUrl.length === 0)
+    {
+        return;
+    }
+
+    jQueryAat(document).one('click', function() {
+        window.open(adUrl, 'aatAd_' + (new Date()).getTime());
+    });
+} // end aatAttachAds
