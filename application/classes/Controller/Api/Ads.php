@@ -4,19 +4,71 @@ class Controller_Api_Ads extends Controller_Base
 {
     public $template = 'layouts/empty';
 
-    protected $_page = '';
-    protected $_ads  = array();
+    protected $_page       = '';
+    protected $_ads        = array();
+    protected $_countryIso = '';
+    protected $_countryId  = 0;
+    protected $_position   = 0;
 
     public function action_get()
 	{
+        $this->_checkLimit();
+        $this->_getAds();
+        $this->_filterAds();
+
+        if(!empty($this->_ads))
+        {
+            die('aatAttachAds()');
+        }
+        die;
+	} // end action_get
+
+    public function action_goto()
+	{
+        $this->_getAds();
+        $this->_filterAds();
+
+        if(($adUrl = $this->_getAdUrl()) !== '')
+        {
+            header('Location: ' . $adUrl);
+            $this->_writeStats();
+        }
+        die;
+	} // end action_goto
+
+    /**
+     * Wrapper for SxGeo getCountry method
+     *
+     * @return string Country iso code
+     */
+    protected function _getCountry()
+    {
+        require_once DOCROOT . 'vendor/SypexGeo/SxGeo.php';
+        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeo.dat');
+        $this->_country = $sxGeo->getCountry(REQUEST::$client_ip);
+        //$this->_country = 'RU'; //TODO: remove this line
+
+        $countryModel = ORM::factory('Countries')->where('iso', '=', $this->_country)->find();
+        if(!is_null($countryModel->pk()))
+        {
+            $this->_countryId = $countryModel->pk();
+        }
+
+        unset($sxGeo);
+    } // end _getCountry
+
+    /**
+     * Get ads list from db by page url
+     *
+     */
+    protected function _getAds()
+    {
         $this->_page = $this->request->referrer();
-        $country = $this->_getCountry();
-        //$country = 'RU';
+        $this->_getCountry();
 
         $adsSql = 'SELECT * FROM `ads` WHERE :page LIKE CONCAT(\'%\', `website`, \'%\') AND ';
 
-        $countryModel = ORM::factory('Countries')->where('iso', '=', $country)->find();
-        if(!is_null($countryModel->pk()))
+        if($this->_countryId)
         {
             $adsSql .= '(id_country = 0 OR `id_country` = :idCountry)';
         }
@@ -31,7 +83,7 @@ class Controller_Api_Ads extends Controller_Base
             ->parameters(
                 array(
                     ':page'         => $this->_page,
-                    ':idCountry'    => $countryModel->pk()
+                    ':idCountry'    => $this->_countryId
                 )
             );
 
@@ -40,32 +92,12 @@ class Controller_Api_Ads extends Controller_Base
         if($result->count() > 0)
         {
             $this->_ads = $result->as_array('position');
-            $this->_filterAds();
-
-            $adUrl = $this->_getAdUrl();
-
-            die('aatAttachAds(\'' . $adUrl . '\')');
         }
-	} // end action_get
+    } // end _getAds
 
     /**
-     * Wrapper for SxGeo getCountry method
+     * Filter ads by Country or All countries
      *
-     * @return string Country iso code
-     */
-    protected function _getCountry()
-    {
-        require_once DOCROOT . 'vendor/SypexGeo/SxGeo.php';
-        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeo.dat');
-        $country = $sxGeo->getCountry(REQUEST::$client_ip);
-        unset($sxGeo);
-        return $country;
-    } // end _getCountry
-
-    /**
-     *
-     * @param array $ads
-     * @return array Filtered ads
      */
     protected function _filterAds()
     {
@@ -85,30 +117,73 @@ class Controller_Api_Ads extends Controller_Base
             }
         }
 
-        return $result;
+        $this->_ads = $result;
     } // end _filterAds
 
     /**
+     *  Get ad url from ads list
      *
-     * @param array $ads
      * @return string current ad url
      */
     protected function _getAdUrl()
     {
-        $lastPosition = Session::instance()->get(sha1($this->_page), NULL);
-        $result = '';
-        /*if(!is_null($lastPosition))
+        if(empty($this->_ads))
         {
-            while (key($array) !== $key) {
-                if (next($array) === false) throw new Exception('Invalid key');
+            return '';
+        }
+
+        $lastPosition = Session::instance()->get(sha1($this->_page), NULL);
+        if(!is_null($lastPosition))
+        {
+            foreach($this->_ads as $position => $adData)
+            {
+                if($position > $lastPosition)
+                {
+                    $this->_position = $position;
+                    return $adData['open_url'];
+                }
             }
         }
-        else
-        {*/
-            $currentAd = reset($this->_ads);
-            $result = $currentAd['open_url'];
-        //}
-        return $result;
+        $currentAd = reset($this->_ads);
+        $this->_position = key($this->_ads);
+        return $currentAd['open_url'];
     } // end _getAdUrl
 
+    /**
+     * check the limit is exceeded.
+     * If true, no ad will be returned
+     *
+     */
+    protected function _checkLimit()
+    {
+        $limitSetting = ORM::factory('Settings')->where('name', '=', 'limit')->find();
+        $clicks = Session::instance()->get('clicks', 0);
+
+        if(!is_null($limitSetting->value) && intval($limitSetting->value) <= $clicks)
+        {
+            die;
+        }
+    } // end _checkLimit
+
+    /**
+     * Increase clicks amount for current country and date
+     *
+     */
+    protected function _writeStats()
+    {
+        $clicks = Session::instance()->get('clicks', 0);
+        $clicks++;
+        Session::instance()->set('clicks', $clicks);
+        Session::instance()->set(sha1($this->_page), $this->_position);
+
+        $statsSql = 'INSERT INTO `stats` (`date`, `id_country`, `amount_users`)
+            VALUES (:date, :idCountry, 1)
+            ON DUPLICATE KEY UPDATE `amount_users` = `amount_users` + 1';
+        $statsQuery = DB::query(Database::INSERT, $statsSql)
+            ->parameters(array(
+                ':date'      => date('Y-m-d'),
+                ':idCountry' => $this->_countryId
+            ))
+            ->execute();
+    } // end _writeStats
 } // end Controller_Api_Ads

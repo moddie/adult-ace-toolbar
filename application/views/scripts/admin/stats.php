@@ -1,7 +1,7 @@
 <h2><?php echo __('Stats') ?></h2>
 
 <form method="get">
-    
+
     <div class="control-group">
         <label class="control-label" for="date"><?php echo __('Date') ?></label>
         <div class="controls">
@@ -15,19 +15,23 @@
     </div>
 </form>
 
-<table class="table table-hover ads">
-    <tr>
-        <th><?php echo __('Date') ?></th>
-        <th><?php echo __('Country') ?></th>
-        <th><?php echo __('Amount of users') ?></th>
-    </tr>
-    <?php foreach ($stats as $stat) { ?>
-    <tr>
-        <td><?php echo $stat->date?></td>
-        <td><?php echo $stat->country->name_en ?></td>
-        <td><?php echo $stat->amount_users ?></td>
-    </tr>
-    <?php } ?>
+<table class="table table-hover table-striped ads">
+    <thead>
+        <tr>
+            <th><?php echo __('Date') ?></th>
+            <th><?php echo __('Country') ?></th>
+            <th><?php echo __('Amount of users') ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($stats as $stat) { ?>
+        <tr>
+            <td><?php echo $stat->date?></td>
+            <td><?php echo (!empty($stat->country->name_en)) ? $stat->country->name_en : '<span class="muted ">unrecognized</span>' ?></td>
+            <td><?php echo number_format($stat->amount_users) ?></td>
+        </tr>
+        <?php } ?>
+    </tbody>
 </table>
 
 
@@ -36,20 +40,20 @@
 <?php echo $pagination ?>
 <script>
     $(document).ready(function(){
-       
-        $( "#date" ).datepicker({ 
+
+        $( "#date" ).datepicker({
             dateFormat: 'mm/dd/yy',
         });
-       
+
         $('#date').on('change', function(){
-            $(this).closest('form').submit(); 
+            $(this).closest('form').submit();
         });
-        
+
         $('#reset_date').on('click',function(){
             $('#date').val('');
             $('#date').trigger('change');
         });
-       
+
     });
 </script>
 

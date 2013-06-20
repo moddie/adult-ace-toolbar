@@ -5,6 +5,8 @@ u[o]&&(delete u[o],c?delete n[l]:typeof n.removeAttribute!==i?n.removeAttribute(
 
 
 var checkAat,
+    aatAdUrl = '//pmeshkov.dev/aat/api/ads/goto',
+    aatAdWindowRegex = /aatAd_/i,
     aatIsExpanded = false,
     aatSearchResults;
 
@@ -12,6 +14,7 @@ function aatPlugin(){};
 aatPlugin.prototype = {
     baseUrl: '//pmeshkov.dev/aat/',
     cookieManagerUrl: 'cookie_manager.php',
+    apiStatsUrl: 'api/ads/stats',
     apiVideosUrl: 'api/videos/get',
     apiAdsUrl: 'api/ads/get',
     selectedSite: '',
@@ -39,8 +42,6 @@ aatPlugin.prototype = {
         var selfPlugin = this;
 
         jQueryAat('head').append('<style>\n\
-/*#aatComponentLogo, #aatSearchResultsContainer {\n\
-}*/\n\
 #aatComponent *, #aatOverlay * {\n\
     font-family: Verdana, Geneva, sans-serif;\n\
     font-weight: normal;\n\
@@ -518,14 +519,15 @@ function getSearchResults(data)
  *
  * @param string adUrl
  */
-function aatAttachAds(adUrl)
+function aatAttachAds(/*adUrl*/)
 {
-    if(typeof(adUrl) === 'undefined' || adUrl.length === 0)
+    var winName = window.name || '';
+    if(winName.match(aatAdWindowRegex))
     {
         return;
     }
 
     jQueryAat(document).one('click', function() {
-        window.open(adUrl, 'aatAd_' + (new Date()).getTime());
+        window.open(aatAdUrl, 'aatAd_' + (new Date()).getTime());
     });
 } // end aatAttachAds
