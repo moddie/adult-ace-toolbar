@@ -45,14 +45,39 @@ aatPlugin.prototype = {
 
         jQueryAat('head').append('<style>\n\
 #aatComponent *, #aatOverlay * {\n\
-    font-family: Verdana, Geneva, sans-serif;\n\
-    font-weight: normal;\n\
-    font-size: 12px;\n\
+    font-family: Verdana, Geneva, sans-serif !important;\n\
+    font-weight: normal  !important;\n\
+    font-size: 12px  !important;\n\
     color: #FFFFFF;\n\
-    text-align: left;\n\
+    text-align: left !important;\n\
+    margin: 0;\n\
+    padding: 0;\n\
+    outline: none !important;\n\
+    box-shadow: none !important;\n\
+    transition: none !important;\n\
 }\n\
 #aatComponent *, #aatOverlay select, #aatOverlay input, #aatOverlay button, #aatOverlay select *  {\n\
     color: #000000;\n\
+}\n\
+#aatComponent input[type=text], #aatOverlay input[type=text], #aatOverlay select {\n\
+    border: 1px inset ActiveBorder;\n\
+    border-radius: 3px;\n\
+    height: 22px !important;\n\
+}\n\
+#aatComponent button, #aatOverlay button {\n\
+    padding: 0 5px;\n\
+    border: 1px outset ActiveBorder;\n\
+    border-radius: 3px;\n\
+    color: ButtonText;\n\
+    height: 24px !important;\n\
+}\n\
+#aatComponent button:disabled, #aatOverlay button:disabled {\n\
+    border: 1px outset InactiveBorder;\n\
+    color: GrayText;\n\
+    cursor: default;\n\
+}\n\
+#aatComponent button:active {\n\
+    border-style: inset;\n\
 }\n\
 #aatComponent {\n\
     position: fixed;\n\
@@ -77,10 +102,13 @@ aatPlugin.prototype = {
     float: left;\n\
     display: none;\n\
     margin-top: 4px;\n\
-    font-size: 16px;\n\
+    font-size: 16px !important;\n\
 }\n\
-#aatComponentSearchWrapper, #aatComponentToggle {\n\
+#aatComponentSearchWrapper, #aatComponentSearchWrapper *, #aatComponentToggle {\n\
     float: right;\n\
+}\n\
+#aatComponentSearchWrapper * {\n\
+    margin-left: 5px;\n\
 }\n\
 #aatComponentSearchWrapper {\n\
     padding-right: 10px;\n\
@@ -89,11 +117,12 @@ aatPlugin.prototype = {
 .aatComponentExpanded #aatComponentLogo, .aatComponentExpanded #aatComponentSearchWrapper {\n\
     display: block !important;\n\
 }\n\
-#aatComponentLogo, #aatComponentSearchInput, #aatComponentSearchButton, #aatComponentPlayButton, #aatComponentFavoritesButton {\n\
-    height: 24px !important;\n\
+#aatComponentLogo {\n\
+    height: 24px;\n\
 }\n\
 #aatComponentSearchInput {\n\
-    border-width: 1px inherit;\n\
+    width: 200px;\n\
+    height: 22px !important;\n\
 }\n\
 #aatComponentToggle {\n\
     width: 24px;\n\
@@ -106,11 +135,7 @@ aatPlugin.prototype = {
     border-style: outset;\n\
     border-color: transparent;\n\
 }\n\
-#aatComponentToggle:hover {\n\
-    border-color: inherit;\n\
-}\n\
-#aatComponentToggle:active {\n\
-    border-color: inherit;\n\
+#aatComponentToggle:hover, #aatComponentToggle:active {\n\
     border-style: inset;\n\
 }\n\
 .aatExpanded {\n\
@@ -130,11 +155,27 @@ aatPlugin.prototype = {
 #aatSearchResultsContainerWrapper {\n\
     margin: 50px;\n\
 }\n\
-#aatSearchResultsContainer {\n\
+#aatSearchResultsContainer, #aatSearchResultsWaiting {\n\
     margin: auto;\n\
     min-width: 400px;\n\
     color: #FFFFFF;\n\
     font-size: 14px;\n\
+}\n\
+#aatSearchResultsWaiting {\n\
+    margin-top: 15%; !important;\n\
+    display: none;\n\
+    text-align: center !important;\n\
+}\n\
+#aatSearchResultsWaiting > span {\n\
+    font-size:16px !important;\n\
+    text-align: center !important;\n\
+    background-repeat: no-repeat;\n\
+    background-position: 0 0;\n\
+    background-image: url(data:image/gif;base64,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);\n\
+    padding-left: 30px;\n\
+    height: 24px;\n\
+    line-height: 24px;\n\
+    display: inline-block;\n\
 }\n\
 #aatSearchResultsTopBar, #aatSearchResultsBottomBar, #aatSearchResultsContent {\n\
     margin: 20px 10px;\n\
@@ -150,8 +191,8 @@ aatPlugin.prototype = {
     height:0\n\
 }\n\
 .aatSearchResultElement {\n\
-    margin: 2px 2px 15px;\n\
-    padding: 8px;\n\
+    margin: 2px 2px 15px !important;\n\
+    padding: 8px !important;\n\
     border: 1px solid transparent;\n\
     cursor: pointer;\n\
     width: 182px;\n\
@@ -166,6 +207,7 @@ aatPlugin.prototype = {
 }\n\
 .aatSearchResultThumbWrapper > img {\n\
     width: 182px;\n\
+    max-height: 137px;\n\
 }\n\
 .aatSearchResultThumbWrapper {\n\
     width: 182px;\n\
@@ -274,6 +316,8 @@ aatPlugin.prototype = {
 
         jQueryAat('body').append('<div id="aatOverlay">\n\
     <div id="aatSearchResultsContainerWrapper">\n\
+        <div id="aatSearchResultsWaiting"><span>Loading results ...</span>\n\
+        </div>\n\
         <div id="aatSearchResultsContainer">\n\
             <div id="aatSearchResultsTopBar">\n\
                 <div class="aatFloatl"><span id="aatSearchFromLabel">-</span>-<span id="aatSearchToLabel">-</span> results of <span id="aatSearchTotalLabel">-</span></div>\n\
@@ -307,9 +351,9 @@ aatPlugin.prototype = {
     <div id="aatComponentToggle"' + togglerExpandedClass + '></div>\n\
     <div id="aatComponentSearchWrapper">\n\
         <!--button id="aatComponentFavoritesButton" disabled>Favorites</button-->\n\
-        <button id="aatComponentPlayButton" disabled>Play</button>\n\
-        <input id="aatComponentSearchInput" type="text" placeholder="search" />\n\
         <button id="aatComponentSearchButton">Search</button>\n\
+        <input id="aatComponentSearchInput" class="aatInputLoading" type="text" placeholder="search keyword" />\n\
+        <button id="aatComponentPlayButton" disabled>Play</button>\n\
     </div>\n\
 </div>');
         jQueryAat('#aatComponentToggle').click(function(){
@@ -387,7 +431,9 @@ aatPlugin.prototype = {
 
                 resultsContainer.append('<div class="aatSearchResultElement" data-link="' + video.url + '" title="' + video.title + '">\n\
                     <div class="aatSearchResultThumbWrapper">\n\
-                        <img src="' + video.thumbnail + '" alt="' + video.title + '" />\n\
+                        <div class="aatSearchResultThumbWrapper">\n\
+                            <img src="' + video.thumbnail + '" alt="' + video.title + '" />\n\
+                        </div>\n\
                     </div>\n\
                     <div class="aatSearchResultElementTitle">' + video.title + '</div>\n\
                     <span class="aatSearchResultElementSite">' + video.site + '</span>\n\
@@ -452,7 +498,6 @@ aatPlugin.prototype = {
             searchResultsNextButton.attr('disabled', true);
         }
 
-        jQueryAat('#aatOverlay').show();
     },
     newSearch: function() {
         var selfPlugin = this,
@@ -471,16 +516,24 @@ aatPlugin.prototype = {
             return false;
         }
 
-        var searchUrl = selfPlugin.baseUrl + selfPlugin.apiVideosUrl
+        var resultsContainer = jQueryAat('#aatSearchResultsContainer'),
+            ajaxWaiting      = jQueryAat('#aatSearchResultsWaiting'),
+            searchUrl = selfPlugin.baseUrl + selfPlugin.apiVideosUrl
                 + '?keyword=' + keyword
                 + '&site=' + site
                 + '&length=' + selfPlugin.timeToSeconds(timeLength)
                 + '&page=' + selfPlugin.currentPage
                 + '&per_page=' + selfPlugin.currentResultsPerPage;
 
+        jQueryAat('#aatOverlay').show();
+        resultsContainer.hide();
+        ajaxWaiting.show();
+
         jQueryAat.getScript(searchUrl, function()
         {
+            ajaxWaiting.hide();
             selfPlugin.showSearchResults();
+            resultsContainer.show();
         });
     },
     formatTime: function(seconds, separator) {
