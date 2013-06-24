@@ -15,9 +15,14 @@ class Controller_Api_Videos extends Controller_Base
         $result = array(
             'videos' => array(),
             'sites'  => array(),
+            'total'  => 0
         );
 
-        $videos = ORM::factory('Videos')->find_by_params($keyword, $length, $site, $page, $per_page);
+        $videosModel = ORM::factory('Videos');
+
+        $videos = $videosModel->find_by_params($keyword, $length, $site, $page, $per_page);
+
+        $result['total'] = $videosModel->count_by_params($keyword, $length, $site);
         foreach ($videos as $video)
         {
             $thumb = '';

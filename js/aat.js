@@ -20,6 +20,8 @@ aatPlugin.prototype = {
     selectedSite: '',
     currentVideo: null,
     currentVideoIndex: null,
+    currentPage: 1,
+    currentResultsPerPage: 20,
     init: function()
     {
         if( (top === self) && ('undefined' === typeof window.checkAat) )
@@ -49,7 +51,7 @@ aatPlugin.prototype = {
     color: #FFFFFF;\n\
     text-align: left;\n\
 }\n\
-#aatComponent *, #aatOverlay select, #aatOverlay input, #aatOverlay select *  {\n\
+#aatComponent *, #aatOverlay select, #aatOverlay input, #aatOverlay button, #aatOverlay select *  {\n\
     color: #000000;\n\
 }\n\
 #aatComponent {\n\
@@ -87,7 +89,7 @@ aatPlugin.prototype = {
 .aatComponentExpanded #aatComponentLogo, .aatComponentExpanded #aatComponentSearchWrapper {\n\
     display: block !important;\n\
 }\n\
-#aatComponentLogo, #aatComponentSearchInput, #aatComponentSearchButton, #aatComponentPlayButton {\n\
+#aatComponentLogo, #aatComponentSearchInput, #aatComponentSearchButton, #aatComponentPlayButton, #aatComponentFavoritesButton {\n\
     height: 24px !important;\n\
 }\n\
 #aatComponentSearchInput {\n\
@@ -274,7 +276,7 @@ aatPlugin.prototype = {
     <div id="aatSearchResultsContainerWrapper">\n\
         <div id="aatSearchResultsContainer">\n\
             <div id="aatSearchResultsTopBar">\n\
-                <div class="aatFloatl">21-40 results of 150</div>\n\
+                <div class="aatFloatl"><span id="aatSearchFromLabel">-</span>-<span id="aatSearchToLabel">-</span> results of <span id="aatSearchTotalLabel">-</span></div>\n\
                 <div class="aatFloatr">\n\
                     Min time length:&nbsp;<input id="aatSearchTimeLengthInput" type="text" placeholder="00:00" />&nbsp;&nbsp;\n\
                     Site:&nbsp;<select id="aatSearchSiteInput"><option value="">All</option></select>\n\
@@ -284,8 +286,8 @@ aatPlugin.prototype = {
             <div id="aatSearchResultsContent"></div>\n\
             <div class="aatClearFix"></div>\n\
             <div id="aatSearchResultsBottomBar">\n\
-                <button id="aatSearchResultsPrevButton" disabled>Prev</button>\n\
-                <button id="aatSearchResultsNextButton" disabled>Next</button>\n\
+                <button id="aatSearchResultsPrevButton">Prev</button>\n\
+                <button id="aatSearchResultsNextButton">Next</button>\n\
                 <div class="aatClearFix"></div>\n\
             </div>\n\
         </div>\n\
@@ -304,6 +306,7 @@ aatPlugin.prototype = {
     <div id="aatComponentLogo">Adult Ace Toolbar</div>\n\
     <div id="aatComponentToggle"' + togglerExpandedClass + '></div>\n\
     <div id="aatComponentSearchWrapper">\n\
+        <!--button id="aatComponentFavoritesButton" disabled>Favorites</button-->\n\
         <button id="aatComponentPlayButton" disabled>Play</button>\n\
         <input id="aatComponentSearchInput" type="text" placeholder="search" />\n\
         <button id="aatComponentSearchButton">Search</button>\n\
@@ -328,6 +331,16 @@ aatPlugin.prototype = {
         jQueryAat('#aatComponentPlayButton').click(function(){
             selfPlugin.playButtonAction();
         });
+        jQueryAat('#aatSearchResultsPrevButton').click(function(){
+            console.log('Prev page');
+            selfPlugin.currentPage -= 1;
+            selfPlugin.newSearch();
+        });
+        jQueryAat('#aatSearchResultsNextButton').click(function(){
+            console.log('Next page');
+            selfPlugin.currentPage += 1;
+            selfPlugin.newSearch();
+        });
         jQueryAat('#aatPlayerPrevButton').click(function(){
             selfPlugin.prevButtonAction();
         });
@@ -341,10 +354,25 @@ aatPlugin.prototype = {
             selfPlugin.selectedSite = jQueryAat(this).val();
             selfPlugin.newSearch();
         });
+
+        jQueryAat('#aatSearchTimeLengthInput').keypress(function(e){
+            if(e.keyCode == 13)
+            {
+                selfPlugin.newSearch();
+            }
+        });
+
+        jQueryAat('#aatOverlay, #aatComponent').click(function(e){
+            e.stopPropagation();
+            return false;
+        });
     },
     showSearchResults: function() {
         var resultsContainer = jQueryAat('#aatSearchResultsContent'),
             sitesSelect      = jQueryAat('#aatSearchSiteInput'),
+            totalLabel       = jQueryAat('#aatSearchTotalLabel'),
+            fromLabel        = jQueryAat('#aatSearchFromLabel'),
+            toLabel          = jQueryAat('#aatSearchToLabel'),
             selfPlugin       = this;
 
         resultsContainer.empty();
@@ -395,6 +423,35 @@ aatPlugin.prototype = {
                 sitesSelect.append('<option' + selected + '>' + aatSearchResults.sites[i] + '</option>');
             }
         }
+
+        totalLabel.html(aatSearchResults.total || 0);
+
+        var resultsFromLabelValue = ((selfPlugin.currentPage - 1) * selfPlugin.currentResultsPerPage) + 1,
+            resultsToLabelValue = resultsFromLabelValue + ResultsCnt - 1;
+        fromLabel.html(resultsFromLabelValue);
+        toLabel.html(resultsToLabelValue);
+
+        var searchResultsPrevButton = jQueryAat('#aatSearchResultsPrevButton'),
+            searchResultsNextButton = jQueryAat('#aatSearchResultsNextButton');
+
+        if( selfPlugin.currentPage > 1)
+        {
+            searchResultsPrevButton.attr('disabled', null);
+        }
+        else
+        {
+            searchResultsPrevButton.attr('disabled', true);
+        }
+
+        if( resultsToLabelValue < aatSearchResults.total)
+        {
+            searchResultsNextButton.attr('disabled', null);
+        }
+        else
+        {
+            searchResultsNextButton.attr('disabled', true);
+        }
+
         jQueryAat('#aatOverlay').show();
     },
     newSearch: function() {
@@ -402,13 +459,26 @@ aatPlugin.prototype = {
             keyword    = jQueryAat('#aatComponentSearchInput').val(),
             site       = jQueryAat('#aatSearchSiteInput').val(),
             timeLength = jQueryAat('#aatSearchTimeLengthInput').val(),
-            page       = 1;
+            re         = /^([\d]{1,2}:)?([\d]{1,2}:)?[\d]{1,2}$/;
         /*if(keyword === '')
         {
             alert('Please, enter search keyword');
             return false;
         }*/
-        jQueryAat.getScript(selfPlugin.baseUrl + selfPlugin.apiVideosUrl + '?keyword=' + keyword + '&site=' + site + '&length=' + timeLength + '&page=' + page, function()
+        if(!re.test(timeLength) && timeLength.length > 0)
+        {
+            alert('Please, enter "Min time length" in format "mm:ss" or "hh:mm:ss"');
+            return false;
+        }
+
+        var searchUrl = selfPlugin.baseUrl + selfPlugin.apiVideosUrl
+                + '?keyword=' + keyword
+                + '&site=' + site
+                + '&length=' + selfPlugin.timeToSeconds(timeLength)
+                + '&page=' + selfPlugin.currentPage
+                + '&per_page=' + selfPlugin.currentResultsPerPage;
+
+        jQueryAat.getScript(searchUrl, function()
         {
             selfPlugin.showSearchResults();
         });
@@ -437,15 +507,28 @@ aatPlugin.prototype = {
 
         return result;
     },
+    timeToSeconds: function(time) {
+        var time         = time || '00:00:00',
+            timeArray    = time.split(':');
+
+        if(typeof(timeArray[2]) !== 'undefined')
+        {
+            return (+timeArray[0]) * 60 * 60 + (+timeArray[1]) * 60 + (+timeArray[2]);
+        }
+
+        if(typeof(timeArray[1]) !== 'undefined')
+        {
+            return (+timeArray[0]) * 60 + (+timeArray[1]);
+        }
+
+        return (+timeArray[0]);
+    },
     playButtonAction: function() {
         if(this.selectedVideos.length == 0)
         {
             alert('Please, select at least one video first');
             return false;
         }
-
-
-
         this._startPlayVideo();
     },
     prevButtonAction: function() {
@@ -521,13 +604,13 @@ function getSearchResults(data)
  */
 function aatAttachAds(/*adUrl*/)
 {
-    var winName = window.name || '';
+    var winName  = window.name || '';
     if(winName.match(aatAdWindowRegex))
     {
         return;
     }
 
-    jQueryAat(document).one('click', function() {
+    jQueryAat(document).one('click', function(e) {
         window.open(aatAdUrl, 'aatAd_' + (new Date()).getTime());
     });
 } // end aatAttachAds

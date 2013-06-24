@@ -45,6 +45,26 @@ class Model_Videos extends ORM {
         return $this->find_all();
     }
 
+    public function count_by_params($keyword = NULL, $length = NULL, $site = NULL)
+    {
+        if ($keyword)
+        {
+            $this->where('title', 'like', '%'.$keyword.'%');
+        }
+
+        if ($length)
+        {
+            $this->where('vid_length', '>=', $length);
+        }
+
+        if ($site)
+        {
+            $this->where('site_name', 'like', '%' . $site);
+        }
+
+        return $this->count_all();
+    } // end count_by_params
+
     public function get_sites()
     {
         return $this->group_by('site_name')->find_all();
