@@ -135,7 +135,12 @@ aatPlugin.prototype = {
     border-style: outset;\n\
     border-color: transparent;\n\
 }\n\
-#aatComponentToggle:hover, #aatComponentToggle:active {\n\
+#aatComponentToggle:hover {\n\
+    border-color: ActiveBorder;\n\
+    border-style: outset;\n\
+}\n\
+#aatComponentToggle:active {\n\
+    border-color: ActiveBorder;\n\
     border-style: inset;\n\
 }\n\
 .aatExpanded {\n\
@@ -180,6 +185,9 @@ aatPlugin.prototype = {
 #aatSearchResultsTopBar, #aatSearchResultsBottomBar, #aatSearchResultsContent {\n\
     margin: 20px 10px;\n\
 }\n\
+#aatSearchResultsContent {\n\
+    text-align: center !important;\n\
+}\n\
 .aatFloatl, #aatSearchResultsPrevButton, .aatSearchResultElement {\n\
     float: left;\n\
 }\n\
@@ -205,18 +213,21 @@ aatPlugin.prototype = {
     border-color:  rgba(50,50,255,1) !important;\n\
     background-color:  rgba(180,180,255,0.7);\n\
 }\n\
-.aatSearchResultThumbWrapper > img {\n\
+.aatSearchResultThumbWrapperInner {\n\
     width: 182px;\n\
-    max-height: 137px;\n\
+    height: 137px;\n\
+    vertical-align:middle;\n\
+    display: table-cell;\n\
+}\n\
+.aatSearchResultThumbWrapperInner > img {\n\
+    width: 182px;\n\
 }\n\
 .aatSearchResultThumbWrapper {\n\
+    overflow: hidden;\n\
     width: 182px;\n\
     height: 137px;\n\
     margin-bottom: 5px;\n\
     background: #000000;\n\
-    overflow: hidden;\n\
-    vertical-align:middle;\n\
-    display: table-cell;;\n\
 }\n\
 .aatSearchResultElementTitle {\n\
     font-weight: bold;\n\
@@ -316,11 +327,10 @@ aatPlugin.prototype = {
 
         jQueryAat('body').append('<div id="aatOverlay">\n\
     <div id="aatSearchResultsContainerWrapper">\n\
-        <div id="aatSearchResultsWaiting"><span>Loading results ...</span>\n\
-        </div>\n\
+        <div id="aatSearchResultsWaiting"><span>Loading results ...</span></div>\n\
         <div id="aatSearchResultsContainer">\n\
             <div id="aatSearchResultsTopBar">\n\
-                <div class="aatFloatl"><span id="aatSearchFromLabel">-</span>-<span id="aatSearchToLabel">-</span> results of <span id="aatSearchTotalLabel">-</span></div>\n\
+                <div id="aatResultsInfo" class="aatFloatl"></div>\n\
                 <div class="aatFloatr">\n\
                     Min time length:&nbsp;<input id="aatSearchTimeLengthInput" type="text" placeholder="00:00" />&nbsp;&nbsp;\n\
                     Site:&nbsp;<select id="aatSearchSiteInput"><option value="">All</option></select>\n\
@@ -400,7 +410,7 @@ aatPlugin.prototype = {
         });
 
         jQueryAat('#aatSearchTimeLengthInput').keypress(function(e){
-            if(e.keyCode == 13)
+            if(e.keyCode === 13)
             {
                 selfPlugin.newSearch();
             }
@@ -414,9 +424,7 @@ aatPlugin.prototype = {
     showSearchResults: function() {
         var resultsContainer = jQueryAat('#aatSearchResultsContent'),
             sitesSelect      = jQueryAat('#aatSearchSiteInput'),
-            totalLabel       = jQueryAat('#aatSearchTotalLabel'),
-            fromLabel        = jQueryAat('#aatSearchFromLabel'),
-            toLabel          = jQueryAat('#aatSearchToLabel'),
+            resultsInfoLabel = jQueryAat('#aatResultsInfo'),
             selfPlugin       = this;
 
         resultsContainer.empty();
@@ -431,7 +439,7 @@ aatPlugin.prototype = {
 
                 resultsContainer.append('<div class="aatSearchResultElement" data-link="' + video.url + '" title="' + video.title + '">\n\
                     <div class="aatSearchResultThumbWrapper">\n\
-                        <div class="aatSearchResultThumbWrapper">\n\
+                        <div class="aatSearchResultThumbWrapperInner">\n\
                             <img src="' + video.thumbnail + '" alt="' + video.title + '" />\n\
                         </div>\n\
                     </div>\n\
@@ -455,6 +463,16 @@ aatPlugin.prototype = {
                     playButton.attr('disabled', true);
                 }
             });
+
+            var resultsFromLabelValue = ((selfPlugin.currentPage - 1) * selfPlugin.currentResultsPerPage) + 1,
+                resultsToLabelValue = resultsFromLabelValue + ResultsCnt - 1;
+
+            resultsInfoLabel.html(resultsFromLabelValue + '-' + resultsToLabelValue + ' results of ' + aatSearchResults.total);
+        }
+        else
+        {
+            resultsContainer.html('No results found');
+            resultsInfoLabel.html('0 results of 0');
         }
 
         sitesSelect
@@ -469,13 +487,6 @@ aatPlugin.prototype = {
                 sitesSelect.append('<option' + selected + '>' + aatSearchResults.sites[i] + '</option>');
             }
         }
-
-        totalLabel.html(aatSearchResults.total || 0);
-
-        var resultsFromLabelValue = ((selfPlugin.currentPage - 1) * selfPlugin.currentResultsPerPage) + 1,
-            resultsToLabelValue = resultsFromLabelValue + ResultsCnt - 1;
-        fromLabel.html(resultsFromLabelValue);
-        toLabel.html(resultsToLabelValue);
 
         var searchResultsPrevButton = jQueryAat('#aatSearchResultsPrevButton'),
             searchResultsNextButton = jQueryAat('#aatSearchResultsNextButton');
@@ -587,7 +598,7 @@ aatPlugin.prototype = {
         return (+timeArray[0]);
     },
     playButtonAction: function() {
-        if(this.selectedVideos.length == 0)
+        if(this.selectedVideos.length === 0)
         {
             alert('Please, select at least one video first');
             return false;
@@ -615,7 +626,7 @@ aatPlugin.prototype = {
         this._startPlayVideo();
     },
     _startPlayVideo: function() {
-        if(this.selectedVideos.length == 0)
+        if(this.selectedVideos.length === 0)
         {
             alert('Noting to play');
         }
@@ -641,7 +652,7 @@ aatPlugin.prototype = {
  */
 function getIsExpandedFromCookie(data)
 {
-    if(typeof(data) != 'undefined')
+    if(typeof(data) !== 'undefined')
     {
         aatIsExpanded = data;
     }
