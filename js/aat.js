@@ -480,22 +480,32 @@ aatPlugin.prototype = {
         var searchResultsPrevButton = jQueryAat('#aatSearchResultsPrevButton'),
             searchResultsNextButton = jQueryAat('#aatSearchResultsNextButton');
 
-        if( selfPlugin.currentPage > 1)
+        if(aatSearchResults.total > selfPlugin.currentResultsPerPage)
         {
-            searchResultsPrevButton.attr('disabled', null);
-        }
-        else
-        {
-            searchResultsPrevButton.attr('disabled', true);
-        }
+            searchResultsPrevButton.show();
+            searchResultsNextButton.show();
+            if( selfPlugin.currentPage > 1)
+            {
+                searchResultsPrevButton.attr('disabled', null);
+            }
+            else
+            {
+                searchResultsPrevButton.attr('disabled', true);
+            }
 
-        if( resultsToLabelValue < aatSearchResults.total)
-        {
-            searchResultsNextButton.attr('disabled', null);
+            if( resultsToLabelValue < aatSearchResults.total)
+            {
+                searchResultsNextButton.attr('disabled', null);
+            }
+            else
+            {
+                searchResultsNextButton.attr('disabled', true);
+            }
         }
         else
         {
-            searchResultsNextButton.attr('disabled', true);
+            searchResultsPrevButton.hide();
+            searchResultsNextButton.hide();
         }
 
     },
