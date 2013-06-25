@@ -235,6 +235,7 @@ aatPlugin.prototype = {
     font-size: 14px;\n\
     white-space: nowrap;\n\
     overflow: hidden;\n\
+    text-overflow: ellipsis;\n\
 }\n\
 .aatSearchResultElementSite {\n\
     font-size: 11px;\n\
