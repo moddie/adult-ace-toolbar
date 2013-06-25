@@ -462,6 +462,8 @@ aatPlugin.prototype = {
                 {
                     playButton.attr('disabled', true);
                 }
+
+                return false;
             });
 
             var resultsFromLabelValue = ((selfPlugin.currentPage - 1) * selfPlugin.currentResultsPerPage) + 1,
