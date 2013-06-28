@@ -20,7 +20,7 @@
         <tr>
             <th><?php echo __('Date') ?></th>
             <th><?php echo __('Country') ?></th>
-            <th><?php echo __('Amount of clicks') ?></th>
+            <th><?php echo __('Amount of users') ?></th>
         </tr>
     </thead>
     <tbody>

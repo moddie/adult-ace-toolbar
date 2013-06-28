@@ -176,13 +176,13 @@ class Controller_Api_Ads extends Controller_Base
         Session::instance()->set('clicks', $clicks);
         Session::instance()->set(sha1($this->_page), $this->_position);
 
-        $statsSql = 'INSERT INTO `stats` (`date`, `id_country`, `amount_users`)
-            VALUES (:date, :idCountry, 1)
-            ON DUPLICATE KEY UPDATE `amount_users` = `amount_users` + 1';
-        $statsQuery = DB::query(Database::INSERT, $statsSql)
+        $statsActiveUsersSql = 'INSERT IGNORE INTO `stats_active_users` (`date`, `id_country`, `ip_address`)
+            VALUES (:date, :idCountry, :ipAddress)';
+        DB::query(Database::INSERT, $statsActiveUsersSql)
             ->parameters(array(
                 ':date'      => date('Y-m-d'),
-                ':idCountry' => $this->_countryId
+                ':idCountry' => $this->_countryId,
+                ':ipAddress' => REQUEST::$client_ip
             ))
             ->execute();
     } // end _writeStats
