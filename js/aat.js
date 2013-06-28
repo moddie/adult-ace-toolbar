@@ -147,6 +147,7 @@ aatPlugin.prototype = {
     background-position: -24px 0 !important;\n\
 }\n\
 #aatOverlay {\n\
+    background-color: #000000;\n\
     background-color: rgba(0,0,0,0.75);\n\
     position: fixed;\n\
     overflow: auto;\n\
@@ -455,6 +456,7 @@ aatPlugin.prototype = {
                 jQueryAat(this).toggleClass('aatSearchResultElementSelected');
 
                 selfPlugin.selectedVideos = jQueryAat('.aatSearchResultElementSelected');
+                selfPlugin.currentVideo = null;
                 if(selfPlugin.selectedVideos.length > 0)
                 {
                     playButton.attr('disabled', null);
@@ -529,11 +531,11 @@ aatPlugin.prototype = {
             site       = jQueryAat('#aatSearchSiteInput').val(),
             timeLength = jQueryAat('#aatSearchTimeLengthInput').val(),
             re         = /^([\d]{1,2}:)?([\d]{1,2}:)?[\d]{1,2}$/;
-        /*if(keyword === '')
+        if(keyword === '')
         {
             alert('Please, enter search keyword');
             return false;
-        }*/
+        }
         if(!re.test(timeLength) && timeLength.length > 0)
         {
             alert('Please, enter "Min time length" in format "mm:ss" or "hh:mm:ss"');
@@ -633,7 +635,7 @@ aatPlugin.prototype = {
         {
             alert('Noting to play');
         }
-        if(this.currentVideo == null)
+        if(this.currentVideo === null)
         {
             this.currentVideo      = this.selectedVideos.first();
             this.currentVideoIndex = this.selectedVideos.index(this.currentVideo);
