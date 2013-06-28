@@ -102,8 +102,10 @@ aatPlugin.prototype = {
 #aatComponentLogo {\n\
     float: left;\n\
     display: none;\n\
-    margin-top: 4px;\n\
-    font-size: 16px !important;\n\
+    height: 24px;\n\
+    width: 141px;\n\
+    background-repeat: no-repeat;\n\
+    background-image: url(data:image/gif;base64,R0lGODlhjQAXANUgAP7Eyf2JlN/f3w8PD/7i5PsiNs/Pz+/v7//w8vsxQ5+fn/xseY+Pj/7T1x8fH/2nrl9fX/xOXv61vP2YoS8vL6+vr/16hr+/v29vb09PT/w/UPxdaz8/P39/f/sUKQAAAP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C1hNUCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MDY2RDA5MTJERkJDMTFFMkE5RUY4Q0MzQUI1OUU1MDUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MDY2RDA5MTNERkJDMTFFMkE5RUY4Q0MzQUI1OUU1MDUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDowNjZEMDkxMERGQkMxMUUyQTlFRjhDQzNBQjU5RTUwNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDowNjZEMDkxMURGQkMxMUUyQTlFRjhDQzNBQjU5RTUwNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAACH5BAEAACAALAAAAACNABcAAAb/QJBwKDRwBhQFcclsQhyQprR5eEIOy4oCO+0+NJ5Io0sum4mHwWf9YZyZF3blzaywlUPGesClSzyAHgUEdIV0HWx7hkKIax2LjGxRQxxsF4YJgYALkJ1SaokfeIWNH4+QpRxElY6FAJqBCJ6zQgqha6qGpaeLqatsvGcLsIATtLOsH8kfArrAnb6Uz28ImhGBCcedAokGDmwYXQzJGXO7Q0YDwUMQHxnNkbhCFxCgHw4cDH1dE9gNmgC6AFiQCVCCBYSkANhQIJCGALKaYGDjAMRERU0EULj1AcM5IReZZbkzJJq9UOukFPRgAQSYTVMsEAsUgAkCmTMLSGjybY0b/24klxzYyPGDPV7J3BAplaEkm1w9b42a8i8QoX6xmgybGYjTEAQvuXoISMQOG3hElTEpZRRDBQwnTUlrtfSpU3kgBDCImu9Sma0eNAghoMnYkgeaEkyQYGHl2CE4AUXYKWFlNiIZ7NbqtiTqBwPoTiKddldtPNNCkqWUgqBhsSEbsDGxHBEEgpU1bRcmQjjQgyFA14w6kGhSkURK8yQaTbd0LhDRUpMmg9jqkOqAdg6pCojsdte/QWAvwASwV+iJ9mXe0ycOm31Cjs6VWxcvevsgVJ8Ju4FI60D9DYGVIE00EIB2IESmAQAMNghYBENE5UAHFFK4nnClDdCEftI1d//ac9HlNx1V1gRgoomOJQRCAIFAWMY1YlkjhFlFhUJBaTcywaGIHt6HWog7dgFYjIDktmKLZsBIpAfaXVgjZyC4t0YTaTFH33wgatbhlVP8t6RBQ7AIZhMSeBcbIAs2qCYAERH35C2TGJCIX8AtN986aWWJX5BSYPclk0L4qeIQW+UmJoFNEJCQHnJIERUf8bFBwT7LWFnRELZoCeSITShJXoGaBNgbTERg5yJ3jy2B004STsEWHu08BZoAsZLmZAcHHJCpplryiJoUo3pwHhNheZCQkiwJgcCAyQqxUgFjKAvYBHKCM0VwpqXxZnOMvqnnr05ay8ShHkTbhJ+GNeClGjawDDLEK4EUsEEAFqw7iJQiTXHhcwbEtQYFtSY3FEcDdBuOEN0Gg6+kTRx6GWvrGvnAusRAe1iMFoPQk3FSVCsKERqFckVw8LATCgeggUKnx6DVB+USo4Y3xaGDNnAmLBbURkQDyHY1qAJzlGFAByWDXEEHFZQsANFUXIB0yyAcwADUQixdNDoMUKjA1bxNMOgUD0yg81cAnMgmGQRIcKIEgwYBADs=);\n\
 }\n\
 #aatComponentSearchWrapper, #aatComponentSearchWrapper *, #aatComponentToggle {\n\
     float: right;\n\
@@ -117,9 +119,6 @@ aatPlugin.prototype = {
 }\n\
 .aatComponentExpanded #aatComponentLogo, .aatComponentExpanded #aatComponentSearchWrapper {\n\
     display: block !important;\n\
-}\n\
-#aatComponentLogo {\n\
-    height: 24px;\n\
 }\n\
 #aatComponentSearchInput {\n\
     width: 200px;\n\
@@ -148,6 +147,7 @@ aatPlugin.prototype = {
     background-position: -24px 0 !important;\n\
 }\n\
 #aatOverlay {\n\
+    background-color: #000000;\n\
     background-color: rgba(0,0,0,0.75);\n\
     position: fixed;\n\
     overflow: auto;\n\
@@ -359,7 +359,7 @@ aatPlugin.prototype = {
     </div>\n\
 </div>\n\
 <div id="aatComponent"' + componentExpandedClass + '>\n\
-    <div id="aatComponentLogo">Adult Ace Toolbar</div>\n\
+    <div id="aatComponentLogo"></div>\n\
     <div id="aatComponentToggle"' + togglerExpandedClass + '></div>\n\
     <div id="aatComponentSearchWrapper">\n\
         <!--button id="aatComponentFavoritesButton" disabled>Favorites</button-->\n\
@@ -456,6 +456,7 @@ aatPlugin.prototype = {
                 jQueryAat(this).toggleClass('aatSearchResultElementSelected');
 
                 selfPlugin.selectedVideos = jQueryAat('.aatSearchResultElementSelected');
+                selfPlugin.currentVideo = null;
                 if(selfPlugin.selectedVideos.length > 0)
                 {
                     playButton.attr('disabled', null);
@@ -530,11 +531,11 @@ aatPlugin.prototype = {
             site       = jQueryAat('#aatSearchSiteInput').val(),
             timeLength = jQueryAat('#aatSearchTimeLengthInput').val(),
             re         = /^([\d]{1,2}:)?([\d]{1,2}:)?[\d]{1,2}$/;
-        /*if(keyword === '')
+        if(keyword === '')
         {
             alert('Please, enter search keyword');
             return false;
-        }*/
+        }
         if(!re.test(timeLength) && timeLength.length > 0)
         {
             alert('Please, enter "Min time length" in format "mm:ss" or "hh:mm:ss"');
@@ -634,7 +635,7 @@ aatPlugin.prototype = {
         {
             alert('Noting to play');
         }
-        if(this.currentVideo == null)
+        if(this.currentVideo === null)
         {
             this.currentVideo      = this.selectedVideos.first();
             this.currentVideoIndex = this.selectedVideos.index(this.currentVideo);

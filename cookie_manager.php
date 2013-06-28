@@ -13,7 +13,7 @@ const COOKIE_NAME = 'aatExpanded';
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 if($action === 'get')
 {
-    $isExpanded = isset($_COOKIE[COOKIE_NAME]) ? $_COOKIE[COOKIE_NAME] : 'false';
+    $isExpanded = isset($_COOKIE[COOKIE_NAME]) ? $_COOKIE[COOKIE_NAME] : 'true';
     die('getIsExpandedFromCookie(' . $isExpanded . ')');
 }
 
