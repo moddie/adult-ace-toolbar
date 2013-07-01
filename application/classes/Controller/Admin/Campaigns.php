@@ -6,8 +6,9 @@ class Controller_Admin_Campaigns extends Controller_Auth {
 
     public function action_index()
 	{
-        
-        if (!empty($_POST['delete'])){
+
+        if (!empty($_POST['delete']))
+        {
             $this->_delete(array_keys($_POST['delete']));
         }
         $view = View::factory('scripts/admin/campaigns');
@@ -26,7 +27,7 @@ class Controller_Admin_Campaigns extends Controller_Auth {
         }
         if ($per_page)
         {
-            $campaigns->limit($per_page)->offset(($page-1)*$per_page);
+            $campaigns->limit($per_page)->offset(($page - 1) * $per_page);
         }
         $pagination_view = new View('pagination/campaigns');
         $pagination_view->page = $page;
@@ -36,27 +37,38 @@ class Controller_Admin_Campaigns extends Controller_Auth {
         $view->pagination = $pagination_view->render();
         $view->filter = $filter;
         $view->campaigns = $campaigns->with('countries')->find_all();
-        $view->countries = ORM::factory('Countries')->find_all();        
+        $view->countries = ORM::factory('Countries')->find_all();
 		$this->display($view);
 	}
-    
+
     public function action_add()
     {
         $view = View::factory('scripts/admin/campaigns_add');
+        $view->action = 'add';
         $this->display($view);
     }
-    
+
     public function action_edit()
     {
-        
+        $idCampaign = intval(Arr::get($_GET, 'id_campaign', 0));
+
+        $campaign = ORM::factory('Campaigns', $idCampaign);
+        if(!$campaign->loaded())
+        {
+             throw HTTP_Exception::factory(404, 'Campaign not found!');
+        }
+        $view = View::factory('scripts/admin/campaigns_add'); //TODO: rename template
+        $view->action   = 'edit';
+        $view->campaign = $campaign;
+        $this->display($view);
     }
-    
+
     protected function _delete($idCampaign = null)
     {
         if (!empty($idCampaign))
         {
             $campaignsToDelete = ORM::factory('Campaigns');
-            
+
             if ( is_array($idCampaign) )
             {
                 $campaignsToDelete->where('id_campaign', 'in', $idCampaign);
@@ -68,5 +80,5 @@ class Controller_Admin_Campaigns extends Controller_Auth {
             $campaignsToDelete->find()->delete();
         }
     }
-    
+
 }
