@@ -43,7 +43,7 @@ class Controller_Admin_Campaigns extends Controller_Auth {
     public function action_add()
     {
         $view = View::factory('scripts/admin/campaigns_add');
-        
+        $this->display($view);
     }
     
     public function action_edit()
