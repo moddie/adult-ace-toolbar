@@ -35,12 +35,18 @@ class Controller_Admin_Campaigns extends Controller_Auth {
         $pagination_view->count_all = ORM::factory('Campaigns')->count_by_params($filter);
         $view->pagination = $pagination_view->render();
         $view->filter = $filter;
-        $view->campaigns = $campaigns->with('countries')->find_all();;//ORM::factory('Campaigns')->with('countries')->find_all();
+        $view->campaigns = $campaigns->with('countries')->find_all();
         $view->countries = ORM::factory('Countries')->find_all();        
 		$this->display($view);
 	}
     
     public function action_add()
+    {
+        $view = View::factory('scripts/admin/campaigns_add');
+        
+    }
+    
+    public function action_edit()
     {
         
     }
@@ -60,8 +66,6 @@ class Controller_Admin_Campaigns extends Controller_Auth {
                 $campaignsToDelete->where('id_campaign', '=', $idCampaign);
             }
             $campaignsToDelete->find()->delete();
-
-            //TODO: delete related patterns and ad_urls
         }
     }
     

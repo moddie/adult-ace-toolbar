@@ -35,7 +35,6 @@
                     </tr>
                 </thead>
                 <tbody>
-
                     <?php
                         foreach ($campaigns as $campaign){
                     ?>
@@ -49,7 +48,6 @@
                     <?php
                     }
                     ?>
-
                 </tbody>
             </table>
         </form>
