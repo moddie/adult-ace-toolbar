@@ -1,20 +1,22 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
+const LIMIT_PERIOD = 86400; // 24hrs
+
 class Controller_Api_Ads extends Controller_Base
 {
     public $template = 'layouts/empty';
 
     protected $_page       = '';
     protected $_ads        = array();
+    protected $_campaignId = null;
     protected $_countryIso = '';
     protected $_countryId  = 0;
     protected $_position   = 0;
 
     public function action_get()
 	{
-        $this->_checkLimit();
         $this->_getAds();
-        $this->_filterAds();
+        $this->_checkLimit();
 
         if(!empty($this->_ads))
         {
@@ -25,12 +27,9 @@ class Controller_Api_Ads extends Controller_Base
 
     public function action_goto()
 	{
-        $this->_getAds();
-        $this->_filterAds();
-
         if(($adUrl = $this->_getAdUrl()) !== '')
         {
-            header('Location: ' . $adUrl);
+            //header('Location: ' . $adUrl);
             $this->_writeStats();
         }
         die;
@@ -46,7 +45,6 @@ class Controller_Api_Ads extends Controller_Base
         require_once DOCROOT . 'vendor/SypexGeo/SxGeo.php';
         $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeo.dat');
         $this->_country = $sxGeo->getCountry(REQUEST::$client_ip);
-        //$this->_country = 'RU'; //TODO: remove this line
 
         $countryModel = ORM::factory('Countries')->where('iso', '=', $this->_country)->find();
         if(!is_null($countryModel->pk()))
@@ -66,32 +64,44 @@ class Controller_Api_Ads extends Controller_Base
         $this->_page = $this->request->referrer();
         $this->_getCountry();
 
-        $adsSql = 'SELECT * FROM `ads` WHERE :page LIKE CONCAT(\'%\', `website`, \'%\') AND ';
+        $campaignsSql = 'SELECT *
+                    FROM `campaigns_website_patterns` AS `cwp`
+                    LEFT JOIN `campaigns` AS `c` ON (`c`.`id_campaign` = `cwp`.`id_campaign`)
+                    WHERE :page LIKE REPLACE( `cwp`.`pattern` , \'*\', \'%\' ) AND ';
 
         if($this->_countryId)
         {
-            $adsSql .= '(id_country = 0 OR `id_country` = :idCountry)';
+            $campaignsSql .= '(`c`.`id_country` = 0 OR `c`.`id_country` = :idCountry)';
         }
         else
         {
-            $adsSql .= 'id_country = 0';
+            $campaignsSql .= '`c`.`id_country` = 0';
         }
 
-        $adsSql .= ' ORDER BY `id_country` DESC, `position` ASC';
+        $campaignsSql .= ' ORDER BY `c`.`id_country` DESC';
 
-        $adsQuery = DB::query(Database::SELECT, $adsSql)
+        $campaignsQuery = DB::query(Database::SELECT, $campaignsSql)
             ->parameters(
                 array(
-                    ':page'         => $this->_page,
-                    ':idCountry'    => $this->_countryId
+                    ':page'      => $this->_page,
+                    ':idCountry' => $this->_countryId
                 )
             );
+
+        $this->_campaignId = $campaignsQuery->execute()->get('id_campaign');
+
+        $adsSql   = 'SELECT * FROM `campaigns_ad_urls` WHERE `id_campaign` = :campaignId ORDER BY `position` ASC';
+        $adsQuery = DB::query(Database::SELECT, $adsSql)
+            ->parameters(array(
+                ':campaignId' => $this->_campaignId
+            ));
 
         $result = $adsQuery->execute();
 
         if($result->count() > 0)
         {
             $this->_ads = $result->as_array('position');
+            $this->_filterAds();
         }
     } // end _getAds
 
@@ -129,10 +139,10 @@ class Controller_Api_Ads extends Controller_Base
     {
         if(empty($this->_ads))
         {
-            return '';
+            $this->_getAds();
         }
 
-        $lastPosition = Session::instance()->get(sha1($this->_page), NULL);
+        $lastPosition = Session::instance()->get($this->_campaignId . '_lastPosition', NULL);
         if(!is_null($lastPosition))
         {
             foreach($this->_ads as $position => $adData)
@@ -140,13 +150,13 @@ class Controller_Api_Ads extends Controller_Base
                 if($position > $lastPosition)
                 {
                     $this->_position = $position;
-                    return $adData['open_url'];
+                    return $adData['target_url'];
                 }
             }
         }
         $currentAd = reset($this->_ads);
         $this->_position = key($this->_ads);
-        return $currentAd['open_url'];
+        return $currentAd['target_url'];
     } // end _getAdUrl
 
     /**
@@ -156,10 +166,26 @@ class Controller_Api_Ads extends Controller_Base
      */
     protected function _checkLimit()
     {
-        $limitSetting = ORM::factory('Settings')->where('name', '=', 'limit')->find();
-        $clicks = Session::instance()->get('clicks', 0);
+        $currentTime = time();
+        $session     = Session::instance();
 
-        if(!is_null($limitSetting->value) && intval($limitSetting->value) <= $clicks)
+        $clicks = $session->get($this->_campaignId . '_clicks', 0);
+        if($clicks === 0)
+        {
+            return;
+        }
+
+
+        if($currentTime - $session->get($this->_campaignId . '_startAt', $currentTime) > LIMIT_PERIOD)
+        {
+            $session->set($this->_campaignId . '_clicks', 0);
+            $session->set($this->_campaignId . '_startAt', $currentTime);
+            return;
+        }
+
+        $campaign = ORM::factory('Campaigns')->where('id_campaign', '=', $this->_campaignId)->find();
+
+        if(!is_null($campaign->click_limit) && intval($campaign->click_limit) <= $clicks)
         {
             die;
         }
@@ -171,10 +197,13 @@ class Controller_Api_Ads extends Controller_Base
      */
     protected function _writeStats()
     {
-        $clicks = Session::instance()->get('clicks', 0);
+        $clicksSessionKey   = $this->_campaignId . '_clicks';
+        $session = Session::instance();
+
+        $clicks = $session->get($clicksSessionKey, 0);
         $clicks++;
-        Session::instance()->set('clicks', $clicks);
-        Session::instance()->set(sha1($this->_page), $this->_position);
+        $session->set($clicksSessionKey, $clicks);
+        $session->set($this->_campaignId . '_lastPosition', $this->_position);
 
         $statsActiveUsersSql = 'INSERT IGNORE INTO `stats_active_users` (`date`, `id_country`, `ip_address`)
             VALUES (:date, :idCountry, :ipAddress)';
