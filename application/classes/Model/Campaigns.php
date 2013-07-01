@@ -23,4 +23,27 @@ class Model_Campaigns extends ORM
             'foreign_key' => 'id_campaign'
         )
     );
+
+    public function count_by_params($filter)
+    {
+        if ($filter)
+        {
+            $this->where('id_country', '=', $filter);
+        }
+
+        return $this->with('countries')->count_all();
+    }
+
+    public function delete()
+    {
+        foreach($this->patterns->find_all() as $entry)
+        {
+            $entry->delete();
+        }
+        foreach($this->ad_urls->find_all() as $entry)
+        {
+            $entry->delete();
+        }
+        parent::delete();
+    }
 }
