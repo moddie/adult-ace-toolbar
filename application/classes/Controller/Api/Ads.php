@@ -1,5 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
+const LIMIT_PERIOD = 86400; // 24hrs
+
 class Controller_Api_Ads extends Controller_Base
 {
     public $template = 'layouts/empty';
@@ -164,8 +166,24 @@ class Controller_Api_Ads extends Controller_Base
      */
     protected function _checkLimit()
     {
+        $currentTime = time();
+        $session     = Session::instance();
+
+        $clicks = $session->get($this->_campaignId . '_clicks', 0);
+        if($clicks === 0)
+        {
+            return;
+        }
+
+
+        if($currentTime - $session->get($this->_campaignId . '_startAt', $currentTime) > LIMIT_PERIOD)
+        {
+            $session->set($this->_campaignId . '_clicks', 0);
+            $session->set($this->_campaignId . '_startAt', $currentTime);
+            return;
+        }
+
         $campaign = ORM::factory('Campaigns')->where('id_campaign', '=', $this->_campaignId)->find();
-        $clicks = Session::instance()->get($this->_campaignId . '_clicks', 0);
 
         if(!is_null($campaign->click_limit) && intval($campaign->click_limit) <= $clicks)
         {
@@ -180,14 +198,12 @@ class Controller_Api_Ads extends Controller_Base
     protected function _writeStats()
     {
         $clicksSessionKey   = $this->_campaignId . '_clicks';
+        $session = Session::instance();
 
-        $clicks = Session::instance()->get($clicksSessionKey, 0);
+        $clicks = $session->get($clicksSessionKey, 0);
         $clicks++;
-        Session::instance()->set($clicksSessionKey, $clicks);
-        Session::instance()->set($this->_campaignId . '_lastPosition', $this->_position);
-
-        echo 'Clicks: ' . Session::instance()->get($clicksSessionKey, 0) . '<br>';
-        echo 'lastPosition: ' . Session::instance()->get($this->_campaignId . '_lastPosition', 0);
+        $session->set($clicksSessionKey, $clicks);
+        $session->set($this->_campaignId . '_lastPosition', $this->_position);
 
         $statsActiveUsersSql = 'INSERT IGNORE INTO `stats_active_users` (`date`, `id_country`, `ip_address`)
             VALUES (:date, :idCountry, :ipAddress)';
