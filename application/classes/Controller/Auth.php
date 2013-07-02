@@ -11,6 +11,7 @@ class Controller_Auth extends Controller_Base {
             //Check admin autentification
             if( !Auth::instance()->logged_in('admin') )
             {
+                Session::instance()->set('requestedUrl', $this->request->uri());
                 Controller::redirect( Route::get('admin')->uri(array('controller' => 'Login', 'action' => 'Index')) );
             }
         }

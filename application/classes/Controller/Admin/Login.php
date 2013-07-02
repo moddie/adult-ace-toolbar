@@ -5,12 +5,12 @@ class Controller_Admin_Login extends Controller_Auth {
     public $template = 'layouts/admin';
 
     public function action_index() {
-        
+
         if (Auth::instance()->logged_in('admin'))
         {
             Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index')) );
         }
-        
+
         $view = View::factory('scripts/admin/login');
 
         $post = $this->request->post();
@@ -20,8 +20,12 @@ class Controller_Admin_Login extends Controller_Auth {
 
             if ($success)
             {
+                $redirectUrl = Session::instance()->get_once(
+                    'requestedUrl',
+                    Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index'))
+                );
                 // Login successful, send to app
-                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index')) );
+                Controller::redirect( $redirectUrl );
             }
             else
             {
@@ -29,15 +33,15 @@ class Controller_Admin_Login extends Controller_Auth {
                 $view->error = __('Unable to login');
             }
         }
-        
+
 		$this->display($view);
 	}
-    
+
     public function action_logout() {
-        
+
         Auth::instance()->logout(FALSE, TRUE);
-        
+
         Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Login', 'action' => 'index')) );
-        
+
     }
 }
