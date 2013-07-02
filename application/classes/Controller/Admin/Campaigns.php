@@ -42,8 +42,20 @@ class Controller_Admin_Campaigns extends Controller_Auth
 
     public function action_add()
     {
+        
+        if(!empty($_POST))
+        {
+            /*$name = intval(Arr::get($_GET, 'filter', 0));
+            $country = intval(Arr::get($_GET, 'filter', 0));
+            $ = intval(Arr::get($_GET, 'filter', 0));
+            $filter = intval(Arr::get($_GET, 'filter', 0));*/
+        }
+        
+        
+        
         $view = View::factory('scripts/admin/campaigns_add');
         $view->action = 'add';
+        $view->countries = ORM::factory('Countries')->find_all();
         $this->display($view);
     }
 
@@ -59,6 +71,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
         $view = View::factory('scripts/admin/campaigns_add'); //TODO: rename template
         $view->action   = 'edit';
         $view->campaign = $campaign;
+        $view->countries = ORM::factory('Countries')->find_all();
         $this->display($view);
     }
 
