@@ -7,7 +7,7 @@ class Model_WebsitePatterns extends ORM
     protected $_table_name = 'campaigns_website_patterns';
     protected $_belongs_to = array(
 		'campaign' => array(
-            'model'       => 'Gampaign',
+            'model'       => 'Campaign',
             'foreign_key' => 'id_country'
         )
 	);
