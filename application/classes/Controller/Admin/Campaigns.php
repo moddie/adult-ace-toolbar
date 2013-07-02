@@ -1,12 +1,11 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Admin_Campaigns extends Controller_Auth {
-
+class Controller_Admin_Campaigns extends Controller_Auth
+{
     public $template = 'layouts/admin';
 
     public function action_index()
 	{
-
         if (!empty($_POST['delete']))
         {
             $this->_delete(array_keys($_POST['delete']));
@@ -81,4 +80,20 @@ class Controller_Admin_Campaigns extends Controller_Auth {
         }
     }
 
-}
+    public function _parseCsv($filePath)
+    {
+        $result = array();
+        if (($f = fopen($filePath, 'rt')) !== FALSE)
+        {
+            $row = 1;
+            while (($data = fgetcsv($f, 2048, ',')) !== FALSE)
+            {
+                $result[$data[0]] = 0;
+                $row++;
+            }
+            fclose($f);
+        }
+
+        return $result;
+    } // end _parseCsv
+} // end Controller_Admin_Campaigns
