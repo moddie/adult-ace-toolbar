@@ -45,19 +45,42 @@ class Controller_Admin_Campaigns extends Controller_Auth
 
     public function action_add()
     {
-
         if(!empty($_POST))
         {
-            /*$name = intval(Arr::get($_GET, 'filter', 0));
-            $country = intval(Arr::get($_GET, 'filter', 0));
-            $ = intval(Arr::get($_GET, 'filter', 0));
-            $filter = intval(Arr::get($_GET, 'filter', 0));*/
+            $campaign = ORM::factory('Campaigns');
+            $campaign->name = Arr::get($_POST, 'c_name');
+            $campaign->id_country = intval(Arr::get($_POST, 'country', 0));
+            $campaign->click_limit = intval(Arr::get($_POST, 'limit', 0));
+            $campaign->save();
+            
+            
+            
+            if(!empty($_POST['patterns']))
+            {
+                foreach($_POST['patterns'] as $pattern){
+                    $pat = ORM::factory('Patterns');
+                    $pat->id_campaign = $campaign->id_campaign;
+                    $pat->pattern = $pattern;
+                    $pat->save();
+                }
+            }
+            if(!empty($_POST['urls']))
+            {
+                foreach($_POST['urls'] as $k=>$url){
+                    $u = ORM::factory('Urls');
+                    $u->id_campaign = $campaign->id_campaign;
+                    $u->target_url = $url;
+                    $u->position = $k;
+                    $u->save();
+                }
+            } 
         }
 
 
 
         $view = View::factory('scripts/admin/campaigns_add');
         $view->action = 'add';
+        $view->campaign = ORM::factory('Campaigns');
         $view->countries = ORM::factory('Countries')->find_all();
         $this->display($view);
     }

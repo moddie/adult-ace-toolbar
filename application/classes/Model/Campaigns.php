@@ -15,11 +15,11 @@ class Model_Campaigns extends ORM
 	);
     protected $_has_many = array(
         'patterns' => array(
-            'model'       => 'WebsitePatterns',
+            'model'       => 'Patterns',
             'foreign_key' => 'id_campaign'
         ),
         'ad_urls' => array(
-            'model'       => 'AdUrls',
+            'model'       => 'Urls',
             'foreign_key' => 'id_campaign'
         )
     );
@@ -36,14 +36,25 @@ class Model_Campaigns extends ORM
 
     public function delete()
     {
-        foreach($this->patterns->find_all() as $entry)
+        $patterns = $this->patterns->find_all();
+        echo '<pre>';
+        if (count($patterns) > 0)
         {
-            $entry->delete();
+            foreach($patterns as $entry)
+            {
+
+                $entry->delete();
+            }
         }
-        foreach($this->ad_urls->find_all() as $entry)
+        $urls = $this->ad_urls->find_all();
+        if ( count($urls) > 0)
         {
-            $entry->delete();
+            foreach($urls as $entry)
+            {
+                $entry->delete();
+            }
         }
         parent::delete();
+        
     }
 }
