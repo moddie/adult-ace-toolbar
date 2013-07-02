@@ -1,7 +1,4 @@
 <h2><?php echo __('Campaigns') ?></h2>
-<!--<pre>
-<?php print_r($campaigns); ?>
-</pre>-->
 <div class="row space">
     <div class="span12 ">
         <a href="<?php echo URL::base() . 'admin/campaigns/add';?>" class="btn btn-primary add-btn"><i class="icon-plus icon-white"></i> Add</a>

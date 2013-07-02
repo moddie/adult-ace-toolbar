@@ -15,11 +15,11 @@ class Model_Campaigns extends ORM
 	);
     protected $_has_many = array(
         'patterns' => array(
-            'model'       => 'Patterns',
+            'model'       => 'WebsitePatterns',
             'foreign_key' => 'id_campaign'
         ),
         'ad_urls' => array(
-            'model'       => 'Urls',
+            'model'       => 'AdUrls',
             'foreign_key' => 'id_campaign'
         )
     );
@@ -34,10 +34,39 @@ class Model_Campaigns extends ORM
         return $this->with('countries')->count_all();
     }
 
+    public function rules()
+	{
+		return array(
+            'name' => array(
+                array('not_empty')
+            ),
+            'id_country' => array(
+                array('not_empty'),
+                array('digit'),
+                array(
+                    function($value, Validation $object)
+                    {
+                        if ($value != 0)
+                        {
+                            $country = ORM::factory('Countries')->find_by_id($value);
+                            if (!$country->pk())
+                            {
+                                $object->error('id_country', 'invalid_country');
+                            }
+                        }
+                    }, 
+                    array(':value', ':validation')
+                )
+            ),
+            'click_limit' => array(
+				array('digit')
+			)
+		);
+	}
+    
     public function delete()
     {
         $patterns = $this->patterns->find_all();
-        echo '<pre>';
         if (count($patterns) > 0)
         {
             foreach($patterns as $entry)

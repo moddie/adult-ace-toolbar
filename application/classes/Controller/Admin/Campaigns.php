@@ -45,35 +45,61 @@ class Controller_Admin_Campaigns extends Controller_Auth
 
     public function action_add()
     {
+        $errors = array();
         if(!empty($_POST))
         {
-            $campaign = ORM::factory('Campaigns');
-            $campaign->name = Arr::get($_POST, 'c_name');
-            $campaign->id_country = intval(Arr::get($_POST, 'country', 0));
-            $campaign->click_limit = intval(Arr::get($_POST, 'limit', 0));
-            $campaign->save();
             
+            try
+            {
+                $campaign = ORM::factory('Campaigns');
+                $campaign->name = Arr::get($_POST, 'c_name');
+                $campaign->id_country = intval(Arr::get($_POST, 'country', 0));
+                $campaign->click_limit = intval(Arr::get($_POST, 'limit', 0));
+                $campaign->save();
+            }
+            catch (ORM_Validation_Exception $e)
+            {
+                $errors = $e->errors();
+            }
             
             
             if(!empty($_POST['patterns']))
             {
                 foreach($_POST['patterns'] as $pattern){
-                    $pat = ORM::factory('Patterns');
-                    $pat->id_campaign = $campaign->id_campaign;
-                    $pat->pattern = $pattern;
-                    $pat->save();
+                    try
+                    {
+                        $pat = ORM::factory('WebsitePatterns');
+                        $pat->id_campaign = $campaign->id_campaign;
+                        $pat->pattern = $pattern;
+                        $pat->save();
+                    }
+                    catch (ORM_Validation_Exception $e)
+                    {
+                        $errors += $e->errors();
+                    }
                 }
             }
             if(!empty($_POST['urls']))
             {
                 foreach($_POST['urls'] as $k=>$url){
-                    $u = ORM::factory('Urls');
-                    $u->id_campaign = $campaign->id_campaign;
-                    $u->target_url = $url;
-                    $u->position = $k;
-                    $u->save();
+                    try
+                    {
+                        $u = ORM::factory('AdUrls');
+                        $u->id_campaign = $campaign->id_campaign;
+                        $u->target_url = $url;
+                        $u->position = $k;
+                        $u->save();
+                    }
+                    catch (ORM_Validation_Exception $e)
+                    {
+                        $errors += $e->errors();
+                    }
                 }
             } 
+            if(empty($errors))   
+            {
+                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'campaigns', 'action' => 'index'))); /*. '?id_campaign=' . $campaign->id_campaign )*/
+            }
         }
 
 
@@ -82,6 +108,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
         $view->action = 'add';
         $view->campaign = ORM::factory('Campaigns');
         $view->countries = ORM::factory('Countries')->find_all();
+        $view->errors = $errors;
         $this->display($view);
     }
 
@@ -98,11 +125,11 @@ class Controller_Admin_Campaigns extends Controller_Auth
         if ($this->request->method() === Request::POST)
         {
             // Patterns csv-import
-            if(iset($_FILES[FORM_CSV_PATERNS_FIELD_NAME]))
+            if(isset($_FILES[FORM_CSV_PATERNS_FIELD_NAME]))
             {
                 $validPatterns = Validation::factory($_FILES)
                     ->rule(FORM_CSV_PATERNS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
-                if ($validation->check())
+                if ($validPatterns->check())
                 {
                     $newPatters = $this->_parseCsv($FILES[FORM_CSV_PATERNS_FIELD_NAME]['tmp_name']);
                     //TODO: save new patterns
@@ -111,11 +138,11 @@ class Controller_Admin_Campaigns extends Controller_Auth
             // end Patterns csv-import
 
             // Ad urls csv-import
-            if(iset($_FILES[FORM_CSV_ADURLS_FIELD_NAME]))
+            if(isset($_FILES[FORM_CSV_ADURLS_FIELD_NAME]))
             {
-                $validPatterns = Validation::factory($_FILES)
+                $validAdUrls = Validation::factory($_FILES)
                     ->rule(FORM_CSV_ADURLS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
-                if ($validation->check())
+                if ($validAdUrls->check())
                 {
                     $newAdUrls = $this->_parseCsv($FILES[FORM_CSV_ADURLS_FIELD_NAME]['tmp_name']);
                     //TODO: save new Ad urls
