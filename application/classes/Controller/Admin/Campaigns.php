@@ -1,5 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
+const FORM_CSV_PATERNS_FIELD_NAME = 'csv_patterns';
+const FORM_CSV_ADURLS_FIELD_NAME  = 'csv_adurls';
+
 class Controller_Admin_Campaigns extends Controller_Auth
 {
     public $template = 'layouts/admin';
@@ -42,7 +45,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
 
     public function action_add()
     {
-        
+
         if(!empty($_POST))
         {
             /*$name = intval(Arr::get($_GET, 'filter', 0));
@@ -50,9 +53,9 @@ class Controller_Admin_Campaigns extends Controller_Auth
             $ = intval(Arr::get($_GET, 'filter', 0));
             $filter = intval(Arr::get($_GET, 'filter', 0));*/
         }
-        
-        
-        
+
+
+
         $view = View::factory('scripts/admin/campaigns_add');
         $view->action = 'add';
         $view->countries = ORM::factory('Countries')->find_all();
@@ -68,6 +71,36 @@ class Controller_Admin_Campaigns extends Controller_Auth
         {
              throw HTTP_Exception::factory(404, 'Campaign not found!');
         }
+
+        if ($this->request->method() === Request::POST)
+        {
+            // Patterns csv-import
+            if(iset($_FILES[FORM_CSV_PATERNS_FIELD_NAME]))
+            {
+                $validPatterns = Validation::factory($_FILES)
+                    ->rule(FORM_CSV_PATERNS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
+                if ($validation->check())
+                {
+                    $newPatters = $this->_parseCsv($FILES[FORM_CSV_PATERNS_FIELD_NAME]['tmp_name']);
+                    //TODO: save new patterns
+                }
+            }
+            // end Patterns csv-import
+
+            // Ad urls csv-import
+            if(iset($_FILES[FORM_CSV_ADURLS_FIELD_NAME]))
+            {
+                $validPatterns = Validation::factory($_FILES)
+                    ->rule(FORM_CSV_ADURLS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
+                if ($validation->check())
+                {
+                    $newAdUrls = $this->_parseCsv($FILES[FORM_CSV_ADURLS_FIELD_NAME]['tmp_name']);
+                    //TODO: save new Ad urls
+                }
+            }
+            // end Ad urls csv-import
+        }
+
         $view = View::factory('scripts/admin/campaigns_add'); //TODO: rename template
         $view->action   = 'edit';
         $view->campaign = $campaign;
@@ -105,6 +138,10 @@ class Controller_Admin_Campaigns extends Controller_Auth
                 $row++;
             }
             fclose($f);
+        }
+        if(!empty($result))
+        {
+            $result = array_keys($result);
         }
 
         return $result;
