@@ -1,4 +1,8 @@
-<h2><?php echo __('Edit Campaign') ?></h2>
+<h2><?php 
+
+echo __($action . ' Campaign') 
+
+?></h2>
 <?php
 
 if(!empty($errors))
@@ -19,19 +23,13 @@ if(!empty($errors))
                 <tr>
                     <td><label for="c_name">Campaign name: </label> </td>
                     <td>
-                        <input type="text" name="c_name" id="c_name" value="<?php if ($action == 'edit')
-                                                                                  {
-                                                                                      echo $campaign->name;
-                                                                                  } ?>">
+                        <input type="text" name="c_name" id="c_name" value="<?php echo $campaign->name; ?>">
                     </td>
                 </tr>
                 <tr>
                     <td><label for="limit">Clicks limit per 24hrs.: </label> </td>
                     <td>
-                        <input type="text" name="limit" id="limit" value="<?php if ($action == 'edit')
-                                                                                {
-                                                                                    echo $campaign->click_limit;
-                                                                                }  ?>">
+                        <input type="text" name="limit" id="limit" value="<?php echo $campaign->click_limit; ?>">
                     </td>
                 </tr>
                 <tr>
@@ -42,14 +40,7 @@ if(!empty($errors))
                             <?php
                             foreach ($countries as $country)
                             {
-                                if ($action == 'edit')
-                                {
-                                    echo '<option value="' . $country->id_country . '" ' . (($campaign->id_country == $country->id_country)?'selected="selected"':'') . ' >' . $country->name_en . '</option>';
-                                }
-                                else
-                                {
-                                    echo '<option value="' . $country->id_country . '" >' . $country->name_en . '</option>';
-                                }
+                                echo '<option value="' . $country->id_country . '" ' . (($campaign->id_country == $country->id_country)?'selected="selected"':'') . ' >' . $country->name_en . '</option>';
                             }
                             ?>
                         </select>
@@ -66,9 +57,10 @@ if(!empty($errors))
         Websites:
         <div class="sites-container">
             <?php
-            if ($action == 'edit')
+            $patterns = $campaign->patterns->find_all();
+            if (count($patterns) > 0)
             {
-                foreach ($campaign->patterns->find_all() as $pattern): ?>
+                foreach ($patterns as $pattern): ?>
                 <div>
                     <input type="text" name="patterns[]" value="<?php echo $pattern->pattern; ?>">
                     <a class="btn btn-danger delete-btn">
@@ -96,9 +88,10 @@ if(!empty($errors))
         Ad urls:
         <div class="urls-container">
             <?php
-            if ($action == 'edit')
+            $ad_urls = $campaign->ad_urls->order_by('position', 'asc')->find_all();
+            if (count($ad_urls) > 0)
             {
-                foreach ($campaign->ad_urls->order_by('position', 'asc')->find_all() as $adUrl):
+                foreach ($ad_urls as $adUrl):
                 ?>
                 <div>
                     <input type="text" name="urls[]" value="<?php echo $adUrl->target_url; ?>">
@@ -134,11 +127,7 @@ if(!empty($errors))
 <div class="row">
     <div class="span12">
         <?php
-
-        if ($action == 'edit')
-        {
             echo '<input type="hidden" name="id_campaign" value="' . $campaign->id_campaign . '">';
-        }
         ?>
         <a class="btn btn-primary" id="save-button"><i class="icon-ok icon-white"></i> Save</a>
         <a class="btn btn-danger"><i class="icon-remove icon-white"></i> Cancel</a>

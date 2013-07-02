@@ -43,15 +43,30 @@ class Controller_Admin_Campaigns extends Controller_Auth
 		$this->display($view);
 	}
 
-    public function action_add()
+    public function action_addedit()
     {
+        $view = View::factory('scripts/admin/campaigns_add');
         $errors = array();
+        $id = Arr::get($_GET, 'id_campaign', NULL);
+        if(empty($id))
+        {
+            $id = Arr::get($_POST, 'id_campaign', NULL);
+        }
+        $campaign = ORM::factory('Campaigns', $id);
+        /*if(!$campaign->loaded())
+        {
+             throw HTTP_Exception::factory(404, 'Campaign not found!');
+        }*/
+        $view->action = 'Add';
+        if (!empty($id))
+        {
+            $view->action = 'Edit';
+        }
+        
         if(!empty($_POST))
         {
-            
             try
             {
-                $campaign = ORM::factory('Campaigns');
                 $campaign->name = Arr::get($_POST, 'c_name');
                 $campaign->id_country = intval(Arr::get($_POST, 'country', 0));
                 $campaign->click_limit = intval(Arr::get($_POST, 'limit', 0));
@@ -62,10 +77,47 @@ class Controller_Admin_Campaigns extends Controller_Auth
                 $errors = $e->errors();
             }
             
+            $csvPatterns = $csvAdUrls = array();
             
-            if(!empty($_POST['patterns']))
+            $newPatterns = Arr::get($_POST,'patterns',array());
+            $newAdUrls = Arr::get($_POST,'urls',array());
+            
+            // Patterns csv-import
+            
+            
+            //echo '<pre>'; print_r($_FILES); die;
+            
+            if(!empty($_FILES[FORM_CSV_PATERNS_FIELD_NAME]['name']))
             {
-                foreach($_POST['patterns'] as $pattern){
+                $validPatterns = Validation::factory($_FILES)
+                    ->rule(FORM_CSV_PATERNS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
+                if ($validPatterns->check())
+                {
+                    $csvPatterns = $this->_parseCsv($_FILES[FORM_CSV_PATERNS_FIELD_NAME]['tmp_name']);
+                    //TODO: save new patterns
+                }
+            }
+            // end Patterns csv-import
+
+            // Ad urls csv-import
+            if(!empty($_FILES[FORM_CSV_ADURLS_FIELD_NAME]['name']))
+            {
+                $validAdUrls = Validation::factory($_FILES)
+                    ->rule(FORM_CSV_ADURLS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
+                if ($validAdUrls->check())
+                {
+                    $csvAdUrls = $this->_parseCsv($_FILES[FORM_CSV_ADURLS_FIELD_NAME]['tmp_name']);
+                    //TODO: save new Ad urls
+                }
+            }
+            // end Ad urls csv-import
+            
+            $patterns = Arr::merge($newPatterns,$csvPatterns);
+            $urls = Arr::merge($newAdUrls, $csvAdUrls);
+            
+            if(!empty($patterns))
+            {
+                foreach($patterns as $pattern){
                     try
                     {
                         $pat = ORM::factory('WebsitePatterns');
@@ -79,9 +131,9 @@ class Controller_Admin_Campaigns extends Controller_Auth
                     }
                 }
             }
-            if(!empty($_POST['urls']))
+            if(!empty($urls))
             {
-                foreach($_POST['urls'] as $k=>$url){
+                foreach($urls as $k=>$url){
                     try
                     {
                         $u = ORM::factory('AdUrls');
@@ -96,65 +148,15 @@ class Controller_Admin_Campaigns extends Controller_Auth
                     }
                 }
             } 
+            
             if(empty($errors))   
             {
                 Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'campaigns', 'action' => 'index'))); /*. '?id_campaign=' . $campaign->id_campaign )*/
             }
         }
-
-
-
-        $view = View::factory('scripts/admin/campaigns_add');
-        $view->action = 'add';
-        $view->campaign = ORM::factory('Campaigns');
-        $view->countries = ORM::factory('Countries')->find_all();
-        $view->errors = $errors;
-        $this->display($view);
-    }
-
-    public function action_edit()
-    {
-        $idCampaign = intval(Arr::get($_GET, 'id_campaign', 0));
-
-        $campaign = ORM::factory('Campaigns', $idCampaign);
-        if(!$campaign->loaded())
-        {
-             throw HTTP_Exception::factory(404, 'Campaign not found!');
-        }
-
-        if ($this->request->method() === Request::POST)
-        {
-            // Patterns csv-import
-            if(isset($_FILES[FORM_CSV_PATERNS_FIELD_NAME]))
-            {
-                $validPatterns = Validation::factory($_FILES)
-                    ->rule(FORM_CSV_PATERNS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
-                if ($validPatterns->check())
-                {
-                    $newPatters = $this->_parseCsv($FILES[FORM_CSV_PATERNS_FIELD_NAME]['tmp_name']);
-                    //TODO: save new patterns
-                }
-            }
-            // end Patterns csv-import
-
-            // Ad urls csv-import
-            if(isset($_FILES[FORM_CSV_ADURLS_FIELD_NAME]))
-            {
-                $validAdUrls = Validation::factory($_FILES)
-                    ->rule(FORM_CSV_ADURLS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
-                if ($validAdUrls->check())
-                {
-                    $newAdUrls = $this->_parseCsv($FILES[FORM_CSV_ADURLS_FIELD_NAME]['tmp_name']);
-                    //TODO: save new Ad urls
-                }
-            }
-            // end Ad urls csv-import
-        }
-
-        $view = View::factory('scripts/admin/campaigns_add'); //TODO: rename template
-        $view->action   = 'edit';
         $view->campaign = $campaign;
         $view->countries = ORM::factory('Countries')->find_all();
+        $view->errors = $errors;
         $this->display($view);
     }
 
@@ -162,17 +164,25 @@ class Controller_Admin_Campaigns extends Controller_Auth
     {
         if (!empty($idCampaign))
         {
-            $campaignsToDelete = ORM::factory('Campaigns');
+            $campaigns = ORM::factory('Campaigns');
 
             if ( is_array($idCampaign) )
             {
-                $campaignsToDelete->where('id_campaign', 'in', $idCampaign);
+                $campaigns->where('id_campaign', 'in', $idCampaign);
             }
             else
             {
-                $campaignsToDelete->where('id_campaign', '=', $idCampaign);
+                $campaigns->where('id_campaign', '=', $idCampaign);
             }
-            $campaignsToDelete->find()->delete();
+            $campaignsToDelete = $campaigns->find_all();
+            if(count($campaignsToDelete) > 0)
+            {
+                foreach ($campaignsToDelete as $campaign)
+                {
+                    $campaign->delete();
+                }
+            }
+            
         }
     }
 

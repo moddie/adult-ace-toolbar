@@ -1,7 +1,7 @@
 <h2><?php echo __('Campaigns') ?></h2>
 <div class="row space">
     <div class="span12 ">
-        <a href="<?php echo URL::base() . 'admin/campaigns/add';?>" class="btn btn-primary add-btn"><i class="icon-plus icon-white"></i> Add</a>
+        <a href="<?php echo URL::base() . 'admin/campaigns/addedit';?>" class="btn btn-primary add-btn"><i class="icon-plus icon-white"></i> Add</a>
         <a class="btn btn-danger remove-btn"><i class="icon-remove icon-white"></i> Delete selected</a>
         
         <span class="pull-right">
@@ -40,7 +40,7 @@
                         <td class="text-center"><input type="checkbox" name="delete[<?php echo $campaign->id_campaign; ?>]"  /></td>
                         <td><?php echo $campaign->name; ?></td>
                         <td><?php echo (($campaign->id_country === '0') ? 'All' : $campaign->country->name_en); ?></td>
-                        <td class="text-center"><a class="btn btn-primary edit-btn" href="<?php echo URL::base() . 'admin/campaigns/edit?id_campaign=' . $campaign->id_campaign; ?>"><i class="icon-pencil icon-white"></i> Edit</a></td>
+                        <td class="text-center"><a class="btn btn-primary edit-btn" href="<?php echo URL::base() . 'admin/campaigns/addedit?id_campaign=' . $campaign->id_campaign; ?>"><i class="icon-pencil icon-white"></i> Edit</a></td>
                     </tr>
                     <?php
                     }
