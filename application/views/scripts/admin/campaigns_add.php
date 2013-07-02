@@ -1,5 +1,5 @@
 <h2><?php echo __('Edit Campaign') ?></h2>
-<form method="post">
+<form method="post" id="form">
 <div class="row">
     <div class="span12">
         <table>
@@ -58,7 +58,7 @@
             {
                 foreach ($campaign->patterns->find_all() as $pattern): ?>
                 <div>
-                    <input type="text" name="sites[]" value="<?php echo $pattern->pattern; ?>">
+                    <input type="text" name="patterns[]" value="<?php echo $pattern->pattern; ?>">
                     <a class="btn btn-danger delete-btn">
                         <i class="icon-remove icon-white"></i>
                     </a>
@@ -69,7 +69,7 @@
             else 
             { ?>
                 <div>
-                    <input type="text" name="sites[]" value="">
+                    <input type="text" name="patterns[]" value="">
                     <a class="btn btn-danger delete-btn">
                         <i class="icon-remove icon-white"></i>
                     </a>
@@ -119,7 +119,14 @@
 <hr />
 <div class="row">
     <div class="span12">
-        <a class="btn btn-primary"><i class="icon-ok icon-white"></i> Save</a>
+        <?php
+        
+        if ($action == 'edit') 
+        {
+            echo '<input type="hidden" name="id_campaign" value="' . $campaign->id_campaign . '">';
+        }
+        ?>
+        <a class="btn btn-primary save-btn"><i class="icon-ok icon-white"></i> Save</a>
         <a class="btn btn-danger"><i class="icon-remove icon-white"></i> Cancel</a>
     </div>
 </div>
@@ -137,11 +144,15 @@
         });
         
         jQuery(".sites-container").parent().find('.add-btn').on('click',function(){
-            jQuery(".sites-container").append('<div><input type="text" name="sites[]"> <a class="btn btn-danger delete-btn"><i class="icon-remove icon-white"></i></a></div>');
+            jQuery(".sites-container").append('<div><input type="text" name="patterns[]"> <a class="btn btn-danger delete-btn"><i class="icon-remove icon-white"></i></a></div>');
         });
         
         jQuery(".urls-container").parent().find('.add-btn').on('click',function(){
             jQuery(".urls-container").append('<div><input type="text" name="urls[]"> <a class="btn btn-danger delete-btn"><i class="icon-remove icon-white"></i></a> <a class="dragger"><i class="icon-resize-vertical"></i></a></div>');
+        });
+        
+        jQuery(".save-btn").on('click',function(){
+            jQuery('#form').submit();
         });
 
     });
