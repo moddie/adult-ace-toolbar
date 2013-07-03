@@ -20,21 +20,18 @@
     <script src="<?php echo URL::base(true) ?>bootstrap/js/bootstrap-select.min.js"></script>
 </head>
     <body>
-        
+
         <div class="navbar navbar-fixed-top">
             <div class="navbar-inner">
                 <div class="container">
                     <a class="brand" href="#"><?php echo Kohana::$config->load('general')->get('site_name') ?></a>
                     <?php if (Auth::instance()->logged_in('admin')) { ?>
                     <ul class="nav">
-                        <li <?php if (Request::$current->controller() == 'Ads') echo 'class="active"' ?> >
-                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index')) ?>"><?php echo __('Ads') ?></a>
+                        <li <?php if (Request::$current->controller() == 'Campaigns') echo 'class="active"' ?>>
+                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Campaigns', 'action' => 'index')) ?>"><?php echo __('Campaigns') ?></a>
                         </li>
                         <li <?php if (Request::$current->controller() == 'Stats') echo 'class="active"' ?>>
                             <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Stats', 'action' => 'index')) ?>"><?php echo __('Stats') ?></a>
-                        </li>
-                        <li <?php if (Request::$current->controller() == 'Campaigns') echo 'class="active"' ?>>
-                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Campaigns', 'action' => 'index')) ?>"><?php echo __('Campaigns') ?></a>
                         </li>
                     </ul>
                     <form class="navbar-form pull-right">
@@ -46,9 +43,9 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="container" style='margin-top: 40px'>
-            
+
             <?php echo $content ?>
 
         </div>

@@ -8,7 +8,7 @@ class Controller_Admin_Login extends Controller_Auth {
 
         if (Auth::instance()->logged_in('admin'))
         {
-            Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index')) );
+            Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'Campaigns', 'action' => 'index')) );
         }
 
         $view = View::factory('scripts/admin/login');
