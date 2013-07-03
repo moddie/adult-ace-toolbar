@@ -12,7 +12,9 @@ class Controller_Admin_Login extends Controller_Auth {
         }
 
         $view = View::factory('scripts/admin/login');
-
+	
+	$this->template->title = 'Login page';
+	
         $post = $this->request->post();
         if ($post)
         {
@@ -22,7 +24,7 @@ class Controller_Admin_Login extends Controller_Auth {
             {
                 $redirectUrl = Session::instance()->get_once(
                     'requestedUrl',
-                    Route::get('admin')->uri(array('controller' => 'Ads', 'action' => 'index'))
+                    Route::get('admin')->uri(array('controller' => 'Campaigns', 'action' => 'index'))
                 );
                 // Login successful, send to app
                 Controller::redirect( $redirectUrl );

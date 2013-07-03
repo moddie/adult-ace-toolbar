@@ -31,7 +31,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
         {
             $campaigns->limit($per_page)->offset(($page - 1) * $per_page);
         }
-        $this->template->title = "Compaigns";
+        $this->template->title = "Campaigns";
         $pagination_view = new View('pagination/campaigns');
         $pagination_view->page = $page;
         $pagination_view->perpage = $per_page;
@@ -59,11 +59,11 @@ class Controller_Admin_Campaigns extends Controller_Auth
              throw HTTP_Exception::factory(404, 'Campaign not found!');
         }*/
         $view->action = 'Add';
-        $this->template->title = "Add Compaign";
+        $this->template->title = "Add Campaign";
         if (!empty($id))
         {
             $view->action = 'Edit';
-            $this->template->title = "Edit Compaign";
+            $this->template->title = "Edit Campaign";
         }
         
         if(!empty($_POST))

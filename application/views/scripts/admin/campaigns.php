@@ -70,10 +70,10 @@
                 td.css({'height': (_self.height()+10)+'px'});
                 _self.hide();
                 tr.on('mouseover',function(){
-                    _self.stop(true,true).fadeIn();
+                    _self.show();
                 });
                 tr.on('mouseout',function(){
-                    _self.stop(true,true).fadeOut();
+                    _self.hide();
                 });
             });    
         });
