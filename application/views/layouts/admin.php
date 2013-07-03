@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <head>
-    <title>Home Page</title>
+    <title><?php if ( !empty($title) ):
+        echo $title;
+    else:
+        echo 'Home Page';
+    endif;
+    ?></title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <!--    <link href="<?php echo URL::base(true) ?>css/common.css" type="text/css" rel="Stylesheet">

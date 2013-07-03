@@ -7,11 +7,11 @@ echo __($action . ' Campaign')
 
 if(!empty($errors))
 {
-    echo '<pre>';
+    echo '<div class="alert alert-error">';
     foreach($errors as $error):
         print_r($error);
     endforeach;
-    echo '</pre>';
+    echo '</div>';
 }
 
 ?>
@@ -54,7 +54,7 @@ if(!empty($errors))
 <hr />
 <div class="row">
     <div class="span6">
-        Websites:
+        Website patterns:
         <div class="sites-container">
             <?php
             $patterns = $campaign->patterns->find_all();
@@ -81,7 +81,7 @@ if(!empty($errors))
             <?php }?>
         </div>
         <a class="btn btn-primary add-btn"><i class="icon-plus icon-white"></i> Add </a>
-        <a class="btn btn-primary"><i class="icon-upload icon-white"></i> Import from CSV </a>
+        <a class="btn btn-primary csv-btn"><i class="icon-upload icon-white"></i> Import from CSV </a>
         <input type="file" name="csv_patterns" />
     </div>
     <div class="span6">
@@ -119,7 +119,7 @@ if(!empty($errors))
             <?php }?>
         </div>
         <a class="btn btn-primary add-btn"><i class="icon-plus icon-white"></i> Add </a>
-        <a class="btn btn-primary"><i class="icon-upload icon-white"></i> Import from CSV </a>
+        <a class="btn btn-primary csv-btn"><i class="icon-upload icon-white"></i> Import from CSV </a>
         <input type="file" name="csv_adurls" />
     </div>
 </div>
@@ -130,7 +130,7 @@ if(!empty($errors))
             echo '<input type="hidden" name="id_campaign" value="' . $campaign->id_campaign . '">';
         ?>
         <a class="btn btn-primary" id="save-button"><i class="icon-ok icon-white"></i> Save</a>
-        <a class="btn btn-danger"><i class="icon-remove icon-white"></i> Cancel</a>
+        <a href="<?php echo URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'campaigns', 'action' => 'index')); ?>" class="btn btn-danger" id="cancel-button"><i class="icon-remove icon-white"></i> Cancel</a>
     </div>
 </div>
 </form>
@@ -141,6 +141,7 @@ if(!empty($errors))
         jQuery('#save-button').on('click', function(){
             jQuery('#campaign-edit-form').submit();
         });
+               
         jQuery('body').on('click','.delete-btn',function(){
             jQuery(this).parent().remove();
         });
@@ -155,6 +156,15 @@ if(!empty($errors))
 
         jQuery(".urls-container").parent().find('.add-btn').on('click',function(){
             jQuery(".urls-container").append('<div><input type="text" name="urls[]"> <a class="btn btn-danger delete-btn"><i class="icon-remove icon-white"></i></a> <a class="dragger"><i class="icon-resize-vertical"></i></a></div>');
+        });
+        
+        jQuery(".csv-btn").each(function(){
+            var _self = jQuery(this),
+                fileinput = _self.parent().find('input[type=file]');
+            fileinput.hide();
+            _self.on('click',function(){
+                fileinput.click();
+            });
         });
     });
 </script>

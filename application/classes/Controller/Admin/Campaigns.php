@@ -31,6 +31,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
         {
             $campaigns->limit($per_page)->offset(($page - 1) * $per_page);
         }
+        $this->template->title = "Compaigns";
         $pagination_view = new View('pagination/campaigns');
         $pagination_view->page = $page;
         $pagination_view->perpage = $per_page;
@@ -58,9 +59,11 @@ class Controller_Admin_Campaigns extends Controller_Auth
              throw HTTP_Exception::factory(404, 'Campaign not found!');
         }*/
         $view->action = 'Add';
+        $this->template->title = "Add Compaign";
         if (!empty($id))
         {
             $view->action = 'Edit';
+            $this->template->title = "Edit Compaign";
         }
         
         if(!empty($_POST))
@@ -74,7 +77,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
             }
             catch (ORM_Validation_Exception $e)
             {
-                $errors = $e->errors();
+                $errors = $e->errors('');
             }
             
             $csvPatterns = $csvAdUrls = array();
@@ -112,8 +115,30 @@ class Controller_Admin_Campaigns extends Controller_Auth
             }
             // end Ad urls csv-import
             
-            $patterns = Arr::merge($newPatterns,$csvPatterns);
-            $urls = Arr::merge($newAdUrls, $csvAdUrls);
+            $patterns = Arr::merge(array_filter($newPatterns),  array_filter($csvPatterns));
+            $urls = Arr::merge(array_filter($newAdUrls), array_filter($csvAdUrls));
+            
+            
+            if($campaign->loaded())
+            {
+                $oldPatterns = $campaign->patterns->find_all();
+                if(count($oldPatterns) > 0) 
+                {
+                    foreach ($oldPatterns as $pattern)
+                    {
+                        $pattern->delete();
+                    }
+                }
+                $oldUrls = $campaign->ad_urls->find_all();
+                if(count($oldUrls) > 0) 
+                {
+                    foreach ($oldUrls as $pattern)
+                    {
+                        $pattern->delete();
+                    }
+                }
+                
+            }
             
             if(!empty($patterns))
             {
@@ -127,7 +152,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
                     }
                     catch (ORM_Validation_Exception $e)
                     {
-                        $errors += $e->errors();
+                        $errors += $e->errors('', TRUE);
                     }
                 }
             }
@@ -144,7 +169,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
                     }
                     catch (ORM_Validation_Exception $e)
                     {
-                        $errors += $e->errors();
+                        $errors += $e->errors('', TRUE);
                     }
                 }
             } 
