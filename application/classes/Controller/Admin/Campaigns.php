@@ -40,7 +40,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
         $view->pagination = $pagination_view->render();
         $view->filter = $filter;
         $view->campaigns = $campaigns->with('countries')->find_all();
-        $view->countries = ORM::factory('Countries')->find_all();
+        $view->countries = ORM::factory('Countries')->order_by('name_en','asc')->find_all();
 		$this->display($view);
 	}
 
@@ -117,7 +117,15 @@ class Controller_Admin_Campaigns extends Controller_Auth
             
             $patterns = Arr::merge(array_filter($newPatterns),  array_filter($csvPatterns));
             $urls = Arr::merge(array_filter($newAdUrls), array_filter($csvAdUrls));
-            
+            if (!empty($urls))
+            {
+                foreach ($urls as $key => $url){
+                    if ($url == 'http://')
+                    {
+                        unset($urls[$key]);
+                    }
+                }
+            }
             
             if($campaign->loaded())
             {
@@ -176,11 +184,11 @@ class Controller_Admin_Campaigns extends Controller_Auth
             
             if(empty($errors))   
             {
-                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'campaigns', 'action' => 'index'))); /*. '?id_campaign=' . $campaign->id_campaign )*/
+                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'campaigns', 'action' => 'addedit')) . ((!empty($id)?('?id_campaign='.$id):''))) ; /*. '?id_campaign=' . $campaign->id_campaign )*/
             }
         }
         $view->campaign = $campaign;
-        $view->countries = ORM::factory('Countries')->find_all();
+        $view->countries = ORM::factory('Countries')->order_by('name_en','asc')->find_all();
         $view->errors = $errors;
         $this->display($view);
     }

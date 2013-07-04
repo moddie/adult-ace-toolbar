@@ -29,6 +29,7 @@ class Controller_Api_Ads extends Controller_Base
 	{
         if(($adUrl = $this->_getAdUrl()) !== '')
         {
+            $adUrl = str_replace('<referer>', urlencode($this->request->referrer()), $adUrl);
             header('Location: ' . $adUrl);
             $this->_writeStats();
         }
@@ -205,11 +206,10 @@ class Controller_Api_Ads extends Controller_Base
         $session->set($clicksSessionKey, $clicks);
         $session->set($this->_campaignId . '_lastPosition', $this->_position);
 
-        $statsActiveUsersSql = 'INSERT IGNORE INTO `stats_active_users` (`date`, `id_country`, `ip_address`)
-            VALUES (:date, :idCountry, :ipAddress)';
+        $statsActiveUsersSql = 'INSERT IGNORE INTO `stats_active_users` (`id_country`, `ip_address`)
+            VALUES (:idCountry, :ipAddress)';
         DB::query(Database::INSERT, $statsActiveUsersSql)
             ->parameters(array(
-                ':date'      => date('Y-m-d'),
                 ':idCountry' => $this->_countryId,
                 ':ipAddress' => REQUEST::$client_ip
             ))
