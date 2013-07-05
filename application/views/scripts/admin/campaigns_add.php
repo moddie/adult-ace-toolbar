@@ -57,7 +57,7 @@ if(!empty($errors))
         Website patterns:
         <div class="sites-container">
             <?php
-            $patterns = $campaign->patterns->find_all();
+            $patterns = $campaign->patterns->order_by('id', 'asc')->find_all();
             if (count($patterns) > 0)
             {
                 foreach ($patterns as $pattern): ?>
@@ -83,6 +83,7 @@ if(!empty($errors))
         <a class="btn btn-primary add-btn"><i class="icon-plus icon-white"></i> Add </a>
         <a class="btn btn-primary csv-btn"><i class="icon-upload icon-white"></i> Import from CSV </a>
         <input type="file" name="csv_patterns" />
+        <div class="info"></div>
     </div>
     <div class="span6">
         Ad urls:
@@ -108,7 +109,7 @@ if(!empty($errors))
             else
             {?>
                 <div>
-                    <input type="text" name="urls[]" value="">
+                    <input type="text" name="urls[]" value="http://">
                     <a class="btn btn-danger delete-btn">
                         <i class="icon-remove icon-white"></i>
                     </a>
@@ -121,6 +122,7 @@ if(!empty($errors))
         <a class="btn btn-primary add-btn"><i class="icon-plus icon-white"></i> Add </a>
         <a class="btn btn-primary csv-btn"><i class="icon-upload icon-white"></i> Import from CSV </a>
         <input type="file" name="csv_adurls" />
+        <div class="info"></div>
     </div>
 </div>
 <hr />
@@ -155,15 +157,19 @@ if(!empty($errors))
         });
 
         jQuery(".urls-container").parent().find('.add-btn').on('click',function(){
-            jQuery(".urls-container").append('<div><input type="text" name="urls[]"> <a class="btn btn-danger delete-btn"><i class="icon-remove icon-white"></i></a> <a class="dragger"><i class="icon-resize-vertical"></i></a></div>');
+            jQuery(".urls-container").append('<div><input type="text" name="urls[]" value="http://"> <a class="btn btn-danger delete-btn"><i class="icon-remove icon-white"></i></a> <a class="dragger"><i class="icon-resize-vertical"></i></a></div>');
         });
         
         jQuery(".csv-btn").each(function(){
             var _self = jQuery(this),
-                fileinput = _self.parent().find('input[type=file]');
+                fileinput = _self.parent().find('input[type=file]'),
+                info = _self.parent().find('.info');
             fileinput.hide();
             _self.on('click',function(){
                 fileinput.click();
+            });
+            fileinput.on('change',function(){
+                info.html('Selected file: ' + fileinput.val());
             });
         });
     });
