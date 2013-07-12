@@ -9,7 +9,7 @@ class Controller_Admin_Stats extends Controller_Auth {
         $view = View::factory('scripts/admin/stats');
 
         $params = array();
-	$this->template->title = 'Statistics';
+        $this->template->title = 'Statistics';
         $page = intval(Arr::get($_GET, 'page', 1));
         $view->page = $page;
         $per_page = 10;

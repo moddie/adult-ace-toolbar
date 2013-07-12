@@ -1,15 +1,13 @@
 <?php
 $pages_count = ceil($count_all / $perpage);
-//    var_dump($pages_count);die();
 ?>
 
 <div class="pagination pagination-centered">
     <ul>
-        
         <?php if ( $page > 1 ) { ?>
         <li><a class="prev js-pagination" href="javascript:void(0);" data-id="prev">Previous</a></li>
         <?php } ?>
-        
+
         <?php
         for ( $i = 1; $i <= $pages_count; $i++ ) {
             if ( abs($page - $i) < 5 ) {
@@ -20,8 +18,6 @@ $pages_count = ceil($count_all / $perpage);
                }
            }
            ?>
-           
-            
         <?php if ( ($page >= 1) && ($page <= $pages_count - 1) ) { ?>
         <li><a class="next js-pagination" href="javascript:void(0);" data-id="next">Next</a></li>
         <?php } ?>
