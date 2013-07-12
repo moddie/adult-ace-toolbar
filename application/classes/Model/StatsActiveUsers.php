@@ -44,6 +44,6 @@ class Model_StatsActiveUsers extends ORM {
             $this->where($param, '=', $val);
         }
 
-        return $this->with('countries')->count_all();
+        return count($this->group_by('id_country')->find_all());
     }
 }
