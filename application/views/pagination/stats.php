@@ -13,7 +13,7 @@ $pages_count = ceil($count_all / $perpage);
             if ( abs($page - $i) < 5 ) {
                 ?>
                 <li class="<?php echo ($i == $page) ? 'active' : '' ?>" ><a data-id="<?php echo $i ?>"
-                   href="?page=<?php echo $i ?><?php if ($date) echo '&date='.urlencode($date) ?>"><?php echo $i ?></a></li>
+                   href="?page=<?php echo $i ?>"><?php echo $i ?></a></li>
                    <?php
                }
            }
@@ -29,12 +29,11 @@ $pages_count = ceil($count_all / $perpage);
         var page = '<?php echo $page ?>';
         var base = '<?php echo URL::base() ?>';
         var perpage = '<?php echo $perpage ?>';
-        var date = '<?php echo $date ?>';
 <?php if ( $page > 1 ) { ?>
-            jQuery('.prev').attr('href', '?page=<?php echo ($page - 1) ?><?php if ($date) echo "&date=".urlencode($date) ?>');
+            jQuery('.prev').attr('href', '?page=<?php echo ($page - 1) ?>');
 <?php } ?>
 <?php if ( $page < $pages_count ) { ?>
-            jQuery('.next').attr('href', '?page=<?php echo ($page + 1) ?><?php if ($date) echo "date=".urlencode($date) ?>');
+            jQuery('.next').attr('href', '?page=<?php echo ($page + 1) ?>');
 <?php } ?>
     });
 </script>

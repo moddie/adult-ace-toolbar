@@ -45,7 +45,7 @@ aatPlugin.prototype = {
         var selfPlugin = this;
 
         jQueryAat('head').append('<style>\n\
-#aatComponent *, #aatOverlay * {\n\
+#aatComponent, #aatComponent *, #aatOverlay, #aatOverlay * {\n\
     font-family: Verdana, Geneva, sans-serif !important;\n\
     font-weight: normal  !important;\n\
     font-size: 12px  !important;\n\
@@ -57,7 +57,7 @@ aatPlugin.prototype = {
     box-shadow: none !important;\n\
     transition: none !important;\n\
 }\n\
-#aatComponent *, #aatOverlay select, #aatOverlay input, #aatOverlay button, #aatOverlay select *  {\n\
+#aatComponent *, #aatOverlay select, #aatOverlay input, #aatOverlay button, #aatOverlay select * {\n\
     color: #000000;\n\
 }\n\
 #aatComponent input[type=text], #aatOverlay input[type=text], #aatOverlay select {\n\
@@ -92,6 +92,8 @@ aatPlugin.prototype = {
     height: 26px;\n\
     padding: 3px 10px;\n\
     z-index: 9999999;\n\
+    -moz-box-sizing: content-box;\n\
+    box-sizing: content-box;\n\
 }\n\
 .aatComponentExpanded {\n\
     width: auto !important;\n\

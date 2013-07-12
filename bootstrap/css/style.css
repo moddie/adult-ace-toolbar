@@ -1,0 +1,27 @@
+.sites-container > div > .btn,
+.urls-container > div > .btn{ 
+    position:relative;
+    top:-5px;
+    padding:4px 7px;
+}
+.sites-container > div:first-child > .btn-danger,
+.urls-container > div:first-child > .btn-danger{ 
+    display:none;
+}
+.urls-container > div {
+    position:relative;
+}
+.urls-container > div > .dragger {
+    padding:4px 7px;
+    position:absolute;
+    top:0px;
+    right:170px;
+    cursor:pointer;
+    opacity:0.5;
+}
+.urls-container > div {
+    background:white;
+    
+}
+
+

@@ -5,7 +5,7 @@ defined('SYSPATH') or die('No direct script access.');
 class Model_StatsActiveUsers extends ORM {
 
     protected $_table_name = 'stats_active_users';
-    protected $_primary_key = 'date';
+    protected $_primary_key = 'id_country';
 
     protected $_belongs_to = array(
 		'country' => array('model' => 'Countries', 'foreign_key' => 'id_country'),
@@ -20,8 +20,7 @@ class Model_StatsActiveUsers extends ORM {
 
         $this
             ->select(array(DB::expr('COUNT("ip_address")'), 'amount_users'))
-            ->order_by('date', 'DESC')
-            ->group_by('date')
+
             ->group_by('id_country');
 
         if ($page < 1)
