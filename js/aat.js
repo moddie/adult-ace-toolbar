@@ -257,6 +257,9 @@ aatPlugin.prototype = {
     line-height: 21px;\n\
     float: right;\n\
 }\n\
+#aatSearchTimeLengthInputM, #aatSearchTimeLengthInputS {\n\
+    width:60px;\n\
+}\n\
 #aatPlayerWrapper{\n\
     width: 80%;\n\
     height: 80%;\n\
@@ -336,7 +339,7 @@ aatPlugin.prototype = {
             <div id="aatSearchResultsTopBar">\n\
                 <div id="aatResultsInfo" class="aatFloatl"></div>\n\
                 <div class="aatFloatr">\n\
-                    Min time length:&nbsp;<input id="aatSearchTimeLengthInput" type="text" placeholder="00:00" />&nbsp;&nbsp;\n\
+                    Min time length:&nbsp;<input id="aatSearchTimeLengthInputM" type="text" placeholder="00" />m <input id="aatSearchTimeLengthInputS" type="text" placeholder="00" />s&nbsp;&nbsp;\n\
                     Site:&nbsp;<select id="aatSearchSiteInput"><option value="">All</option></select>\n\
                 </div>\n\
                 <div class="aatClearFix"></div>\n\
@@ -376,11 +379,17 @@ aatPlugin.prototype = {
             jQueryAat('#aatComponent').toggleClass('aatComponentExpanded');
 
             aatIsExpanded = self.hasClass('aatExpanded');
-            /*if(! aatIsExpanded)
+            if(! aatIsExpanded)
             {
                 jQueryAat('#aatOverlay').hide();
-                selfPlugin.closePlayer();
-            }*/
+
+                //selfPlugin.closePlayer();
+            }
+            else
+            {
+                jQueryAat('#aatOverlay').show();
+            }
+
             jQueryAat.getScript(selfPlugin.baseUrl + selfPlugin.cookieManagerUrl + '?is_expanded=' + aatIsExpanded);
         });
         jQueryAat('#aatComponentSearchButton').click(function(){
@@ -413,7 +422,7 @@ aatPlugin.prototype = {
             selfPlugin.newSearch();
         });
 
-        jQueryAat('#aatSearchTimeLengthInput').keypress(function(e){
+        jQueryAat('#aatSearchTimeLengthInputM, #aatSearchTimeLengthInputS').keypress(function(e){
             if(e.keyCode === 13)
             {
                 selfPlugin.newSearch();
@@ -531,17 +540,31 @@ aatPlugin.prototype = {
         var selfPlugin = this,
             keyword    = jQueryAat('#aatComponentSearchInput').val(),
             site       = jQueryAat('#aatSearchSiteInput').val(),
-            timeLength = jQueryAat('#aatSearchTimeLengthInput').val(),
-            re         = /^([\d]{1,2}:)?([\d]{1,2}:)?[\d]{1,2}$/;
+            timeLengthM = jQueryAat('#aatSearchTimeLengthInputM').val(),
+            timeLengthS = jQueryAat('#aatSearchTimeLengthInputS').val(),
+            re         = /^[\d]{1,2}$/; //^([\d]{1,2}:)?([\d]{1,2}:)?[\d]{1,2}$/;
         if(keyword === '')
         {
             alert('Please, enter search keyword');
             return false;
         }
-        if(!re.test(timeLength) && timeLength.length > 0)
+        if(!re.test(timeLengthM) && timeLengthM.length > 0)
         {
-            alert('Please, enter "Min time length" in format "mm:ss" or "hh:mm:ss"');
+            alert('Please, enter "Min time length" minutes in format "mm"');
             return false;
+        }
+        if(!re.test(timeLengthS) && timeLengthS.length > 0)
+        {
+            alert('Please, enter "Min time length" seconds in format "ss"');
+            return false;
+        }
+        if(timeLengthM.length === 0)
+        {
+            timeLengthM = '00';
+        }
+        if(timeLengthS.length === 0)
+        {
+            timeLengthS = '00';
         }
 
         var resultsContainer = jQueryAat('#aatSearchResultsContainer'),
@@ -549,7 +572,7 @@ aatPlugin.prototype = {
             searchUrl = selfPlugin.baseUrl + selfPlugin.apiVideosUrl
                 + '?keyword=' + keyword
                 + '&site=' + site
-                + '&length=' + selfPlugin.timeToSeconds(timeLength)
+                + '&length=' + selfPlugin.timeToSeconds(timeLengthM + ':' + timeLengthS)
                 + '&page=' + selfPlugin.currentPage
                 + '&per_page=' + selfPlugin.currentResultsPerPage;
 
