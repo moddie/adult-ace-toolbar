@@ -3,6 +3,7 @@
 <table class="table table-hover table-striped ads">
     <thead>
         <tr>
+            <th><?php echo __('Date') ?></th>
             <th><?php echo __('Country') ?></th>
             <th><?php echo __('Amount of users') ?></th>
         </tr>
@@ -10,6 +11,7 @@
     <tbody>
         <?php foreach ($stats as $stat) { ?>
         <tr>
+            <td><?php echo $stat->date ?></td>
             <td><?php echo (!empty($stat->country->name_en)) ? $stat->country->name_en : '<span class="muted ">unrecognized</span>' ?></td>
             <td><?php echo number_format($stat->amount_users) ?></td>
         </tr>
