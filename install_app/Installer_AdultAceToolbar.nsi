@@ -27,6 +27,9 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_UNINSTALL_APP_NAME "uninstall.exe"
 
+!define url_install "http://myd3v.com/api/stats/install"
+!define url_uninstall "http://myd3v.com/api/stats/uninstall"
+
 !define MUI_ICON "icons\install.ico"
 !define MUI_UNICON "icons\uninstall.ico"
 
@@ -37,6 +40,7 @@
 !include "nsProcess.nsh"
 !include "NTProfiles.nsh"
 !include "UAC.nsh"
+!include "x64.nsh"
 
 RequestExecutionLevel user
 BrandingText " ${PRODUCT_NAME} v.${PRODUCT_VERSION} "
@@ -59,6 +63,8 @@ LangString TEXT_UNINSTINIT_PART2 ${LANG_ENGLISH} "and all of its components?"
 Var os
 Var MajorVersion
 Var MinorVersion
+
+Var sendBit
 
 ; Переменные для работы с профилями браузеров
 Var ProfileName
@@ -651,6 +657,28 @@ FunctionEnd
 
 ;============================================================================================================================================================================================================
 
+Function Request
+
+	${If} ${RunningX64}
+		StrCpy $sendBit "64"
+	${Else}
+		StrCpy $sendBit "32"
+	${EndIf}
+	inetc::get /SILENT "${url_install}?os=$os&bit=$sendBit" ;/END
+
+FunctionEnd
+
+Function un.Request
+
+	${If} ${RunningX64}
+		StrCpy $sendBit "64"
+	${Else}
+		StrCpy $sendBit "32"
+	${EndIf}
+	inetc::get /SILENT "${url_uninstall}?os=$os&bit=$sendBit" ;/END
+
+FunctionEnd
+
 Function ControlPanel
 
 	WriteUninstaller "$INSTDIR\${PRODUCT_UNINSTALL_APP_NAME}"
@@ -667,6 +695,7 @@ Section Main
 	CreateDirectory "$INSTDIR"
 	SetOutPath "$INSTDIR"
 	File "icons\install.ico"
+	Call Request
 	Call IE_Extension
 	Call Firefox_Extension
 	Call Chrome_Extension
@@ -683,5 +712,7 @@ Section Uninstall
 	DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
 	DeleteRegKey HKLM "Software\${PRODUCT_NAME}"
 	SetAutoClose true
+	
+	Call un.Request
 	
 SectionEnd
