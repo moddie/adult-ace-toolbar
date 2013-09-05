@@ -23,18 +23,23 @@ class Controller_Api_Stats extends Controller_Base
      */
     protected function _writeStats($action)
     {
-        $statsSql = 'INSERT INTO `stats_installs` (`date`, `action`, `id_country`, `amount_users`)
-            VALUES (:date, :action, :idCountry, 1)
-            ON DUPLICATE KEY UPDATE `amount_users` = `amount_users` + 1';
+        $onDuplicateSql = '`amount_installs` = `amount_installs` + 1';
+        if( $action === 'uninstall' )
+        {
+            $onDuplicateSql = '`amount_uninstalls` = `amount_uninstalls` + 1';
+        }
+
+        $statsSql = 'INSERT INTO `stats_installs` (`id_country`, `amount_installs`, `amount_uninstalls`)
+            VALUES (:idCountry, :amountInstalls, :amountUninstalls)
+            ON DUPLICATE KEY UPDATE ' . $onDuplicateSql;
 
         $this->_getCountry();
 
         DB::query(Database::INSERT, $statsSql)
             ->parameters(array(
-                ':date'      => date('Y-m-d'),
-                ':action'    => $action,
-                ':idCountry' => $this->_countryId,
-                ':ipAddress' => REQUEST::$client_ip
+                ':idCountry'        => $this->_countryId,
+                ':amountInstalls'   => ($action === 'install') ? 1 : 0,
+                ':amountUninstalls' => ($action === 'uninstall') ? 1 : 0,
             ))
             ->execute();
     } // end _writeStats

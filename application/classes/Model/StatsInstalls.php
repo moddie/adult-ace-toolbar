@@ -17,8 +17,7 @@ class Model_StatsInstalls extends ORM
             $this->where($param, '=', $val);
         }
 
-        $this->order_by('date', 'DESC');
-        $this->order_by('amount_users', 'DESC');
+        $this->order_by('amount_installs', 'DESC');
 
         if ($page < 1)
         {
