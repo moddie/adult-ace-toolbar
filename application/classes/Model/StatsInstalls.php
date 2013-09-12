@@ -10,14 +10,12 @@ class Model_StatsInstalls extends ORM
 		'country' => array('model' => 'Countries', 'foreign_key' => 'id_country'),
 	);
 
-    public function findByParams($params, $page, $limit = 10)
+    public function findByParams($params, $page, $limit = 10, $orderBy = 'id', $orderDirection = 'ASC')
     {
         foreach ($params as $param => $val)
         {
             $this->where($param, '=', $val);
         }
-
-        $this->order_by('amount_installs', 'DESC');
 
         if ($page < 1)
         {
@@ -26,8 +24,35 @@ class Model_StatsInstalls extends ORM
 
         if ($limit)
         {
-            $this->limit($limit)->offset(($page-1)*$limit);
+            $this->limit($limit)->offset(($page - 1) * $limit);
         }
+
+        if(!in_array(strtolower($orderDirection), array('asc', 'desc')))
+        {
+            $orderDirection = 'asc';
+        }
+
+        switch($orderBy)
+        {
+            case 'chrome':
+            case 'firefox':
+            case 'ie':
+            case 'unknown':
+                $orderBy = 'amount_installs_' . $orderBy;
+                break;
+
+            case 'total':
+                $orderBy = DB::expr(
+                    '(amount_installs_chrome + amount_installs_firefox + amount_installs_ie + amount_installs_unknown)'
+                );
+                break;
+            
+            case '':
+                $orderBy = 'id';
+                break;
+        }
+
+        $this->order_by($orderBy, $orderDirection);
 
         return $this->with('countries')->find_all();
     }

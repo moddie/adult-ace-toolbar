@@ -11,16 +11,28 @@ class Controller_Admin_Stats extends Controller_Auth {
         $params = array();
 
         $this->template->title = 'Statistics';
-        $page = intval(Arr::get($_GET, 'page', 1));
-        $view->page = $page;
-        $per_page = 10;
 
-        $view->stats = ORM::factory('StatsInstalls')->findByParams($params, $page, $per_page);
+        $page = intval(Arr::get($_GET, 'page', 1));
+
+        $order = explode('|', Arr::get($_GET, 'order', 'id'));
+
+        $orderBy = $order[0];
+        $orderDirection = (isset($order[1])) ? $order[1] : 'asc';
+
+        $view->page           = $page;
+        $view->orderBy        = $orderBy;
+        $view->orderDirection = $orderDirection;
+        
+        $perPage = 10;
+
+        $view->stats = ORM::factory('StatsInstalls')->findByParams($params, $page, $perPage, $orderBy, $orderDirection);
 
         $pagination_view = new View('pagination/stats');
-        $pagination_view->page = $page;
-        $pagination_view->perpage = $per_page;
-        $pagination_view->count_all = ORM::factory('StatsInstalls')->countByParams($params);
+
+        $pagination_view->page           = $page;
+        $pagination_view->perPage        = $perPage;
+        $pagination_view->countAll       = ORM::factory('StatsInstalls')->countByParams($params);
+
         $view->pagination = $pagination_view->render();
 
 		$this->display($view);

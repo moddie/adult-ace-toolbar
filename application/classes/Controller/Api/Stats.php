@@ -6,40 +6,58 @@ class Controller_Api_Stats extends Controller_Base
 
     protected $_countryIso = '';
     protected $_countryId  = 0;
+    protected $_trackingBrowsers = array(
+        'chrome',
+        'firefox',
+        'ie'
+    );
 
     public function action_install()
     {
-        $this->_writeStats('install');
+        $this->_writeStats($this->request->param('id'));
     } // end action_install
-
-    public function action_uninstall()
-    {
-        $this->_writeStats('uninstall');
-    } // end action_uninstall
 
     /**
      * Increase users amount for current country on install
      *
      */
-    protected function _writeStats($action)
+    protected function _writeStats($browser)
     {
-        $onDuplicateSql = '`amount_installs` = `amount_installs` + 1';
-        if( $action === 'uninstall' )
+        $browser = strtolower($browser);
+        if(empty($browser) || !in_array($browser, $this->_trackingBrowsers))
         {
-            $onDuplicateSql = '`amount_uninstalls` = `amount_uninstalls` + 1';
+            $browser = 'unknown';
         }
 
-        $statsSql = 'INSERT INTO `stats_installs` (`id_country`, `amount_installs`, `amount_uninstalls`)
-            VALUES (:idCountry, :amountInstalls, :amountUninstalls)
+        $onDuplicateSql = '`amount_installs_' . $browser . '` = `amount_installs_' . $browser . '` + 1';
+
+        $statsSql = 'INSERT INTO `stats_installs`
+            (
+                `id_country`,
+                `amount_installs_chrome`,
+                `amount_installs_firefox`,
+                `amount_installs_ie`,
+                `amount_installs_unknown`
+            )
+            VALUES
+            (
+                :idCountry,
+                :amountInstallsChrome,
+                :amountInstallsFirefox,
+                :amountInstallsIe,
+                :amountInstallsUnknown
+            )
             ON DUPLICATE KEY UPDATE ' . $onDuplicateSql;
 
         $this->_getCountry();
 
         DB::query(Database::INSERT, $statsSql)
             ->parameters(array(
-                ':idCountry'        => $this->_countryId,
-                ':amountInstalls'   => ($action === 'install') ? 1 : 0,
-                ':amountUninstalls' => ($action === 'uninstall') ? 1 : 0,
+                ':idCountry'             => $this->_countryId,
+                ':amountInstallsChrome'  => ($browser === 'chrome') ? 1 : 0,
+                ':amountInstallsFirefox' => ($browser === 'firefox') ? 1 : 0,
+                ':amountInstallsIe'      => ($browser === 'ie') ? 1 : 0,
+                ':amountInstallsUnknown' => ($browser === 'unknown') ? 1 : 0,
             ))
             ->execute();
     } // end _writeStats
