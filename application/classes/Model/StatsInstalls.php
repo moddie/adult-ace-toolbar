@@ -41,12 +41,20 @@ class Model_StatsInstalls extends ORM
                 $orderBy = 'amount_installs_' . $orderBy;
                 break;
 
+            case 'country':
+                $countryTableName = 'countries';
+                $this
+                    ->join($countryTableName, 'LEFT')
+                    ->using('id_country');
+                $orderBy = $countryTableName . '.name_en';
+                break;
+
             case 'total':
                 $orderBy = DB::expr(
                     '(amount_installs_chrome + amount_installs_firefox + amount_installs_ie + amount_installs_unknown)'
                 );
                 break;
-            
+
             case '':
                 $orderBy = 'id';
                 break;

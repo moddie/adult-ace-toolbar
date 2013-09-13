@@ -3,7 +3,20 @@
 <table class="table table-hover table-striped ads">
     <thead>
         <tr>
-            <th><?php echo __('Country') ?></th>
+            <th>
+                <?php echo __('Country') ?>
+                <?php if ($orderBy === 'country' && $orderDirection === 'asc'): ?>
+                <strong>&UpArrow;</strong>
+                <?php else: ?>
+                <a href="<?php echo Request::current()->url() . URL::query(array('order' => 'country|asc')); ?>">&UpArrow;</a>
+                <?php endif; ?>
+
+                <?php if ($orderBy === 'country' && $orderDirection === 'desc'): ?>
+                <strong>&DownArrow;</strong>
+                <?php else: ?>
+                <a href="<?php echo Request::current()->url() . URL::query(array('order' => 'country|desc')); ?>">&DownArrow;</a>
+                <?php endif; ?>
+            </th>
             <th>
                 <?php echo __('Chrome Qty') ?>
                 <?php if ($orderBy === 'chrome' && $orderDirection === 'asc'): ?>
@@ -25,6 +38,7 @@
                 <?php else: ?>
                 <a href="<?php echo Request::current()->url() . URL::query(array('order' => 'firefox|asc')); ?>">&UpArrow;</a>
                 <?php endif; ?>
+
                 <?php if ($orderBy === 'firefox' && $orderDirection === 'desc'): ?>
                 <strong>&DownArrow;</strong>
                 <?php else: ?>
@@ -38,6 +52,7 @@
                 <?php else: ?>
                 <a href="<?php echo Request::current()->url() . URL::query(array('order' => 'ie|asc')); ?>">&UpArrow;</a>
                 <?php endif; ?>
+
                 <?php if ($orderBy === 'ie' && $orderDirection === 'desc'): ?>
                 <strong>&DownArrow;</strong>
                 <?php else: ?>
@@ -51,6 +66,7 @@
                 <?php else: ?>
                 <a href="<?php echo Request::current()->url() . URL::query(array('order' => 'unknown|asc')); ?>">&UpArrow;</a>
                 <?php endif; ?>
+
                 <?php if ($orderBy === 'unknown' && $orderDirection === 'desc'): ?>
                 <strong>&DownArrow;</strong>
                 <?php else: ?>
@@ -64,6 +80,7 @@
                 <?php else: ?>
                 <a href="<?php echo Request::current()->url() . URL::query(array('order' => 'total|asc')); ?>">&UpArrow;</a>
                 <?php endif; ?>
+
                 <?php if ($orderBy === 'total' && $orderDirection === 'desc'): ?>
                 <strong>&DownArrow;</strong>
                 <?php else: ?>
