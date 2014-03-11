@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+        <title>MapsEverywhere</title>
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        <style type="text/css">
+            .linkDivider{
+                margin: 0 10px;
+            }
+            #toolbar{
+                padding: 4px;
+                background-color: #10A2C6;
+                height: 250px;
+                width: 300px;
+            }
+            #toolbar form{
+                margin-bottom: 0;
+            }
+            .toolbarHeader{
+                margin-bottom: 3px;
+            }
+            .whiteBG{
+                background: #fff;
+                padding: 9px 0 6px 0;
+                height: 142px;
+            }
+            .nav-tabs{
+                margin: 0!important;
+            }
+            #toolbar .form-horizontal .controls {
+                margin-left: 10px;
+            }
+            #toolbar .form-horizontal .control-group{
+                margin-bottom: 6px;
+            }
+            #toolbar .form-horizontal .noMargin{
+                margin-bottom: 0px;
+            }
+            .toolbarInput{
+                width: 265px;
+                border: 1px solid #C6C3C6;
+                height: 34px;
+                padding: 0 40px 0 5px;
+                outline: 0;
+                border-radius: 0px !important;
+                color: #E1E0E1;
+            }
+            .logo{
+                color: #fff;
+                font-size: 20px;
+            }
+            #toolbar .controls{
+                margin-left: 12px;
+            }
+            #toolbar .nav-tabs>li>a{
+                border-radius: 0;
+            }
+            .toolbarTab{
+                border-radius: 0;
+                color: #fff;
+            }
+            #toolbar .form-horizontal .checkbox{
+                width: 105px;
+            }
+            #goBtn, #findAddress{
+                margin: 5px auto 0;
+                display: block;
+                width: 100px;
+            }
+            #toolbar .nav-tabs>li>a {
+                padding-top: 4px;
+                padding-bottom: 5px;
+            }
+            .inputError{
+                outline: 1px solid red;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="toolbar">
+            <div class="toolbarHeader">
+                <a href="#" class="logo">MapsEverywhere</a>
+            </div>
+            <div>
+                <ul class="nav nav-tabs" id="tabs">
+                    <li class="active"><a href="#directions" data-toggle="tab" class="toolbarTab">Get Directions</a></li>
+                    <li><a href="#locations" data-toggle="tab" class="toolbarTab">Find a Location</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active in" id="directions">
+                        <form class="form-horizontal" action='' method="POST" id="directionForm">
+                            <div class="whiteBG">
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <input type="text" id="from" name="from" placeholder="From" class="toolbarInput">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <input type="text" id="to" name="to" placeholder="To" class="toolbarInput">
+                                    </div>
+                                </div>
+                                <div class="control-group noMargin">
+                                    <div class="controls">
+                                        <a href="javascript:void(0);" class="pull-left" id="reverceBtn">Reverce</a>
+                                        <span class="pull-left linkDivider">|</span>
+                                        <a href="javascript:void(0);" class="pull-left clearBtn">Clear</a>
+                                    </div>
+                                </div>
+                                <div class="control-group noMargin">
+                                    <div class="controls">
+                                        <label class="checkbox inline" for="checkboxes-gmaps">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-gmaps" value="gmaps" class="checkboxes" checked/>
+                                            Google Maps
+                                        </label>
+                                        <label class="checkbox inline" for="checkboxes-qmaps">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-qmaps" value="qmaps" class="checkboxes" checked/>
+                                            MapsQuest
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-group noMargin">
+                                    <div class="controls">
+                                        <label class="checkbox inline" for="checkboxes-bmaps">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-bmaps" value="bmaps" class="checkboxes" checked/>
+                                            Bing Maps
+                                        </label>
+                                        <label class="checkbox inline" for="checkboxes-ymaps">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-ymaps" value="ymaps" class="checkboxes" checked/>
+                                            Yahoo Maps
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-warning disabled" id="goBtn" disabled="disabled"> GO</button>
+                            </div>
+                        </form>                
+                    </div>
+                    <div class="tab-pane fade" id="locations">
+                        <form class="form-horizontal" action='' method="POST" id="locationForm">
+                            <div class="whiteBG">
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <input type="text" id="address" name="address" placeholder="Address" class="toolbarInput">
+                                    </div>
+                                </div>
+                                <div class="control-group noMargin">
+                                    <div class="controls">
+                                        <a href="javascript:void(0);" class="pull-left clearBtn">Clear</a>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <label class="checkbox inline" for="checkboxes-gmaps-address">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-gmaps-address" value="gmaps" class="checkboxes" checked/>
+                                            Google Maps
+                                        </label>
+                                        <label class="checkbox inline" for="checkboxes-qmaps-address">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-qmaps-address" value="qmaps" class="checkboxes" checked/>
+                                            MapsQuest
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <label class="checkbox inline" for="checkboxes-bmaps-address">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-bmaps-address" value="bmaps" class="checkboxes" checked/>
+                                            Bing Maps
+                                        </label>
+                                        <label class="checkbox inline" for="checkboxes-ymaps-address">
+                                            <input type="checkbox" name="checkboxes" id="checkboxes-ymaps-address" value="ymaps" class="checkboxes" checked/>
+                                            Yahoo Maps
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-warning disabled" id="findAddress" disabled="disabled">FIND</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            //проверяем заполнены ли инпуты
+            function checkInputs(container)
+            {
+                //проверяются все
+                var arr = [],
+                        inputLength = $(".toolbarInput", container).length;
+                $(".toolbarInput", container).each(function() {
+                    if ($(this).val() !== "")
+                    {
+                        arr.push(1);
+                    }
+                });
+
+                if (inputLength === arr.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            //проверяем, что хотя бы один чекбокс отмечен
+            function checkCheckboxes(container)
+            {
+                //проверяется хотя бы один
+                var flag = false;
+
+                $(".checkboxes", container).each(function() {
+                    if ($(this).prop('checked'))
+                    {
+                        flag = true;
+                    }
+                });
+                return flag;
+            }
+
+            //делаем кнопку активной
+            function removeDisabled(sender)
+            {
+                var container = sender.closest('form');
+                if (checkInputs(container) && checkCheckboxes(container))
+                {
+                    $(container).find('button').removeClass('disabled').removeAttr('disabled');
+                }
+                else
+                {
+                    $(container).find('button').addClass('disabled').attr('disabled');
+                }
+            }
+
+            $(document).ready(function() {
+                //навешиваем табы
+                $('#tabs').tab();
+
+                //меняем инупы местами
+                $(document).on('click', '#reverceBtn', function() {
+                    var val1 = $('#from').val(),
+                            val2 = $('#to').val();
+
+                    $('#from').val(val2);
+                    $('#to').val(val1);
+                });
+
+                //очищаем инпуты в текущем табе
+                $(document).on('click', '.clearBtn', function() {
+                    var form = $(this).closest('form');
+                    form.find('input[type="text"]').val('');
+                    form.find('input[type="checkbox"]').removeAttr('checked');
+                });
+
+                //открываем окна с маршрутом
+                $(document).on('click', '#goBtn', function() {
+
+                    var from = $('#from').val(),
+                            to = $('#to').val();
+
+                    if ($('#checkboxes-gmaps').prop('checked'))
+                    {
+                        window.open('https://maps.google.com/maps?saddr=' + from + '&daddr=' + to, '_blank');
+                    }
+                    if ($('#checkboxes-qmaps').prop('checked'))
+                    {
+                        window.open('http://www.mapquest.com/?le=t&q1=' + from + '&q2=' + to + '&vs=', '_blank');
+                    }
+                    if ($('#checkboxes-bmaps').prop('checked'))
+                    {
+                        window.open('http://www.bing.com/maps/?rtp=adr.' + from + '~adr.' + to, '_blank');
+                    }
+                    if ($('#checkboxes-ymaps').prop('checked'))
+                    {
+                        window.open('http://maps.yahoo.com/map?q1=' + from + '&q2=' + to, '_blank');
+                    }
+                });
+
+                //открываем окна с адресом
+                $(document).on('click', '#findAddress', function() {
+                    var address = $('#address').val();
+
+                    if ($('#checkboxes-gmaps').prop('checked'))
+                    {
+                        window.open('https://www.google.com/maps/place/' + address, 'google', '_blank');
+                    }
+                    if ($('#checkboxes-qmaps').prop('checked'))
+                    {
+                        window.open('http://www.mapquest.com/?le=t&q=' + address + '&vs=', 'map quest', '_blank');
+                    }
+                    if ($('#checkboxes-bmaps').prop('checked'))
+                    {
+                        window.open('http://www.bing.com/maps/?where1=' + address, 'bing', '_blank');
+                    }
+                    if ($('#checkboxes-ymaps').prop('checked'))
+                    {
+                        window.open('http://maps.yahoo.com/place/?addr=' + address, 'yahoo', '_blank');
+                    }
+                });
+
+
+                $(document).on('keyup paste', '.toolbarInput', function() {
+                    removeDisabled($(this));
+                });
+
+                $(document).on('change click', '.checkboxes', function() {
+                    removeDisabled($(this));
+                });
+            });
+        </script>
+    </body>
+</html>
