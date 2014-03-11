@@ -9,12 +9,10 @@
 -->
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <link href="<?php echo URL::base(true) ?>bootstrap/css/preset.css" rel="stylesheet" media="screen">
+    <link href="<?php echo URL::base(true) ?>bootstrap/css/popup.css" rel="stylesheet" media="screen">
 </head>
     <body>
-        
-
-        <?php echo $content ?>
-
-        
+        <?php echo $content ?>        
     </body>
 </html>
