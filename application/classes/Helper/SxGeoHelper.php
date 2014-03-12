@@ -11,7 +11,7 @@ class Helper_SxGeoHelper {
             return FALSE;
         }
 
-        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeo.dat');
+        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeo_GL.dat');
         $country = $sxGeo->getCountry($ip);
         unset($sxGeo);
         return $country;
@@ -25,7 +25,7 @@ class Helper_SxGeoHelper {
             return FALSE;
         }
 
-        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeoCity.dat');
+        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeo_GLCity.dat');
         $city = $sxGeo->getCity($ip);
         unset($sxGeo);
         return $city;
