@@ -64,7 +64,7 @@
                 color: #fff;
             }
             #toolbar .form-horizontal .checkbox{
-                width: 105px;
+                width: 108px;
             }
             #goBtn, #findAddress{
                 margin: 5px auto 0;
@@ -114,11 +114,11 @@
                                 <div class="control-group noMargin">
                                     <div class="controls">
                                         <label class="checkbox inline" for="checkboxes-gmaps">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-gmaps" value="gmaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-gmaps" value="gmaps" class="checkboxes" checked="checked"/>
                                             Google Maps
                                         </label>
                                         <label class="checkbox inline" for="checkboxes-qmaps">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-qmaps" value="qmaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-qmaps" value="qmaps" class="checkboxes" />
                                             MapsQuest
                                         </label>
                                     </div>
@@ -126,11 +126,11 @@
                                 <div class="control-group noMargin">
                                     <div class="controls">
                                         <label class="checkbox inline" for="checkboxes-bmaps">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-bmaps" value="bmaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-bmaps" value="bmaps" class="checkboxes" />
                                             Bing Maps
                                         </label>
                                         <label class="checkbox inline" for="checkboxes-ymaps">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-ymaps" value="ymaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-ymaps" value="ymaps" class="checkboxes" />
                                             Yahoo Maps
                                         </label>
                                     </div>
@@ -157,11 +157,11 @@
                                 <div class="control-group">
                                     <div class="controls">
                                         <label class="checkbox inline" for="checkboxes-gmaps-address">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-gmaps-address" value="gmaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-gmaps-address" value="gmaps" class="checkboxes" checked="checked"/>
                                             Google Maps
                                         </label>
                                         <label class="checkbox inline" for="checkboxes-qmaps-address">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-qmaps-address" value="qmaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-qmaps-address" value="qmaps" class="checkboxes" />
                                             MapsQuest
                                         </label>
                                     </div>
@@ -169,11 +169,11 @@
                                 <div class="control-group">
                                     <div class="controls">
                                         <label class="checkbox inline" for="checkboxes-bmaps-address">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-bmaps-address" value="bmaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-bmaps-address" value="bmaps" class="checkboxes" />
                                             Bing Maps
                                         </label>
                                         <label class="checkbox inline" for="checkboxes-ymaps-address">
-                                            <input type="checkbox" name="checkboxes" id="checkboxes-ymaps-address" value="ymaps" class="checkboxes" checked/>
+                                            <input type="radio" name="checkboxes" id="checkboxes-ymaps-address" value="ymaps" class="checkboxes" />
                                             Yahoo Maps
                                         </label>
                                     </div>
@@ -257,7 +257,6 @@
                 $(document).on('click', '.clearBtn', function() {
                     var form = $(this).closest('form');
                     form.find('input[type="text"]').val('');
-                    form.find('input[type="checkbox"]').removeAttr('checked');
                 });
 
                 //открываем окна с маршрутом
@@ -270,15 +269,15 @@
                     {
                         window.open('https://maps.google.com/maps?saddr=' + from + '&daddr=' + to, '_blank');
                     }
-                    if ($('#checkboxes-qmaps').prop('checked'))
+                    else if ($('#checkboxes-qmaps').prop('checked'))
                     {
                         window.open('http://www.mapquest.com/?le=t&q1=' + from + '&q2=' + to + '&vs=', '_blank');
                     }
-                    if ($('#checkboxes-bmaps').prop('checked'))
+                    else if ($('#checkboxes-bmaps').prop('checked'))
                     {
                         window.open('http://www.bing.com/maps/?rtp=adr.' + from + '~adr.' + to, '_blank');
                     }
-                    if ($('#checkboxes-ymaps').prop('checked'))
+                    else if ($('#checkboxes-ymaps').prop('checked'))
                     {
                         window.open('http://maps.yahoo.com/map?q1=' + from + '&q2=' + to, '_blank');
                     }
@@ -288,21 +287,21 @@
                 $(document).on('click', '#findAddress', function() {
                     var address = $('#address').val();
 
-                    if ($('#checkboxes-gmaps').prop('checked'))
+                    if ($('#checkboxes-gmaps-address').prop('checked'))
                     {
-                        window.open('https://www.google.com/maps/place/' + address, 'google', '_blank');
+                        window.open('https://www.google.com/maps/place/' + address, '_blank');
                     }
-                    if ($('#checkboxes-qmaps').prop('checked'))
+                    else if ($('#checkboxes-qmaps-address').prop('checked'))
                     {
-                        window.open('http://www.mapquest.com/?le=t&q=' + address + '&vs=', 'map quest', '_blank');
+                        window.open('http://www.mapquest.com/?le=t&q=' + address + '&vs=', '_blank');
                     }
-                    if ($('#checkboxes-bmaps').prop('checked'))
+                    else if ($('#checkboxes-bmaps-address').prop('checked'))
                     {
-                        window.open('http://www.bing.com/maps/?where1=' + address, 'bing', '_blank');
+                        window.open('http://www.bing.com/maps/?where1=' + address, '_blank');
                     }
-                    if ($('#checkboxes-ymaps').prop('checked'))
+                    else if ($('#checkboxes-ymaps-address').prop('checked'))
                     {
-                        window.open('http://maps.yahoo.com/place/?addr=' + address, 'yahoo', '_blank');
+                        window.open('http://maps.yahoo.com/place/?addr=' + address, '_blank');
                     }
                 });
 
