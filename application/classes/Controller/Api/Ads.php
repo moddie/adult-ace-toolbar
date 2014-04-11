@@ -91,6 +91,10 @@ class Controller_Api_Ads extends Controller_Base
                              ':keyword LIKE CONCAT("%", `c`.`keyword`, "%" )) OR `c`.`keyword` IS NULL OR `c`.`keyword` = "") ';
             $replaceParams[':keyword'] = $queryString['query'];
         }
+        else
+        {
+            $campaignsSql .= ' AND ( `c`.`keyword` IS NULL OR `c`.`keyword` = "") ';
+        }
         
 
         $campaignsSql .= ' ORDER BY `c`.`id_country` DESC';
