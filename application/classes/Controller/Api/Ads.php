@@ -64,6 +64,12 @@ class Controller_Api_Ads extends Controller_Base
     {
         $this->_page = $this->request->referrer();
         $this->_getCountry();
+        $queryString = parse_url($this->_page);
+        $replaceParams = array(
+            ':page'      => $this->_page,
+            ':idCountry' => $this->_countryId
+        );
+
 
         $campaignsSql = 'SELECT *
                     FROM `campaigns_website_patterns` AS `cwp`
@@ -79,18 +85,21 @@ class Controller_Api_Ads extends Controller_Base
             $campaignsSql .= '`c`.`id_country` = 0';
         }
 
+        if( is_array($queryString) && !empty($queryString['query']) )
+        {
+            $campaignsSql .= ' AND ((`c`.`keyword` IS NOT NULL  AND `c`.`keyword` != "" AND  '.
+                             ':keyword LIKE CONCAT("%", `c`.`keyword`, "%" )) OR `c`.`keyword` IS NULL OR `c`.`keyword` = "") ';
+            $replaceParams[':keyword'] = $queryString['query'];
+        }
+        
+
         $campaignsSql .= ' ORDER BY `c`.`id_country` DESC';
 
-        $campaignsQuery = DB::query(Database::SELECT, $campaignsSql)
-            ->parameters(
-                array(
-                    ':page'      => $this->_page,
-                    ':idCountry' => $this->_countryId
-                )
-            );
+        $campaignsQuery = DB::query(Database::SELECT, $campaignsSql)->parameters($replaceParams);
 
         $this->_campaignId = $campaignsQuery->execute()->get('id_campaign');
-
+      
+        var_dump($this->_campaignId); die;
         $adsSql   = 'SELECT * FROM `campaigns_ad_urls` WHERE `id_campaign` = :campaignId ORDER BY `position` ASC';
         $adsQuery = DB::query(Database::SELECT, $adsSql)
             ->parameters(array(

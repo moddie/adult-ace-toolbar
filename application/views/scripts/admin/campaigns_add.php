@@ -46,6 +46,12 @@ if(!empty($errors))
                         </select>
                     </td>
                 </tr>
+                <tr>
+                    <td><label for="limit">Keyword: </label> </td>
+                    <td>
+                        <input type="text" name="keyword" id="keyword" value="<?php echo $campaign->keyword; ?>">
+                    </td>
+                </tr>
             </tbody>
         </table>
 

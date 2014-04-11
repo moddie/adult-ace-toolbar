@@ -73,6 +73,7 @@ class Controller_Admin_Campaigns extends Controller_Auth
                 $campaign->name = Arr::get($_POST, 'c_name');
                 $campaign->id_country = intval(Arr::get($_POST, 'country', 0));
                 $campaign->click_limit = intval(Arr::get($_POST, 'limit', 0));
+                $campaign->keyword = Arr::get($_POST, 'keyword', null);
                 $campaign->save();
             }
             catch (ORM_Validation_Exception $e)
