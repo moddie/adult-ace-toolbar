@@ -98,8 +98,7 @@ class Controller_Api_Ads extends Controller_Base
         $campaignsQuery = DB::query(Database::SELECT, $campaignsSql)->parameters($replaceParams);
 
         $this->_campaignId = $campaignsQuery->execute()->get('id_campaign');
-      
-        var_dump($this->_campaignId); die;
+        
         $adsSql   = 'SELECT * FROM `campaigns_ad_urls` WHERE `id_campaign` = :campaignId ORDER BY `position` ASC';
         $adsQuery = DB::query(Database::SELECT, $adsSql)
             ->parameters(array(
