@@ -9,6 +9,7 @@ class Controller_Admin_Stats extends Controller_Auth {
         $view = View::factory('scripts/admin/stats');
 
         $params = array();
+        $params['date'] = Arr::get($_GET,'date','');
 
         $this->template->title = 'Statistics';
 

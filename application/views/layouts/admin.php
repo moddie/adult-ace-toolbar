@@ -23,6 +23,8 @@
     <link href="<?php echo URL::base(true) ?>bootstrap/css/style.css" rel="stylesheet" media="screen">
     <script src="<?php echo URL::base(true) ?>bootstrap/js/bootstrap.min.js"></script>
     <script src="<?php echo URL::base(true) ?>bootstrap/js/bootstrap-select.min.js"></script>
+    <script src="<?php echo URL::base(true) ?>js/datepicker/js/bootstrap-datepicker.js"></script>
+    <link href="<?php echo URL::base(true) ?>js/datepicker/css/datepicker.css" rel="stylesheet" media="screen">
 </head>
     <body>
 

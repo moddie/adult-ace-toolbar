@@ -37,7 +37,8 @@ class Controller_Api_Stats extends Controller_Base
                 `amount_installs_chrome`,
                 `amount_installs_firefox`,
                 `amount_installs_ie`,
-                `amount_installs_unknown`
+                `amount_installs_unknown`,
+                `date`
             )
             VALUES
             (
@@ -45,7 +46,8 @@ class Controller_Api_Stats extends Controller_Base
                 :amountInstallsChrome,
                 :amountInstallsFirefox,
                 :amountInstallsIe,
-                :amountInstallsUnknown
+                :amountInstallsUnknown,
+                :date
             )
             ON DUPLICATE KEY UPDATE ' . $onDuplicateSql;
 
@@ -58,6 +60,7 @@ class Controller_Api_Stats extends Controller_Base
                 ':amountInstallsFirefox' => ($browser === 'firefox') ? 1 : 0,
                 ':amountInstallsIe'      => ($browser === 'ie') ? 1 : 0,
                 ':amountInstallsUnknown' => ($browser === 'unknown') ? 1 : 0,
+                ':date'                  => date('Y-m-d'),
             ))
             ->execute();
     } // end _writeStats
