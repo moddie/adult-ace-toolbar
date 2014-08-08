@@ -12,7 +12,8 @@ class Model_StatsInstalls extends ORM
 
     public function findByParams($params, $page, $limit = 10, $orderBy = 'id', $orderDirection = 'ASC')
     {
-        if(isset($params['date']) && !empty($params['date']))
+        if(false && (isset($params['dateFrom']) && !empty($params['dateFrom']))
+            || (isset($params['dateTo']) && !empty($params['dateTo'])))
         {
             $query = DB::select('amount_installs_chrome', 'amount_installs_firefox', 'amount_installs_ie', 'amount_installs_unknown',
                                 'date',
@@ -44,7 +45,19 @@ class Model_StatsInstalls extends ORM
             {
                 continue;
             }
-            $query->where($param, '=', $val);
+            if($param == 'dateFrom' && !empty($val))
+            {
+                $query->where('date', '>=', $val);
+            }
+            elseif($param == 'dateTo' && !empty($val))
+            {
+                $query->where('date', '<=', $val);
+            }
+            else
+            {
+                $query->where($param, '=', $val);
+            }
+            
         }
 
         if ($page < 1)
@@ -68,7 +81,8 @@ class Model_StatsInstalls extends ORM
             case 'firefox':
             case 'ie':
             case 'unknown':
-                $orderBy = ((isset($params['date']) && !empty($params['date']))?'':'sum_').'amount_installs_' . $orderBy;
+                $orderBy = (((isset($params['dateFrom']) && !empty($params['dateFrom']))
+                || (isset($params['dateTo']) && !empty($params['dateTo'])))?'':'sum_').'amount_installs_' . $orderBy;
                 break;
 
             case 'country':
@@ -85,10 +99,12 @@ class Model_StatsInstalls extends ORM
         }
 
         $query->order_by($orderBy, $orderDirection);
-        if( !((isset($params['date']) && !empty($params['date']))))
-        {
-            $query->group_by('stats_installs.id_country');
-        }
+        /*
+        if( !((isset($params['dateFrom']) && !empty($params['dateFrom']))
+            || (isset($params['dateTo']) && !empty($params['dateTo']))))
+        {*/
+        $query->group_by('stats_installs.id_country');
+        //}
         $query->join('countries','left')->on('countries.id_country', '=', 'stats_installs.id_country');
         return $query->execute()->as_array();
     }
@@ -102,9 +118,22 @@ class Model_StatsInstalls extends ORM
             {
                 continue;
             }
-            $query->where($param, '=', $val);
+            if($param == 'dateFrom' && !empty($val))
+            {
+                $query->where('date', '>=', $val);
+            }
+            elseif($param == 'dateTo' && !empty($val))
+            {
+                $query->where('date', '<=', $val);
+            }
+            else
+            {
+                $query->where($param, '=', $val);
+            }
+            
         }
-        if( !((isset($params['date']) && !empty($params['date']))))
+        if( !((isset($params['dateFrom']) && !empty($params['dateFrom']))
+            || (isset($params['dateTo']) && !empty($params['dateTo']))))
         {
             $query->group_by('stats_installs.id_country');
         }
