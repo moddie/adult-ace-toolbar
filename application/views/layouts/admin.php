@@ -34,6 +34,9 @@
                     <a class="brand" href="#"><?php echo Kohana::$config->load('general')->get('site_name') ?></a>
                     <?php if (Auth::instance()->logged_in('admin')) { ?>
                     <ul class="nav">
+                        <li <?php if (Request::$current->controller() == 'Users') echo 'class="active"' ?>>
+                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Users', 'action' => 'index')) ?>"><?php echo __('Users') ?></a>
+                        </li>
                         <li <?php if (Request::$current->controller() == 'Campaigns') echo 'class="active"' ?>>
                             <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Campaigns', 'action' => 'index')) ?>"><?php echo __('Campaigns') ?></a>
                         </li>
