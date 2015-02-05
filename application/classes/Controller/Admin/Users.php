@@ -3,241 +3,167 @@
 const FORM_CSV_PATERNS_FIELD_NAME = 'csv_patterns';
 const FORM_CSV_ADURLS_FIELD_NAME  = 'csv_adurls';
 
-class Controller_Admin_Campaigns extends Controller_Auth
+class Controller_Admin_Users extends Controller_Auth
 {
     public $template = 'layouts/admin';
 
     public function action_index()
-	{
+    {
         if (!empty($_POST['delete']))
         {
             $this->_delete(array_keys($_POST['delete']));
         }
-        $view = View::factory('scripts/admin/campaigns');
+        $view = View::factory('scripts/admin/users');
         $page = intval(Arr::get($_GET, 'page', 1));
         $view->page = $page;
-        $per_page = 10;
-        $filter = intval(Arr::get($_GET, 'filter', 0));
-        $campaigns = ORM::factory('Campaigns');
-        if ($filter > 0)
-        {
-            $campaigns->where('id_country', '=', $filter);
-        }
+        $per_page = 10;        
+        $users = ORM::factory('Users');        
+        
         if ($page < 1)
         {
             $page = 1;
         }
         if ($per_page)
         {
-            $campaigns->limit($per_page)->offset(($page - 1) * $per_page);
+            $users->limit($per_page)->offset(($page - 1) * $per_page);
         }
-        $this->template->title = "Campaigns";
-        $pagination_view = new View('pagination/campaigns');
+        
+        $this->template->title = "Users";        
+        $pagination_view = new View('pagination/users');
         $pagination_view->page = $page;
-        $pagination_view->perpage = $per_page;
-        $pagination_view->filter = $filter;
-        $pagination_view->count_all = ORM::factory('Campaigns')->count_by_params($filter);
-        $view->pagination = $pagination_view->render();
-        $view->filter = $filter;
-        $view->campaigns = $campaigns->with('countries')->find_all();
-        $view->countries = ORM::factory('Countries')->order_by('name_en','asc')->find_all();
-		$this->display($view);
-	}
+        $pagination_view->perpage = $per_page;        
+        $pagination_view->count_all = ORM::factory('Users')->count_all();
+        $view->pagination = $pagination_view->render();                
+        $view->users = ORM::factory('Users')->order_by('id','asc')->find_all();        
+        
+	$this->display($view);
+    }
 
     public function action_addedit()
     {
-        $view = View::factory('scripts/admin/campaigns_add');
+        $view = View::factory('scripts/admin/users_add');
         $errors = array();
-        $id = Arr::get($_GET, 'id_campaign', NULL);
+        $id = Arr::get($_GET, 'id_user', NULL);
         if(empty($id))
         {
-            $id = Arr::get($_POST, 'id_campaign', NULL);
-        }
-        $campaign = ORM::factory('Campaigns', $id);
-        /*if(!$campaign->loaded())
-        {
-             throw HTTP_Exception::factory(404, 'Campaign not found!');
-        }*/
-        $view->action = 'Add';
-        $this->template->title = "Add Campaign";
-        if (!empty($id))
+            $view->action = 'Add';
+            $this->template->title = "Add User";
+            $view->user = ORM::factory('Users')->find($id);
+        }   
+        else 
         {
             $view->action = 'Edit';
-            $this->template->title = "Edit Campaign";
+            $this->template->title = "Edit User";
+            
+            $view->user = ORM::factory('Users')->find($id);
+            if(!$view->user)
+            {
+                 throw HTTP_Exception::factory(404, 'User not found!');
+            }
         }
         
         if(!empty($_POST))
-        {
+        {   
             try
-            {
-                $campaign->name = Arr::get($_POST, 'c_name');
-                $campaign->id_country = intval(Arr::get($_POST, 'country', 0));
-                $campaign->click_limit = intval(Arr::get($_POST, 'limit', 0));
-                $campaign->keyword = Arr::get($_POST, 'keyword', null);
-                $campaign->save();
+            {  
+                $password = intval(Arr::get($_POST, 'password', 0));
+                $confirm_password = intval(Arr::get($_POST, 'password2', 0));
+                if ($password == $confirm_password) 
+                {
+                    $pwd = Auth::instance()->hash_password($password);
+                    $data = array();
+                    $data['username'] = Arr::get($_POST, 'u_name');
+                    $data['password'] = Arr::get($_POST, $pwd);
+                    $data['email'] = Arr::get($_POST, 'email', null);
+                    $data['created'] = time();                    
+                }
+                else
+                {
+                    $errors['password'] = 'Incorrect password. Please retry';
+                }
+                
             }
             catch (ORM_Validation_Exception $e)
             {
                 $errors = $e->errors('');
             }
             
-            $csvPatterns = $csvAdUrls = array();
-            
-            $newPatterns = Arr::get($_POST,'patterns',array());
-            $newAdUrls = Arr::get($_POST,'urls',array());
-            
-            // Patterns csv-import
-            
-            
-            //echo '<pre>'; print_r($_FILES); die;
-            
-            if(!empty($_FILES[FORM_CSV_PATERNS_FIELD_NAME]['name']))
-            {
-                $validPatterns = Validation::factory($_FILES)
-                    ->rule(FORM_CSV_PATERNS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
-                if ($validPatterns->check())
-                {
-                    $csvPatterns = $this->_parseCsv($_FILES[FORM_CSV_PATERNS_FIELD_NAME]['tmp_name']);
-                    //TODO: save new patterns
-                }
-            }
-            // end Patterns csv-import
-
-            // Ad urls csv-import
-            if(!empty($_FILES[FORM_CSV_ADURLS_FIELD_NAME]['name']))
-            {
-                $validAdUrls = Validation::factory($_FILES)
-                    ->rule(FORM_CSV_ADURLS_FIELD_NAME, 'Upload::type', array(':value', array('csv', 'txt')));
-                if ($validAdUrls->check())
-                {
-                    $csvAdUrls = $this->_parseCsv($_FILES[FORM_CSV_ADURLS_FIELD_NAME]['tmp_name']);
-                    //TODO: save new Ad urls
-                }
-            }
-            // end Ad urls csv-import
-            
-            $patterns = Arr::merge(array_filter($newPatterns),  array_filter($csvPatterns));
-            $urls = Arr::merge(array_filter($newAdUrls), array_filter($csvAdUrls));
-            if (!empty($urls))
-            {
-                foreach ($urls as $key => $url){
-                    if ($url == 'http://')
-                    {
-                        unset($urls[$key]);
-                    }
-                }
-            }
-            
-            if($campaign->loaded())
-            {
-                $oldPatterns = $campaign->patterns->find_all();
-                if(count($oldPatterns) > 0) 
-                {
-                    foreach ($oldPatterns as $pattern)
-                    {
-                        $pattern->delete();
-                    }
-                }
-                $oldUrls = $campaign->ad_urls->find_all();
-                if(count($oldUrls) > 0) 
-                {
-                    foreach ($oldUrls as $pattern)
-                    {
-                        $pattern->delete();
-                    }
-                }
-                
-            }
-            
-            if(!empty($patterns))
-            {
-                foreach($patterns as $pattern){
-                    try
-                    {
-                        $pat = ORM::factory('WebsitePatterns');
-                        $pat->id_campaign = $campaign->id_campaign;
-                        $pat->pattern = $pattern;
-                        $pat->save();
-                    }
-                    catch (ORM_Validation_Exception $e)
-                    {
-                        $errors += $e->errors('', TRUE);
-                    }
-                }
-            }
-            if(!empty($urls))
-            {
-                foreach($urls as $k=>$url){
-                    try
-                    {
-                        $u = ORM::factory('AdUrls');
-                        $u->id_campaign = $campaign->id_campaign;
-                        $u->target_url = $url;
-                        $u->position = $k;
-                        $u->save();
-                    }
-                    catch (ORM_Validation_Exception $e)
-                    {
-                        $errors += $e->errors('', TRUE);
-                    }
-                }
-            } 
-            
             if(empty($errors))   
             {
-                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'campaigns', 'action' => 'addedit')) . ((!empty($id)?('?id_campaign='.$id):''))) ; /*. '?id_campaign=' . $campaign->id_campaign )*/
+                if ($view->action == "Add") 
+                {            
+                    ORM::factory('Users')->values($data)->save();
+                }
+                else
+                {
+                    ORM::factory('Users', $id)->values($data)->save();
+                }
+                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'users', 'action' => 'addedit')) . ((!empty($id)?('?id_user='.$id):'')));
             }
-        }
-        $view->campaign = $campaign;
-        $view->countries = ORM::factory('Countries')->order_by('name_en','asc')->find_all();
+        }        
+        
         $view->errors = $errors;
         $this->display($view);
     }
-
-    protected function _delete($idCampaign = null)
+    
+    public function action_block() 
     {
-        if (!empty($idCampaign))
+        $view = View::factory('scripts/admin/user_block');
+        $id = Arr::get($_GET, 'id', NULL);
+        $action = Arr::get($_GET, 'action', 'block'); 
+        $user = ORM::factory('Users')->find($id);
+        
+        if ($action == 'block' && $user->status == 'unblock') 
         {
-            $campaigns = ORM::factory('Campaigns');
+            $user->status = 'block';
+            $user->save();
+        }
+        else if ($action == 'unblock' && $user->status == 'block')
+        {
+            $user->status = 'unblock';
+            $user->save();
+        }
+        
+        $view->user = $user;        
+	$this->display($view);
+    }
 
-            if ( is_array($idCampaign) )
+    protected function _delete($idUsers = null)
+    {
+        if (!empty($idUsers))
+        {
+            $user = ORM::factory('User');
+
+            if ( is_array($idUsers) )
             {
-                $campaigns->where('id_campaign', 'in', $idCampaign);
+                $user->where('id', 'in', $idUsers);
             }
             else
             {
-                $campaigns->where('id_campaign', '=', $idCampaign);
+                $user->where('id', '=', $idUsers);
             }
-            $campaignsToDelete = $campaigns->find_all();
-            if(count($campaignsToDelete) > 0)
+            $userToDelete = $user->find_all();
+            if(count($userToDelete) > 0)
             {
-                foreach ($campaignsToDelete as $campaign)
+                foreach ($userToDelete as $usr)
                 {
-                    $campaign->delete();
+                    $usr->delete();
                 }
             }
             
         }
     }
-
-    public function _parseCsv($filePath)
+    
+    public function action_add()
     {
-        $result = array();
-        if (($f = fopen($filePath, 'rt')) !== FALSE)
-        {
-            $row = 1;
-            while (($data = fgetcsv($f, 2048, ',')) !== FALSE)
-            {
-                $result[$data[0]] = 0;
-                $row++;
-            }
-            fclose($f);
-        }
-        if(!empty($result))
-        {
-            $result = array_keys($result);
-        }
+        $view = View::factory('scripts/admin/user_add');        
+	$this->display($view);
+    }
+    
+    public function action_login()
+    {
+        $view = View::factory('scripts/admin/login_api');        
+	$this->display($view);
+    }
 
-        return $result;
-    } // end _parseCsv
 } // end Controller_Admin_Campaigns

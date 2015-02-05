@@ -6,6 +6,7 @@
  *
  * @link http://kohanaframework.org/guide/about.install#application
  */
+
 $application = 'application';
 
 /**
