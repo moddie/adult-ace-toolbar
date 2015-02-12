@@ -196,10 +196,7 @@ class Controller_Api_User extends Controller_Base
             $data['status'] = 'block';            
             $data['logins'] = time();
             $data['last_login'] = time();
-            $data['created'] = time();    
-            echo "<pre>";
-            print_r($data);
-            echo "</pre>";
+            $data['created'] = time();                
             ORM::factory('Users')->values($data)->save();
             
             //Send Email            
