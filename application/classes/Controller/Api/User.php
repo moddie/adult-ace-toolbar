@@ -120,24 +120,39 @@ class Controller_Api_User extends Controller_Base
     public function action_getData()
     {   
         $json = array();        
-        $user_id  = Auth::instance()->get_user();        
         
-        $data['image'] = $this->_get_data_images();
-        $data['quote'] = $this->_get_data_citates();
-        
-        $token = $this->request->headers('X-Auth-Token');            
-        if ($token == $user->access_token) 
+        //$token = Arr::get($_GET, 'token', '');
+        $token = $this->request->headers('X-Auth-Token');        
+        $user = ORM::factory('Users')->where('access_token','=',$token)->find();        
+        if (!empty($token) && $user->loaded())
         {
-            $data['task_categories'] = $this->_get_data_task_categories($user->id);
-            $data['task'] = $this->_get_data_task($user->id);
-            $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
-            $json['status'] = 1;
-        }
+            if ($token == $user->access_token) 
+            {         
+                $usr['email'] = $user->email;
+                $usr['username'] = $user->username;                
+                $usr['access_token'] = $user->access_token;
+                
+                $data['user'] = $usr;
+                $data['image'] = $this->_get_data_images();
+                $data['quote'] = $this->_get_data_citates();
+                $data['task_categories'] = $this->_get_data_task_categories($user->id);
+                $data['task'] = $this->_get_data_task($user->id);
+                $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
+                
+                $json['data'] = $data;         
+                $json['status'] = 1;
+            }
+            else
+            {
+                $json['status'] = 0;
+                $json['message'] = 'X-Auth-Token not find in database';
+            }            
+        }    
         else
         {
             $json['status'] = 0;
+            $json['message'] = 'Please entry valid X-Auth-Token';
         }        
-        $json['data'] = $data;         
         $this->display_ajax(json_encode($json));
     }
     
