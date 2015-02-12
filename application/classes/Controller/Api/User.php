@@ -125,21 +125,13 @@ class Controller_Api_User extends Controller_Base
         $data['image'] = $this->_get_data_images();
         $data['quote'] = $this->_get_data_citates();
         
-        $user = ORM::factory('Users', $user_id);
-        if ($user->loaded())
-        {   
-            $token = $this->request->headers('X-Auth-Token');            
-            if ($token == $user->access_token) 
-            {
-                $data['task_categories'] = $this->_get_data_task_categories($user->id);
-                $data['task'] = $this->_get_data_task($user->id);
-                $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
-                $json['status'] = 1;
-            }
-            else
-            {
-                $json['status'] = 0;
-            }
+        $token = $this->request->headers('X-Auth-Token');            
+        if ($token == $user->access_token) 
+        {
+            $data['task_categories'] = $this->_get_data_task_categories($user->id);
+            $data['task'] = $this->_get_data_task($user->id);
+            $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
+            $json['status'] = 1;
         }
         else
         {
