@@ -113,15 +113,18 @@ class Controller_Admin_Users extends Controller_Auth
         $action = Arr::get($_GET, 'action', 'block'); 
         $user = ORM::factory('Users')->find($id);
         
-        if ($action == 'block' && $user->status == 'unblock') 
+        if ($user->status != 'not active') 
         {
-            $user->status = 'block';
-            $user->save();
-        }
-        else if ($action == 'unblock' && $user->status == 'block')
-        {
-            $user->status = 'unblock';
-            $user->save();
+            if ($action == 'blocked') 
+            {
+                $user->status = 'blocked';
+                $user->save();
+            }
+            else if ($action == 'active')
+            {
+                $user->status = 'active';
+                $user->save();
+            }
         }
         
         $view->user = $user;        

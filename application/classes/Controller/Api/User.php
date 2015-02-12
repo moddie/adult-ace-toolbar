@@ -6,13 +6,13 @@ class Controller_Api_User extends Controller_Base
         
     public function action_register()
     {           
-        $user['username']  = Arr::get($_POST, 'username', NULL);
-        $user['password']  = Arr::get($_POST, 'password', NULL);
-        $user['email']     = Arr::get($_POST, 'email', NULL);
+        $user['username']  = Arr::get($_GET, 'username', NULL);
+        $user['password']  = Arr::get($_GET, 'password', NULL);
+        $user['email']     = Arr::get($_GET, 'email', NULL);
         $this->_insert_user($user);
     }
     
-    public function action_checkToken()
+    public function action_checktoken()
     {          
         $token = Arr::get($_GET, 'token', NULL);
         $json["status"] = $this->_check_email_token($token);
@@ -31,9 +31,9 @@ class Controller_Api_User extends Controller_Base
         {
             $valid['email'] = $email;
             $post = Validation::factory($valid); 
-            $post->rule('email', 'email');
+            $post->rule('email', 'email');            
             if(!$post->check()) 
-            {
+            {               
                 $json['status'] = 0;
                 $json['isValid'] = 0;
                 $json['message'] = 'Please entry valid email';
@@ -46,11 +46,23 @@ class Controller_Api_User extends Controller_Base
             
             if ($json['isValid'] == 1)
             {
-                $users = ORM::factory('Users')->where('email','=',$email)->find();
-                if ($users->loaded())
+                $user = ORM::factory('Users')->where('email','=',$email)->find();
+                if ($user->loaded())
                 {
-                    $json['isRegistered'] = 1;
-                    $json['status'] = 1;
+                    if ($user->status == 'active')
+                    {
+                        $json['isRegistered'] = 1;
+                        $json['status'] = 1;
+                    }
+                    elseif ($user->status == 'not active')
+                    {
+                        $json['isRegistered'] = 0;                        
+                        $json['message'] = 'This email is not required';
+                    }
+                    else
+                    {
+                        $json['isRegistered'] = 0;
+                    }
                 }
                 else
                 {
@@ -156,35 +168,28 @@ class Controller_Api_User extends Controller_Base
         $this->display_ajax(json_encode($json));
     }
     
-    public function _insert_user($user)
+    public function _insert_user($user_data)
     {   
         $json = array();
         $json['status'] = 1;
         
-        if (empty($user['username']))
+        if (empty($user_data['username']))
         {
             $json['status'] = 0;
             $json['message'] = 'Empty field: username';             
         }
-        else if(empty($user['password']))
+        else if(empty($user_data['password']))
         {
             $json['status'] = 0;
             $json['message'] = 'Empty field: password';             
         }
-        else if (empty($user['email']))
+        else if (empty($user_data['email']))
         {
             $json['status'] = 0;
             $json['message'] = 'Empty field: email';             
         }
         
-        $users = ORM::factory('Users')->where('username','=',$user['username'])->or_where('email','=',$user['email'])->find();        
-        if ($users->loaded()) 
-        {
-            $json['status'] = 0;
-            $json['message'] = 'The field is already exists';                     
-        }
-           
-        $post = Validation::factory($user); 
+        $post = Validation::factory($user_data); 
         $post->rule('email', 'email');
         if(!$post->check())                    
         {
@@ -192,45 +197,99 @@ class Controller_Api_User extends Controller_Base
             $json['message'] = 'Please entry valid email';            
         }
         
+        $post = Validation::factory($user_data); 
+        $post->rule('password', 'min_length', array(':value', 6));
+        if(!$post->check())                    
+        {
+            $json['status'] = 0;
+            $json['message'] = 'The password must be 6 characters';            
+        }
+        
         //Save data
         if ($json['status'] !== 0)
-        {
-            $data['username'] = $user['username'];
-            $data['password'] = Auth::instance()->hash_password($user['password']);                
-            $data['email'] = $user['email'];                    
-            $data['email_required'] = 0;
-            $data['email_token'] = md5($user['username']);
-            $data['status'] = 'block';            
-            $data['logins'] = time();
+        {            
+            $data['username'] = $user_data['username'];
+            $data['password'] = Auth::instance()->hash_password($user_data['password']);
+            $data['email'] = $user_data['email'];            
+            $data['email_token'] = md5($user_data['username']);
+            $data['status'] = 'not active';
+            $data['logins'] = 1;
             $data['last_login'] = time();
-            $data['created'] = time();                
-            ORM::factory('Users')->values($data)->save();
+            $now = Date::formatted_time('now'); 
+            $data['created'] = $now;
             
-            //Send Email            
-            $swiftmailer = Email::factory('title', 'message');
-            $msg = '<p>Confirm your email address to complete your Twitter account.' .
-                   'It\'s easy — just click on this link:</p>' . 
-                   'http://'. APPPATH . '/api/user/check?token=' . $data['email_token'];
-            $swiftmailer->message($msg, 'text/html');
-            $swiftmailer->from('test@test.ru')->to($user['email'])->send();
-
-            $json['status'] = 1;                       
+            //Save User Data
+            $users = ORM::factory('Users')->where('email','=',$user_data['email'])->find();        
+            if ($users->loaded()) 
+            {
+                if ($users->status = 'not active')
+                {
+                    //Send Email            
+                    $send = $this->_send_email($user_data['email'], $data['email_token']);
+                    if ($send)
+                    {
+                        $json['status'] = 1;
+                    }                     
+                    $json['message'] = 'Email sent';
+                }
+                else
+                {
+                    $json['status'] = 0;
+                    $json['message'] = 'This login is already exists';
+                }
+            }
+            else
+            {
+                ORM::factory('Users')->values($data)->save();                             
+                //Send Email            
+                $send = $this->_send_email($user_data['email'], $data['email_token']);
+                if ($send)
+                {
+                    $json['status'] = 1;
+                } 
+            }
+                        
+            
+            
+            //Return Data
+            unset($data['email_token']);
+            unset($data['password']);
+            $json['data'] = $data;
         }            
         
-        $json['data'] = '';         
         $this->display_ajax(json_encode($json));
     }
     
     public function _check_email_token($token)
     {
-        if (!empty($token)) {
+        if (!empty($token)) {            
             $user = ORM::factory('Users')->where('email_token','=',$token)->find();
-            return $user->loaded();
+            if ($user->loaded())
+            {
+                $user->access_token = md5($user->email . $user->password);
+                $user->status = 'active';
+                $user->save();
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
         }
         else
         {
             return 0;
         }
+    }
+    
+    protected function _send_email($email, $token)
+    {
+        $swiftmailer = Email::factory('Ace Toolbar', 'message');
+        $msg = '<p>Confirm your email address to complete your account.' .
+               'It\'s easy — just click on this link:</p>' . 
+               'http://'. $_SERVER['HTTP_HOST'] . '/api/user/checktoken?token=' . $token;            
+        $swiftmailer->message($msg, 'text/html');
+        return $swiftmailer->from('info@adultace.net')->to($email)->send();            
     }
     
     protected function _get_data_images()
