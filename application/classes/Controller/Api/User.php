@@ -12,9 +12,54 @@ class Controller_Api_User extends Controller_Base
         $this->_insert_user($user);
     }
     
-    public function action_check()
+    public function action_checkToken()
     {          
-        $json["status"] = $this->_check_email_token();                
+        $token = Arr::get($_GET, 'token', NULL);
+        $json["status"] = $this->_check_email_token($token);
+        $this->display_ajax(json_encode($json));
+    }
+    
+    public function action_checkEmail()
+    {          
+        $email = Arr::get($_GET, 'email', NULL);
+        if (empty($email))
+        {            
+            $json['status'] = 0;
+            $json['message'] = 'Empty field: email';
+        }
+        else
+        {
+            $valid['email'] = $email;
+            $post = Validation::factory($valid); 
+            $post->rule('email', 'email');
+            if(!$post->check()) 
+            {
+                $json['status'] = 0;
+                $json['isValid'] = 0;
+                $json['message'] = 'Please entry valid email';
+            }
+            else
+            {
+                $json['status'] = 0;
+                $json['isValid'] = 1;                       
+            }
+            
+            if ($json['isValid'] == 1)
+            {
+                $users = ORM::factory('Users')->where('email','=',$email)->find();
+                if ($users->loaded())
+                {
+                    $json['isRegistered'] = 1;
+                    $json['status'] = 1;
+                }
+                else
+                {
+                    $json['isRegistered'] = 0;                
+                    $json['message'] = 'This email is not registered';
+                }
+            }
+        }       
+        
         $this->display_ajax(json_encode($json));
     }
     
@@ -25,7 +70,7 @@ class Controller_Api_User extends Controller_Base
            
         $post = Validation::factory($user); 
         $post->rule('email', 'email');
-        if(!$post->check())                    
+        if(!$post->check())                 
         {
             $json['status'] = 0;
             $json['message'] = 'Please entry valid email';            
@@ -50,7 +95,10 @@ class Controller_Api_User extends Controller_Base
             $res = ORM::factory('Users')->where('email','=',$user['email'])->and_where('password','=',$pwd)->find();
             if ($res->loaded())
             {
-                $json['status'] = 1;
+                $data['username'] = $res->username;
+                $data['access_token'] = $res->access_token;
+                $json['user'] = $data;
+                $json['status'] = 1;                
                 $json['message'] = 'Authorization completed';                     
             }
             else
@@ -80,14 +128,22 @@ class Controller_Api_User extends Controller_Base
         $user = ORM::factory('Users', $user_id);
         if ($user->loaded())
         {   
-            $data['task_categories'] = $this->_get_data_task_categories($user->id);
-            $data['task'] = $this->_get_data_task($user->id);
-            $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
-            $json['success'] = 1;
+            $token = $this->request->headers('X-Auth-Token');            
+            if ($token == $user->access_token) 
+            {
+                $data['task_categories'] = $this->_get_data_task_categories($user->id);
+                $data['task'] = $this->_get_data_task($user->id);
+                $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
+                $json['status'] = 1;
+            }
+            else
+            {
+                $json['status'] = 0;
+            }
         }
         else
         {
-            $json['success'] = 0;
+            $json['status'] = 0;
         }        
         $json['data'] = $data;         
         $this->display_ajax(json_encode($json));
@@ -140,7 +196,10 @@ class Controller_Api_User extends Controller_Base
             $data['status'] = 'block';            
             $data['logins'] = time();
             $data['last_login'] = time();
-            $data['created'] = time();                
+            $data['created'] = time();    
+            echo "<pre>";
+            print_r($data);
+            echo "</pre>";
             ORM::factory('Users')->values($data)->save();
             
             //Send Email            
@@ -158,11 +217,16 @@ class Controller_Api_User extends Controller_Base
         $this->display_ajax(json_encode($json));
     }
     
-    public function _check_email_token()
+    public function _check_email_token($token)
     {
-        $token = Arr::get($_GET, 'token', NULL);
-        $user = ORM::factory('Users')->where('email_token','=',$token)->find();
-        return $user->loaded();
+        if (!empty($token)) {
+            $user = ORM::factory('Users')->where('email_token','=',$token)->find();
+            return $user->loaded();
+        }
+        else
+        {
+            return 0;
+        }
     }
     
     protected function _get_data_images()
