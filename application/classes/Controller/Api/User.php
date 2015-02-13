@@ -12,6 +12,25 @@ class Controller_Api_User extends Controller_Base
         $this->_insert_user($user);
     }
     
+    public function action_resend()
+    {           
+        $email = Arr::get($_POST, 'email');
+        
+        $json['status'] = 0;
+        
+        $user = ORM::factory('User')->where('email', '=', $email)->find();
+        if( $user->pk() )
+        {
+            $send = $this->_send_email($user->email, $user->email_token);
+            if( $send )
+            {
+                $json['status'] = 1;
+            }   
+        }
+
+        $this->display_ajax(json_encode($json));
+    }
+    
     public function action_checktoken()
     {          
         $token = Arr::get($_GET, 'token', NULL);
