@@ -8,8 +8,8 @@ class Controller_Api_Geo extends Controller_Base
     {
         require_once DOCROOT . 'vendor/SypexGeo/SxGeo.php';
         $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeoCity.dat');
-        $ip = '54.251.129.117';
-        //$ip = REQUEST::$client_ip;
+        //$ip = '54.251.129.117';
+        $ip = REQUEST::$client_ip;
         $city = $sxGeo->getCityFull($ip);
         unset($sxGeo);
         
