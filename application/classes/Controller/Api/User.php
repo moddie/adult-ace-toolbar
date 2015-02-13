@@ -6,9 +6,9 @@ class Controller_Api_User extends Controller_Base
         
     public function action_register()
     {           
-        $user['username']  = Arr::get($_GET, 'username', NULL);
-        $user['password']  = Arr::get($_GET, 'password', NULL);
-        $user['email']     = Arr::get($_GET, 'email', NULL);
+        $user['username']  = Arr::get($_POST, 'username', NULL);
+        $user['password']  = Arr::get($_POST, 'password', NULL);
+        $user['email']     = Arr::get($_POST, 'email', NULL);
         $this->_insert_user($user);
     }
     
