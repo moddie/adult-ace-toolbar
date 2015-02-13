@@ -1,10 +1,10 @@
 <?php
 /***************************************************************************\
-| Sypex Geo                  version 2.1.0                                  |
-| (c)2006-2012 zapimir       zapimir@zapimir.net       http://sypex.net/    |
-| (c)2006-2012 BINOVATOR     info@sypex.net                                 |
+| Sypex Geo                  version 2.2.3                                  |
+| (c)2006-2014 zapimir       zapimir@zapimir.net       http://sypex.net/    |
+| (c)2006-2014 BINOVATOR     info@sypex.net                                 |
 |---------------------------------------------------------------------------|
-|     created: 2006.10.17 18:33              modified: 2012.06.26 19:55     |
+|     created: 2006.10.17 18:33              modified: 2014.06.20 18:57     |
 |---------------------------------------------------------------------------|
 | Sypex Geo is released under the terms of the BSD license                  |
 |   http://sypex.net/bsd_license.txt                                        |
@@ -25,30 +25,28 @@ class SxGeo {
 	protected $m_idx_arr;
 	protected $m_idx_len;
 	protected $db_items;
+	protected $country_size;
 	protected $db;
 	protected $regions_db;
 	protected $cities_db;
-	public $cc2iso = array(
-		'', 'AP', 'EU', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AN', 'AO', 'AQ',
-		'AR', 'AS', 'AT', 'AU', 'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH',
-		'BI', 'BJ', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA',
-		'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU',
-		'CV', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG',
-		'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'FX', 'GA', 'GB',
-		'GD', 'GE', 'GF', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT',
-		'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IN',
-		'IO', 'IQ', 'IR', 'IS', 'IT', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM',
-		'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS',
-		'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN',
-		'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA',
-		'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA',
-		'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY',
-		'QA', 'RE', 'RO', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI',
-		'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'ST', 'SV', 'SY', 'SZ', 'TC', 'TD',
-		'TF', 'TG', 'TH', 'TJ', 'TK', 'TM', 'TN', 'TO', 'TL', 'TR', 'TT', 'TV', 'TW',
-		'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN',
-		'VU', 'WF', 'WS', 'YE', 'YT', 'RS', 'ZA', 'ZM', 'ME', 'ZW', 'A1', 'A2', 'O1',
-		'AX', 'GG', 'IM', 'JE', 'BL', 'MF'
+
+	public $id2iso = array(
+		'', 'AP', 'EU', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'CW', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU',
+		'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BM', 'BN', 'BO', 'BR', 'BS',
+		'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN',
+		'CO', 'CR', 'CU', 'CV', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG',
+		'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'SX', 'GA', 'GB', 'GD', 'GE', 'GF',
+		'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN',
+		'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JM', 'JO', 'JP', 'KE',
+		'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR',
+		'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP',
+		'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI',
+		'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN',
+		'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG',
+		'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'ST', 'SV', 'SY', 'SZ', 'TC', 'TD', 'TF',
+		'TG', 'TH', 'TJ', 'TK', 'TM', 'TN', 'TO', 'TL', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM',
+		'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'RS', 'ZA',
+		'ZM', 'ME', 'ZW', 'A1', 'XK', 'O1', 'AX', 'GG', 'IM', 'JE', 'BL', 'MF', 'BQ', 'SS'
 	);
 
 	public $batch_mode  = false;
@@ -57,12 +55,10 @@ class SxGeo {
 	public function __construct($db_file = 'SxGeo.dat', $type = SXGEO_FILE){
 		$this->fh = fopen($db_file, 'rb');
 		// Сначала убеждаемся, что есть файл базы данных
-		$header = fread($this->fh, 32);
+		$header = fread($this->fh, 40); // В версии 2.2 заголовок увеличился на 8 байт
 		if(substr($header, 0, 3) != 'SxG') die("Can't open {$db_file}\n");
-		$info = unpack('Cver/Ntime/Ctype/Ccharset/Cb_idx_len/nm_idx_len/nrange/Ndb_items/Cid_len/nmax_region/nmax_city/Nregion_size/Ncity_size', substr($header, 3));
+		$info = unpack('Cver/Ntime/Ctype/Ccharset/Cb_idx_len/nm_idx_len/nrange/Ndb_items/Cid_len/nmax_region/nmax_city/Nregion_size/Ncity_size/nmax_country/Ncountry_size/npack_size', substr($header, 3));
 		if($info['b_idx_len'] * $info['m_idx_len'] * $info['range'] * $info['db_items'] * $info['time'] * $info['id_len'] == 0) die("Wrong file format {$db_file}\n");
-		$this->b_idx_str = fread($this->fh, $info['b_idx_len'] * 4);
-		$this->m_idx_str = fread($this->fh, $info['m_idx_len'] * 4);
 		$this->range       = $info['range'];
 		$this->b_idx_len   = $info['b_idx_len'];
 		$this->m_idx_len   = $info['m_idx_len'];
@@ -71,10 +67,16 @@ class SxGeo {
 		$this->block_len   = 3 + $this->id_len;
 		$this->max_region  = $info['max_region'];
 		$this->max_city    = $info['max_city'];
+		$this->max_country = $info['max_country'];
+		$this->country_size= $info['country_size'];
 		$this->batch_mode  = $type & SXGEO_BATCH;
 		$this->memory_mode = $type & SXGEO_MEMORY;
+		$this->pack        = $info['pack_size'] ? explode("\0", fread($this->fh, $info['pack_size'])) : '';
+		$this->b_idx_str   = fread($this->fh, $info['b_idx_len'] * 4);
+		$this->m_idx_str   = fread($this->fh, $info['m_idx_len'] * 4);
+
 		$this->db_begin = ftell($this->fh);
-		if ($this->batch_mode) { // Значительное ускорение блока
+		if ($this->batch_mode) {
 			$this->b_idx_arr = array_values(unpack("N*", $this->b_idx_str)); // Быстрее в 5 раз, чем с циклом
 			unset ($this->b_idx_str);
 			$this->m_idx_arr = str_split($this->m_idx_str, 4); // Быстрее в 5 раз чем с циклом
@@ -82,9 +84,10 @@ class SxGeo {
 		}
 		if ($this->memory_mode) {
 			$this->db  = fread($this->fh, $this->db_items * $this->block_len);
-			$this->regions_db = fread($this->fh, $info['region_size']);
-			$this->cities_db  = fread($this->fh, $info['city_size']);
+			$this->regions_db = $info['region_size'] > 0 ? fread($this->fh, $info['region_size']) : '';
+			$this->cities_db  = $info['city_size'] > 0 ? fread($this->fh, $info['city_size']) : '';
 		}
+		$this->info = $info;
 		$this->info['regions_begin'] = $this->db_begin + $this->db_items * $this->block_len;
 		$this->info['cities_begin']  = $this->info['regions_begin'] + $info['region_size'];
 	}
@@ -110,17 +113,17 @@ class SxGeo {
 	}
 
 	protected function search_db($str, $ipn, $min, $max){
-		if($max - $min > 0) {
+		if($max - $min > 1) {
 			$ipn = substr($ipn, 1);
 			while($max - $min > 8){
 				$offset = ($min + $max) >> 1;
 				if ($ipn > substr($str, $offset * $this->block_len, 3)) $min = $offset;
 				else $max = $offset;
 			}
-			while ($ipn >= substr($str, $min * $this->block_len, 3) && $min++ < $max){};
+			while ($ipn >= substr($str, $min * $this->block_len, 3) && ++$min < $max){};
 		}
 		else {
-			return hexdec(bin2hex(substr($str, $min * $this->block_len + 3 , 3)));
+			$min++;
 		}
 		return hexdec(bin2hex(substr($str, $min * $this->block_len - $this->id_len, $this->id_len)));
 	}
@@ -130,21 +133,27 @@ class SxGeo {
 		if($ip1n == 0 || $ip1n == 10 || $ip1n == 127 || $ip1n >= $this->b_idx_len || false === ($ipn = ip2long($ip))) return false;
 		$ipn = pack('N', $ipn);
 		$this->ip1c = chr($ip1n);
-		// Находим блок данных индексе первых байт
+		// Находим блок данных в индексе первых байт
 		if ($this->batch_mode){
 			$blocks = array('min' => $this->b_idx_arr[$ip1n-1], 'max' => $this->b_idx_arr[$ip1n]);
 		}
 		else {
 			$blocks = unpack("Nmin/Nmax", substr($this->b_idx_str, ($ip1n - 1) * 4, 8));
 		}
-		// Ищем блок в основном индексе
-		$part = $this->search_idx($ipn, floor($blocks['min'] / $this->range), floor($blocks['max'] / $this->range)-1);
-		// Нашли номер блока в котором нужно искать IP, теперь находим нужный блок в БД
-		$min = $part > 0 ? $part * $this->range : 0;
-		$max = $part > $this->m_idx_len ? $this->db_items : ($part+1) * $this->range;
-		// Нужно проверить чтобы блок не выходил за пределы блока первого байта
-		if($min < $blocks['min']) $min = $blocks['min'];
-		if($max > $blocks['max']) $max = $blocks['max'];
+		if ($blocks['max'] - $blocks['min'] > $this->range){
+			// Ищем блок в основном индексе
+			$part = $this->search_idx($ipn, floor($blocks['min'] / $this->range), floor($blocks['max'] / $this->range)-1);
+			// Нашли номер блока в котором нужно искать IP, теперь находим нужный блок в БД
+			$min = $part > 0 ? $part * $this->range : 0;
+			$max = $part > $this->m_idx_len ? $this->db_items : ($part+1) * $this->range;
+			// Нужно проверить чтобы блок не выходил за пределы блока первого байта
+			if($min < $blocks['min']) $min = $blocks['min'];
+			if($max > $blocks['max']) $max = $blocks['max'];
+		}
+		else {
+			$min = $blocks['min'];
+			$max = $blocks['max'];
+		}
 		$len = $max - $min;
 		// Находим нужный диапазон в БД
 		if ($this->memory_mode) {
@@ -152,113 +161,151 @@ class SxGeo {
 		}
 		else {
 			fseek($this->fh, $this->db_begin + $min * $this->block_len);
-			return $this->search_db(fread($this->fh, $len * $this->block_len), $ipn, 0, $len-1);
+			return $this->search_db(fread($this->fh, $len * $this->block_len), $ipn, 0, $len);
 		}
 	}
 
-	protected function parseCity($seek){
-
-		if($this->memory_mode){
-			$raw = substr($this->cities_db, $seek, $this->max_city);
-		}
-		else{
-			fseek($this->fh, $this->info['cities_begin'] + $seek);
-			$raw = fread($this->fh, $this->max_city);
-		}
-		$this->city = unpack('Nregid/Ccc/a2fips/Nlat/Nlon', $raw);
-		$this->city['country']  = $this->cc2iso[$this->city['cc']];
-		$this->city['lat'] /= 1000000;
-		$this->city['lon'] /= 1000000;
-		$c = explode("\0", substr($raw, 15),2);
-		$this->city['city'] = $c[0];
-		return $this->city;
-	}
-
-	protected function parseRegion($region_seek){
-		static $tz = array(
-			'',  'Africa/Abidjan', 'Africa/Accra', 'Africa/Addis_Ababa', 'Africa/Algiers', 'Africa/Bamako', 'Africa/Banjul',
-			'Africa/Blantyre', 'Africa/Brazzaville', 'Africa/Bujumbura', 'Africa/Cairo', 'Africa/Casablanca', 'Africa/Ceuta',
-			'Africa/Conakry', 'Africa/Dakar', 'Africa/Dar_es_Salaam', 'Africa/Douala', 'Africa/Freetown', 'Africa/Gaborone',
-			'Africa/Harare', 'Africa/Johannesburg', 'Africa/Kampala', 'Africa/Khartoum', 'Africa/Kigali', 'Africa/Kinshasa',
-			'Africa/Lagos', 'Africa/Libreville', 'Africa/Luanda', 'Africa/Lubumbashi', 'Africa/Lusaka', 'Africa/Malabo',
-			'Africa/Maputo', 'Africa/Maseru', 'Africa/Mbabane', 'Africa/Mogadishu', 'Africa/Monrovia', 'Africa/Nairobi',
-			'Africa/Ndjamena', 'Africa/Niamey', 'Africa/Nouakchott', 'Africa/Ouagadougou', 'Africa/Porto-Novo', 'Africa/Tripoli',
-			'Africa/Tunis', 'Africa/Windhoek', 'America/Anchorage', 'America/Anguilla', 'America/Antigua', 'America/Araguaina',
-			'America/Argentina/Buenos_Aires', 'America/Argentina/Catamarca', 'America/Argentina/Cordoba', 'America/Argentina/Jujuy',
-			'America/Argentina/La_Rioja', 'America/Argentina/Mendoza', 'America/Argentina/Rio_Gallegos', 'America/Argentina/Salta',
-			'America/Argentina/San_Juan', 'America/Argentina/San_Luis', 'America/Argentina/Tucuman', 'America/Argentina/Ushuaia',
-			'America/Asuncion', 'America/Bahia', 'America/Bahia_Banderas', 'America/Barbados', 'America/Belem', 'America/Belize',
-			'America/Boa_Vista', 'America/Bogota', 'America/Campo_Grande', 'America/Cancun', 'America/Caracas', 'America/Chicago',
-			'America/Chihuahua', 'America/Costa_Rica', 'America/Cuiaba', 'America/Denver', 'America/Dominica', 'America/Edmonton',
-			'America/El_Salvador', 'America/Fortaleza', 'America/Godthab', 'America/Grenada', 'America/Guatemala', 'America/Guayaquil',
-			'America/Guyana', 'America/Halifax', 'America/Havana', 'America/Hermosillo', 'America/Indianapolis', 'America/Iqaluit',
-			'America/Jamaica', 'America/La_Paz', 'America/Lima', 'America/Los_Angeles', 'America/Maceio', 'America/Managua',
-			'America/Manaus', 'America/Matamoros', 'America/Mazatlan', 'America/Merida', 'America/Mexico_City', 'America/Moncton',
-			'America/Monterrey', 'America/Montevideo', 'America/Montreal', 'America/Nassau', 'America/New_York', 'America/Ojinaga',
-			'America/Panama', 'America/Paramaribo', 'America/Phoenix', 'America/Port_of_Spain', 'America/Port-au-Prince',
-			'America/Porto_Velho', 'America/Recife', 'America/Regina', 'America/Rio_Branco', 'America/Santo_Domingo',
-			'America/Sao_Paulo', 'America/St_Johns', 'America/St_Kitts', 'America/St_Lucia', 'America/St_Vincent',
-			'America/Tegucigalpa', 'America/Thule', 'America/Tijuana', 'America/Vancouver', 'America/Whitehorse', 'America/Winnipeg',
-			'America/Yellowknife', 'Asia/Aden', 'Asia/Almaty', 'Asia/Amman', 'Asia/Anadyr', 'Asia/Aqtau', 'Asia/Aqtobe', 'Asia/Baghdad',
-			'Asia/Bahrain', 'Asia/Baku', 'Asia/Bangkok', 'Asia/Beirut', 'Asia/Bishkek', 'Asia/Choibalsan', 'Asia/Chongqing',
-			'Asia/Colombo', 'Asia/Damascus', 'Asia/Dhaka', 'Asia/Dubai', 'Asia/Dushanbe', 'Asia/Harbin', 'Asia/Ho_Chi_Minh',
-			'Asia/Hong_Kong', 'Asia/Hovd', 'Asia/Irkutsk', 'Asia/Jakarta', 'Asia/Jayapura', 'Asia/Jerusalem', 'Asia/Kabul',
-			'Asia/Kamchatka', 'Asia/Karachi', 'Asia/Kashgar', 'Asia/Kolkata', 'Asia/Krasnoyarsk', 'Asia/Kuala_Lumpur', 'Asia/Kuching',
-			'Asia/Kuwait', 'Asia/Macau', 'Asia/Magadan', 'Asia/Makassar', 'Asia/Manila', 'Asia/Muscat', 'Asia/Nicosia', 'Asia/Novokuznetsk',
-			'Asia/Novosibirsk', 'Asia/Omsk', 'Asia/Oral', 'Asia/Phnom_Penh', 'Asia/Pontianak', 'Asia/Qatar', 'Asia/Qyzylorda', 'Asia/Riyadh',
-			'Asia/Sakhalin', 'Asia/Seoul', 'Asia/Shanghai', 'Asia/Singapore', 'Asia/Taipei', 'Asia/Tashkent', 'Asia/Tbilisi', 'Asia/Tehran',
-			'Asia/Thimphu', 'Asia/Tokyo', 'Asia/Ulaanbaatar', 'Asia/Urumqi', 'Asia/Vientiane', 'Asia/Vladivostok', 'Asia/Yakutsk',
-			'Asia/Yekaterinburg', 'Asia/Yerevan', 'Atlantic/Azores', 'Atlantic/Bermuda', 'Atlantic/Canary', 'Atlantic/Cape_Verde',
-			'Atlantic/Madeira', 'Atlantic/Reykjavik', 'Australia/Adelaide', 'Australia/Brisbane', 'Australia/Darwin', 'Australia/Hobart',
-			'Australia/Melbourne', 'Australia/Perth', 'Australia/Sydney', 'Chile/Santiago', 'Europe/Amsterdam', 'Europe/Andorra',
-			'Europe/Athens', 'Europe/Belgrade', 'Europe/Berlin', 'Europe/Bratislava', 'Europe/Brussels', 'Europe/Bucharest', 'Europe/Budapest',
-			'Europe/Chisinau', 'Europe/Copenhagen', 'Europe/Dublin', 'Europe/Gibraltar', 'Europe/Helsinki', 'Europe/Istanbul',
-			'Europe/Kaliningrad', 'Europe/Kiev', 'Europe/Lisbon', 'Europe/Ljubljana', 'Europe/London', 'Europe/Luxembourg', 'Europe/Madrid',
-			'Europe/Malta', 'Europe/Mariehamn', 'Europe/Minsk', 'Europe/Monaco', 'Europe/Moscow', 'Europe/Oslo', 'Europe/Paris',
-			'Europe/Prague', 'Europe/Riga', 'Europe/Rome', 'Europe/Samara', 'Europe/San_Marino', 'Europe/Sarajevo', 'Europe/Simferopol',
-			'Europe/Skopje', 'Europe/Sofia', 'Europe/Stockholm', 'Europe/Tallinn', 'Europe/Tirane', 'Europe/Uzhgorod', 'Europe/Vaduz',
-			'Europe/Vatican', 'Europe/Vienna', 'Europe/Vilnius', 'Europe/Volgograd', 'Europe/Warsaw', 'Europe/Yekaterinburg', 'Europe/Zagreb',
-			'Europe/Zaporozhye', 'Europe/Zurich', 'Indian/Antananarivo', 'Indian/Comoro', 'Indian/Mahe', 'Indian/Maldives', 'Indian/Mauritius',
-			'Pacific/Auckland', 'Pacific/Chatham', 'Pacific/Efate', 'Pacific/Fiji', 'Pacific/Galapagos', 'Pacific/Guadalcanal', 'Pacific/Honolulu',
-			'Pacific/Port_Moresby'
-		);
-		if($region_seek > 0){
-			if($this->memory_mode){
-				$region = explode("\0",substr($this->regions_db, $region_seek, $this->max_region));
+	protected function readData($seek, $max, $type){
+		$raw = '';
+		if($seek && $max) {
+			if ($this->memory_mode) {
+				$raw = substr($type == 1 ? $this->regions_db : $this->cities_db, $seek, $max);
+			} else {
+				fseek($this->fh, $this->info[$type == 1 ? 'regions_begin' : 'cities_begin'] + $seek);
+				$raw = fread($this->fh, $max);
 			}
-			else{
-				fseek($this->fh, $this->info['regions_begin'] + $region_seek);
-				$region = explode("\0", fread($this->fh, $this->max_region));
-			}
-			$this->city['region_name'] = $region[0];
-			$this->city['timezone'] = $tz[$region[1]];
 		}
-		else{
-			$this->city['region_name'] = '';
-			$this->city['timezone'] = '';
+		return $this->unpack($this->pack[$type], $raw);
+	}
+
+	protected function parseCity($seek, $full = false){
+		if(!$this->pack) return false;
+		$only_country = false;
+		if($seek < $this->country_size){
+			$country = $this->readData($seek, $this->max_country, 0);
+			$city = $this->unpack($this->pack[2]);
+			$city['lat'] = $country['lat'];
+			$city['lon'] = $country['lon'];
+			$only_country = true;
+		}
+		else {
+			$city = $this->readData($seek, $this->max_city, 2);
+			$country = array('id' => $city['country_id'], 'iso' => $this->id2iso[$city['country_id']]);
+			unset($city['country_id']);
+		}
+		if($full) {
+			$region = $this->readData($city['region_seek'], $this->max_region, 1);
+			if(!$only_country) $country = $this->readData($region['country_seek'], $this->max_country, 0);
+			unset($city['region_seek']);
+			unset($region['country_seek']);
+			return array('city' => $city, 'region' => $region, 'country' => $country);
+		}
+		else {
+			unset($city['region_seek']);
+			return array('city' => $city, 'country' => array('id' => $country['id'], 'iso' => $country['iso']));
 		}
 	}
+
+	protected function unpack($pack, $item = ''){
+		$unpacked = array();
+		$empty = empty($item);
+		$pack = explode('/', $pack);
+		$pos = 0;
+		foreach($pack AS $p){
+			list($type, $name) = explode(':', $p);
+			$type0 = $type{0};
+			if($empty) {
+				$unpacked[$name] = $type0 == 'b' || $type0 == 'c' ? '' : 0;
+				continue;
+			}
+			switch($type0){
+				case 't':
+				case 'T': $l = 1; break;
+				case 's':
+				case 'n':
+				case 'S': $l = 2; break;
+				case 'm':
+				case 'M': $l = 3; break;
+				case 'd': $l = 8; break;
+				case 'c': $l = (int)substr($type, 1); break;
+				case 'b': $l = strpos($item, "\0", $pos)-$pos; break;
+				default: $l = 4;
+			}
+			$val = substr($item, $pos, $l);
+			switch($type0){
+				case 't': $v = unpack('c', $val); break;
+				case 'T': $v = unpack('C', $val); break;
+				case 's': $v = unpack('s', $val); break;
+				case 'S': $v = unpack('S', $val); break;
+				case 'm': $v = unpack('l', $val . (ord($val{2}) >> 7 ? "\xff" : "\0")); break;
+				case 'M': $v = unpack('L', $val . "\0"); break;
+				case 'i': $v = unpack('l', $val); break;
+				case 'I': $v = unpack('L', $val); break;
+				case 'f': $v = unpack('f', $val); break;
+				case 'd': $v = unpack('d', $val); break;
+
+				case 'n': $v = current(unpack('s', $val)) / pow(10, $type{1}); break;
+				case 'N': $v = current(unpack('l', $val)) / pow(10, $type{1}); break;
+
+				case 'c': $v = rtrim($val, ' '); break;
+				case 'b': $v = $val; $l++; break;
+			}
+			$pos += $l;
+			$unpacked[$name] = is_array($v) ? current($v) : $v;
+		}
+		return $unpacked;
+	}
+
 	public function get($ip){
 		return $this->max_city ? $this->getCity($ip) : $this->getCountry($ip);
 	}
 	public function getCountry($ip){
-		return $this->cc2iso[$this->get_num($ip)];
+		if($this->max_city) {
+			$tmp = $this->parseCity($this->get_num($ip));
+			return $tmp['country']['iso'];
+		}
+		else return $this->id2iso[$this->get_num($ip)];
 	}
 	public function getCountryId($ip){
-		return $this->get_num($ip);
+		if($this->max_city) {
+			$tmp = $this->parseCity($this->get_num($ip));
+			return $tmp['country']['id'];
+		}
+		else return $this->get_num($ip);
 	}
 	public function getCity($ip){
 		$seek = $this->get_num($ip);
-		if($seek > 0) return $this->parseCity($seek);
-		else return false;
+		return $seek ? $this->parseCity($seek) : false;
 	}
 	public function getCityFull($ip){
 		$seek = $this->get_num($ip);
-		if($seek > 0) {
-			$this->parseCity($seek);
-			$this->parseRegion($this->city['regid']);
-			return $this->city;
-		}
-		else return false;
+		return $seek ? $this->parseCity($seek, 1) : false;
+	}
+	public function about(){
+		$charset = array('utf-8', 'latin1', 'cp1251');
+		$types   = array('n/a', 'SxGeo Country', 'SxGeo City RU', 'SxGeo City EN', 'SxGeo City', 'SxGeo City Max RU', 'SxGeo City Max EN', 'SxGeo City Max');
+		return array(
+			'Created' => date('Y.m.d', $this->info['time']),
+			'Timestamp' => $this->info['time'],
+			'Charset' => $charset[$this->info['charset']],
+			'Type' => $types[$this->info['type']],
+			'Byte Index' => $this->b_idx_len,
+			'Main Index' => $this->m_idx_len,
+			'Blocks In Index Item' => $this->range,
+			'IP Blocks' => $this->db_items,
+			'Block Size' => $this->block_len,
+			'City' => array(
+				'Max Length' => $this->max_city,
+				'Total Size' => $this->info['city_size'],
+			),
+			'Region' => array(
+				'Max Length' => $this->max_region,
+				'Total Size' => $this->info['region_size'],
+			),
+			'Country' => array(
+				'Max Length' => $this->max_country,
+				'Total Size' => $this->info['country_size'],
+			),
+		);
 	}
 }
