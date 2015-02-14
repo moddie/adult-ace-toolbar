@@ -306,7 +306,7 @@ class Controller_Api_User extends Controller_Base
         $swiftmailer = Email::factory('Ace Toolbar', 'message');
         $msg = '<p>Confirm your email address to complete your account.' .
                'It\'s easy — just click on this link:</p>' . 
-               URL::base(true) . '/api/user/checktoken?token=' . $token;            
+               URL::base(true) . 'api/user/checktoken?token=' . $token;            
         $swiftmailer->message($msg, 'text/html');
         return $swiftmailer->from('info@adultace.net')->to($email)->send();            
     }
