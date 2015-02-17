@@ -106,31 +106,6 @@ class Controller_Admin_Users extends Controller_Auth
         $this->display($view);
     }
     
-    public function action_block() 
-    {
-        $view = View::factory('scripts/admin/user_block');
-        $id = Arr::get($_GET, 'id', NULL);
-        $action = Arr::get($_GET, 'action', 'block'); 
-        $user = ORM::factory('Users')->find($id);
-        
-        if ($user->status != 'not active') 
-        {
-            if ($action == 'blocked') 
-            {
-                $user->status = 'blocked';
-                $user->save();
-            }
-            else if ($action == 'active')
-            {
-                $user->status = 'active';
-                $user->save();
-            }
-        }
-        
-        $view->user = $user;        
-	$this->display($view);
-    }
-
     protected function _delete($idUsers = null)
     {
         if (!empty($idUsers))

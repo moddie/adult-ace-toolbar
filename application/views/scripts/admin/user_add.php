@@ -1,5 +1,5 @@
 <div style="padding:40px">
-    <form action="/api/user/register" method="get">
+    <form action="/api/user/register" method="post">
         <table>
             <tr><td>Username:</td><td> <input type="text" name="username" value="" /></td></tr>
             <tr><td>Password:</td><td><input type="text" name="password" value="" /></td></tr>

@@ -1,12 +1,10 @@
 <h2><?php echo __('Users') ?></h2>
 <div class="row space">
-    <div class="span12 ">        
-        <a class="btn btn-danger remove-btn"><i class="icon-remove icon-white"></i> Delete selected</a>
-    </div>
-    <div class="span12 block-user">        
-        <a class="btn btn-primary block-btn"> Block user</a>
-        <a class="btn btn-primary unblock-btn"><i class="icon-remove icon-white"></i> Unblock user</a>
-    </div>
+    <div class="span12 ">                
+        <a class="btn btn-success activate-btn"><i class="icon-ok icon-white"></i> Activate user</a>
+        <a class="btn btn-primary block-btn"><i class="icon-minus-sign icon-white"></i> Block user</a>        
+        <a class="btn btn-danger remove-btn"><i class="icon-remove icon-white"></i> Delete selected</a>        
+    </div>    
 </div>
 <div class="row space">
     <div class="span12">
@@ -26,7 +24,7 @@
                         foreach ($users as $user){
                     ?>
                         <tr id="user_<?php echo $user->id; ?>">
-                            <td class="text-center"><input type="checkbox" name="delete[<?php echo $user->id; ?>]"  /></td>
+                            <td class="text-center"><input type="checkbox" name="delete[<?php echo $user->id; ?>]" userid="<?php echo $user->id; ?>" /></td>
                             <td><?php echo $user->username; ?></td>
                             <td><?php echo $user->email; ?></td>
                             <td><?php echo $user->status; ?></td>
@@ -74,25 +72,26 @@
                 if (checkboxes.filter(':checked').length === 0){
                     jQuery('.remove-btn').addClass('disabled');
                     jQuery('.block-btn').addClass('disabled');
-                    jQuery('.unblock-btn').addClass('disabled');
+                    jQuery('.activate-btn').addClass('disabled');
                 }
                 else {
                     jQuery('.remove-btn').removeClass('disabled');
                     jQuery('.block-btn').removeClass('disabled');
-                    jQuery('.unblock-btn').removeClass('disabled');
+                    jQuery('.activate-btn').removeClass('disabled');
                 }                
             };
-        checkboxes.on('change',function(){
+        jQuery('td input[type=checkbox]').on('change',function(){
+            console.log(this);
             disabling();
         });
         
         jQuery(function(){
             jQuery('th input[type=checkbox]').on('change',function(){
                 if (jQuery(this).is(':checked')){
-                    checkboxes.prop('checked',true);
+                    jQuery('td input[type=checkbox]').prop('checked',true);
                 }
                 else{
-                    checkboxes.prop('checked',false);
+                    jQuery('td input[type=checkbox]').prop('checked',false);
                 }
                 disabling();
             });
@@ -106,38 +105,44 @@
         });
         
         jQuery('.block-btn').on('click', function(){
-            if ( !jQuery(this).is('.disabled')) {
-                jQuery.ajax({
-                    url:'/admin/Json/user_block/',                    
-                    dataType:'html',
-                    data:{
-                        id: <?php echo $user->id; ?>,
-                        action: 'block',
-                    },
-                    success: function(response){
-                        console.log(response);                        
-                        jQuery('#user-table #user_<?php echo $user->id; ?>').html(response);
-                    }
-                });
-            }
+            jQuery('td input[type=checkbox]').each(function(){                
+                var userid = jQuery(this).attr('userid');
+                if (jQuery(this).is(':checked')) {                    
+                    jQuery.ajax({
+                        url:'/admin/Json/user_block/',                    
+                        dataType:'html',
+                        data:{
+                            id: userid,
+                            action: 'block',
+                        },
+                        success: function(response){
+                            //console.log(response);                            
+                            jQuery('#user-table #user_'+userid).html(response);
+                        }
+                    });
+                }    
+            });
         });
         
-        jQuery('.unblock-btn').on('click', function(){
-            if ( !jQuery(this).is('.disabled')) {
-                jQuery.ajax({
-                    url:'/admin/Json/user_block/',                    
-                    dataType:'html',
-                    data:{
-                        id: <?php echo $user->id; ?>,
-                        action: 'unblock',
-                    },
-                    success: function(response){
-                        console.log(response);
-                        jQuery('#user-table #user_<?php echo $user->id; ?>').html(response);
-                    }
-                });
-            }
-        });
+        jQuery('.activate-btn').on('click', function(){
+            jQuery('td input[type=checkbox]').each(function(){
+                var userid = jQuery(this).attr('userid');                
+                if (jQuery(this).is(':checked')) {
+                    jQuery.ajax({
+                        url:'/admin/Json/user_block/',                    
+                        dataType:'html',
+                        data:{
+                            id: userid,
+                            action: 'activate',
+                        },
+                        success: function(response){
+                            //console.log(response);
+                            jQuery('#user-table #user_'+userid).html(response);
+                        }
+                    });
+                }
+            });
+        });        
         
     });
 </script>
