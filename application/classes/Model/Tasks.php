@@ -11,11 +11,7 @@ class Model_Tasks extends ORM
         'users'  => array(
                'model'       => 'users',
                'foreign_key' => 'user_id',
-        ),
-        'task_categories'  => array(
-               'model'       => 'task_categories',
-               'foreign_key' => 'category_id',
-        ),
+        ),        
     );
 
     public function rules()
@@ -24,7 +20,7 @@ class Model_Tasks extends ORM
             'user_id' => array(
                 array('not_empty')
             ),      
-            'category_id' => array(
+            'parent_id' => array(
                 array('not_empty')
             ),
             'title' => array(
