@@ -21,7 +21,7 @@ return array
 			'username'   => 'user_for_work',
 			'password'   => 'password',
 			'persistent' => FALSE,
-			'database'   => 'adult_ace_toolbar',
+			'database'   => 'momentum',
 		),
 		'table_prefix' => '',
 		'charset'      => 'utf8',
