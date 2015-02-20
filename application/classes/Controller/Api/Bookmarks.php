@@ -119,11 +119,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
 
             if ($validator->check())
             {            
-                $orm = ORM::factory('Tasks');
-                $task = $orm->where('id','=',$id)
-                            ->and_where('user_id','=',$user->id)
-                            ->find();
-                
+                $task = ORM::factory('Tasks', $id);
                 if ($task->loaded())
                 {
                     $task->title = $data['title'];            
@@ -215,10 +211,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         if ($user = $this->auth_user())
         {       
             $orm = ORM::factory('Tasks');
-            $tasks = $orm->where('parent_id','=',$parent_id)
-                         ->and_where('user_id','=',$task->user_id)
-                         ->find_all();
-            
+            $tasks = $orm->where('parent_id','=',$parent_id)->find_all();
             foreach ($tasks as $task)
             {
                 $data = array();                
