@@ -233,8 +233,8 @@ class Controller_Api_Tasks extends Controller_Api_Auth
                 $data['date_create'] = $task->date_create;       
                 $data['date_update'] = $task->date_update;
                 
-                $json['items'][] = $data;
                 $json['status'] = 1; 
+                $json['items'][] = $data;
             }  
         }    
         else
