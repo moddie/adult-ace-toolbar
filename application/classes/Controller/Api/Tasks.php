@@ -118,9 +118,9 @@ class Controller_Api_Tasks extends Controller_Api_Auth
                       ->rule('deadline','not_empty');
 
             if ($validator->check())
-            {            
-                $orm = ORM::factory('Tasks');
-                $task = $orm->where('id','=',$id)
+            {   
+                $task = ORM::factory('Tasks')
+                            ->where('id','=',$id)
                             ->and_where('user_id','=',$user->id)
                             ->find();
                 
@@ -213,11 +213,11 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         $parent_id = Arr::get($_POST, 'parent_id', 0);        
         
         if ($user = $this->auth_user())
-        {       
-            $orm = ORM::factory('Tasks');
-            $tasks = $orm->where('parent_id','=',$parent_id)
-                         ->and_where('user_id','=',$task->user_id)
-                         ->find_all();
+        {   
+            $tasks = ORM::factory('Tasks')
+                        ->where('parent_id','=',$parent_id)
+                        ->and_where('user_id','=',$task->user_id)
+                        ->find_all();
             
             foreach ($tasks as $task)
             {
