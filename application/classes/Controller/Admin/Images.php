@@ -132,11 +132,6 @@ class Controller_Admin_Users extends Controller_Auth
         }
     }
     
-    //------------------------------------------
-    //  debug actions
-    //  delete after development
-    //------------------------------------------
-    
     public function action_add()
     {
         $view = View::factory('scripts/admin/user_add');        
@@ -149,4 +144,4 @@ class Controller_Admin_Users extends Controller_Auth
 	$this->display($view);
     }
 
-} // end Controller_Admin_Users
+} // end Controller_Admin_Campaigns
