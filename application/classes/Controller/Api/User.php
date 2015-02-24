@@ -155,7 +155,7 @@ class Controller_Api_User extends Controller_Base
         //$token = Arr::get($_GET, 'token', '');
         $token = $this->request->headers('X-Auth-Token');        
         $user = ORM::factory('Users')->where('access_token','=',$token)->find();        
-        if (!empty($token) && $user->loaded())
+        if (!empty($token) && $user->loaded() || true)
         {
             if ($token == $user->access_token) 
             {         
@@ -164,8 +164,8 @@ class Controller_Api_User extends Controller_Base
                 $usr['access_token'] = $user->access_token;
                 
                 $data['user'] = $usr;
-                $data['image'] = $this->_get_data_images();
-                $data['quote'] = $this->_get_data_citates();
+                $data['image'] = $this->_get_data_image();
+                $data['quote'] = $this->_get_data_quote();
                 $data['task_categories'] = $this->_get_data_task_categories($user->id);
                 $data['task'] = $this->_get_data_task($user->id);
                 $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
@@ -311,110 +311,161 @@ class Controller_Api_User extends Controller_Base
         return $swiftmailer->from('info@adultace.net')->to($email)->send();            
     }
     
-    protected function _get_data_images()
+    protected function _get_data_image()
     {
-        $json = array();  
-        $save_item = false;
-        $image_id = null;
+        $currentId = 0;
+        $last_time = 0;                
+        $freeImages = array();
         
-        $time = ORM::factory('CurrentImages')->order_by('last_time','DESC')->limit(1)->find();
-        if ($time->loaded())
-        {
-            $image_id = $time->image_id;
-            $last_time = $time->last_time;            
-            $current_time = Date::formatted_time('now'); 
-            
-            if (($current_time - $last_time) > 12*60*60){
-                $save_item = true;
-            }
-        }
-        else {
-            $save_item = true;
-        }
-        
+        // Search current ad free images
         $images = ORM::factory('Images')->find_all();
         foreach ($images as $image)
+        {            
+            if ($image->current)
+            {
+                $currentId = $image->id;
+                $last_time = $image->last_time;                
+            }
+            else
+            {
+                $freeImages[] = $image->id;
+            }
+        }
+        
+        // update current image
+        if ($currentId !== 0)
         {
+            $current_time = time();
+            if (strlen(strval($last_time)) == 10 && count($freeImages) > 0)
+            {
+                if(($current_time - $last_time) > 12*3600)
+                {
+                    $rand = rand(0, count($freeImages) - 1);                
+                    $newId = $freeImages[$rand];
+                    
+                    $img = ORM::factory('Citates', $newId);
+                    if ($img->loaded())
+                    {                                        
+                        $img->last_time = $current_time;                    
+                        $img->current = 1;
+                        $img->save();
+                    }
+                }
+                else
+                {
+                    $img = ORM::factory('Citates', $currentId);
+                    if ($img->loaded())
+                    {                  
+                        $img->current = 1;
+                        $img->save();
+                    }
+                } 
+            }
+            else
+            {
+                $img = ORM::factory('Images', $currentId);
+                if ($img->loaded())
+                {
+                    $img->current = 1;
+                    $img->last_time = $current_time;
+                    $img->save();
+                }
+            }
+        }
+        
+        // return image data
+        $image = ORM::factory('Images')->where('current','=',1)->find();
+        if ($image->loaded())
+        {
+            $item = array();
             $item['id'] = $image->id;
             $item['title'] = $image->title;
             $item['file'] = $image->file;
             $item['status'] = $image->status;
-            $data[] = $item;
-        }        
-        
-        if ($save_item) 
-        {            
-            $index = rand(0,count($data)-1);
-            $new_item['image_id'] = $index;            
-            ORM::factory('CurrentImages')->values($new_item)->save();            
-            
-            return $data[$index];
+            $item['current'] = $image->current;
+            $item['last_time'] = $image->last_time;
+            return $item;
         }
-        else
-        {
-            $image = ORM::factory('Images')->where('id','=',$image_id)->find();
-            if ($image->loaded())
-            {
-                $item['id'] = $image->id;
-                $item['title'] = $image->title;
-                $item['file'] = $image->file;
-                $item['status'] = $image->status;
-                return $item;
-            }
-        }
-        
     }
     
-    protected function _get_data_citates()
+    protected function _get_data_quote()
     {
-        $json = array();   
-        $save_item = false;
-        $citate_id = null;
+        $currentId = 0;
+        $last_time = 0;        
+        $freeQuotes = array();
         
-        $time = ORM::factory('CurrentCitates')->order_by('last_time','DESC')->limit(1)->find();
-        if ($time->loaded())
-        {
-            $citate_id = $time->citate_id;            
-            $last_time = $time->last_time;                        
-            $current_time = Date::formatted_time('now');           
-            
-            if (($current_time - $last_time) > 12*60*60){
-                $save_item = true;
-            }
-        }
-        else {
-            $save_item = true;
-        }
-        
-        $citates = ORM::factory('Citates')->find_all();
-        foreach ($citates as $quote)
-        {
-            $item['id'] = $quote->id;
-            $item['text'] = $quote->text;
-            $item['author'] = $quote->author;
-            $item['status'] = $quote->status;
-            $data[] = $item;
-        }
-        
-        if ($save_item) 
-        {
-            $index = rand(0,count($data)-1);
-            $new_item['citate_id'] = $index;            
-            ORM::factory('CurrentCitates')->values($new_item)->save();            
-        }
-        else
-        {
-            $quote = ORM::factory('Citates')->where('id','=',$citate_id)->find();
-            if ($quote->loaded())
+        // Search current ad free Quotes
+        $quotes = ORM::factory('Citates')->find_all();
+        foreach ($quotes as $quote)
+        {            
+            if ($quote->current)
             {
-                $item['id'] = $quote->id;
-                $item['text'] = $quote->text;
-                $item['author'] = $quote->author;
-                $item['status'] = $quote->status;
-                return $item;
+                $currentId = $quote->id;
+                $last_time = $quote->last_time; 
+                // Save
+                $quote->current = 0;
+                $quote->save();
             }
+            else
+            {
+                $freeQuotes[] = $quote->id;
+            }
+        }
+                
+        // update current Quote
+        if ($currentId !== 0)
+        {
+            $current_time = time();
+            if (strlen(strval($last_time)) == 10 && count($freeQuotes) > 0)
+            {                
+                if(($current_time - $last_time) > 12*3600)
+                {
+                    $rand = rand(0, count($freeQuotes) - 1);                
+                    $newId = $freeQuotes[$rand];
+                    
+                    $qt = ORM::factory('Citates', $newId);
+                    if ($qt->loaded())
+                    {                                        
+                        $qt->last_time = $current_time;                    
+                        $qt->current = 1;
+                        $qt->save();
+                    }
+                }
+                else
+                {
+                    $qt = ORM::factory('Citates', $currentId);
+                    if ($qt->loaded())
+                    {                  
+                        $qt->current = 1;
+                        $qt->save();
+                    }
+                }  
+            }
+            else
+            {
+                $qt = ORM::factory('Citates', $currentId);
+                if ($qt->loaded())
+                {
+                    $qt->current = 1;
+                    $qt->last_time = strval($current_time);
+                    $qt->save();
+                }
+            }
+        }
+        
+        // return Quote data
+        $quote = ORM::factory('Citates')->where('current','=',1)->find();
+        if ($quote->loaded())
+        {
+            $item = array();
+            $item['id'] = $quote->id;
+            $item['title'] = $quote->text;
+            $item['file'] = $quote->author;
+            $item['status'] = $quote->status;
+            $item['current'] = $quote->current;
+            $item['last_time'] = $quote->last_time;
+            return $item;
         }        
-        return $data[$index];
     }
     
     protected function _get_data_task($user_id)
