@@ -3,7 +3,7 @@
 const FORM_CSV_PATERNS_FIELD_NAME = 'csv_patterns';
 const FORM_CSV_ADURLS_FIELD_NAME  = 'csv_adurls';
 
-class Controller_Admin_Users extends Controller_Auth
+class Controller_Admin_Images extends Controller_Auth
 {
     public $template = 'layouts/admin';
 
@@ -13,11 +13,11 @@ class Controller_Admin_Users extends Controller_Auth
         {
             $this->_delete(array_keys($_POST['delete']));
         }
-        $view = View::factory('scripts/admin/users');
+        $view = View::factory('scripts/admin/images');
         $page = intval(Arr::get($_GET, 'page', 1));
         $view->page = $page;
         $per_page = 10;        
-        $users = ORM::factory('Users');        
+        $images = ORM::factory('Images');        
         
         if ($page < 1)
         {
@@ -25,16 +25,16 @@ class Controller_Admin_Users extends Controller_Auth
         }
         if ($per_page)
         {
-            $users->limit($per_page)->offset(($page - 1) * $per_page);
+            $images->limit($per_page)->offset(($page - 1) * $per_page);
         }
         
-        $this->template->title = "Users";        
-        $pagination_view = new View('pagination/users');
+        $this->template->title = "Images";        
+        $pagination_view = new View('pagination/images');
         $pagination_view->page = $page;
         $pagination_view->perpage = $per_page;        
-        $pagination_view->count_all = ORM::factory('Users')->count_all();
+        $pagination_view->count_all = ORM::factory('Images')->count_all();
         $view->pagination = $pagination_view->render();                
-        $view->users = ORM::factory('Users')->order_by('id','asc')->find_all();        
+        $view->images = ORM::factory('Images')->order_by('id','asc')->find_all();        
         
 	$this->display($view);
     }
@@ -132,16 +132,5 @@ class Controller_Admin_Users extends Controller_Auth
         }
     }
     
-    public function action_add()
-    {
-        $view = View::factory('scripts/admin/user_add');        
-	$this->display($view);
-    }
-    
-    public function action_login()
-    {
-        $view = View::factory('scripts/admin/login_api');        
-	$this->display($view);
-    }
 
-} // end Controller_Admin_Campaigns
+} // end Controller_Admin_Images

@@ -40,6 +40,9 @@
                         <li <?php if (Request::$current->controller() == 'Campaigns') echo 'class="active"' ?>>
                             <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Campaigns', 'action' => 'index')) ?>"><?php echo __('Campaigns') ?></a>
                         </li>
+                        <li <?php if (Request::$current->controller() == 'Images') echo 'class="active"' ?>>
+                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Images', 'action' => 'index')) ?>"><?php echo __('Images') ?></a>
+                        </li>
                         <li <?php if (Request::$current->controller() == 'Stats') echo 'class="active"' ?>>
                             <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Stats', 'action' => 'index')) ?>"><?php echo __('Stats') ?></a>
                         </li>

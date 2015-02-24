@@ -74,6 +74,8 @@ CREATE TABLE `citates` (
   `text` text NOT NULL,
   `author` varchar(255) NOT NULL,
   `status` varchar(100) NOT NULL,
+  `current` tinyint(1) NOT NULL DEFAULT '0',
+  `last_time` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -116,6 +118,9 @@ CREATE TABLE `images` (
   `title` varchar(255) NOT NULL,
   `file` varchar(255) NOT NULL,
   `status` varchar(100) NOT NULL,
+  `current` tinyint(1) NOT NULL DEFAULT '0',
+  `last_time` varchar(10) DEFAULT NULL,
+  `created_time` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
