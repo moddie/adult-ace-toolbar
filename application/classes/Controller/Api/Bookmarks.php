@@ -14,7 +14,12 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
      *      X-Auth-Token: access_token
      * @params         
      *      bookmarks = json array(bookmark1, bookmark2, bookmark3...)
-     *          where bookmark1..N = array(0=>name, 1=>url)
+     *          where bookmark1..N = array(
+     *                                  0=>parent_id, 
+     *                                  1=>is_category
+     *                                  2=>name, 
+     *                                  3=>url
+     *                               )
      * @return 
      *      status  = [0/1]
      *      message = 'error message';
@@ -33,8 +38,10 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
                  
                 foreach ($bookmarksArray as $newBookmark)
                 {   
-                    $bmName = $newBookmark[0];
-                    $bmUrl = $newBookmark[1];
+                    $bmParentId = $newBookmark[0];
+                    $bmIsCategory = $newBookmark[0];
+                    $bmName = $newBookmark[1];
+                    $bmUrl = $newBookmark[2];
                     if (!empty($bmUrl))
                     {
                         $oldBookmark = ORM::factory('Bookmarks')->where('user_id','=',$user->id)
@@ -45,6 +52,8 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
                         {
                             $data = array();
                             $data['user_id'] = $user->id;
+                            $data['is_category'] = $bmIsCategory;
+                            $data['parent_id'] = $bmParentId;
                             $data['name'] = $bmName;
                             $data['url'] = $bmUrl;
                             $data['date_create'] = date('Y-m-d H:i:s');
@@ -92,6 +101,8 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
                 $data = array();                
                 $data['id'] = $bookmark->id;
                 $data['user_id'] = $bookmark->user_id;
+                $data['parent_id'] = $bookmark->parent_id;
+                $data['is_category'] = $bookmark->is_category;
                 $data['name'] = $bookmark->name;
                 $data['url'] = $bookmark->url;                  
                 $data['date_create'] = $bookmark->date_create;       
