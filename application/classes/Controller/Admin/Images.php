@@ -94,8 +94,7 @@ class Controller_Admin_Images extends Controller_Auth
             if ($_FILES['file']['error'] != 0)
             {                
                 $errors['file'] = 'Please, choose file';
-            }
-            $debug = $_FILES;
+            }            
             
             if(empty($errors))   
             {   
@@ -120,23 +119,21 @@ class Controller_Admin_Images extends Controller_Auth
                 {
                     $data = array();
                     $data['title'] = $post['title'];
-                    $data['file'] = $uploadPath . $newFileName;
-                    $data['status'] = 1;        
-                    $data['current'] = $post['current'];
-                    $data['last_time'] = NULL;               
+                    $data['file'] = $uploadPath . $newFileName;                    
+                    $data['current'] = $post['current'];                    
                     $data['created_time'] = time();
-                    
-                    $view->debug = $view->action;
                     
                     if ($view->action == "Add") 
                     {    
+                        $data['status'] = 1;  
+                        $data['last_time'] = NULL;
                         ORM::factory('Images')->values($data)->save();
                     }
                     else
                     {
                         ORM::factory('Images', $id)->values($data)->save();
                     }
-                    //Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller'=>'images', 'action'=>'index')));
+                    Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller'=>'images', 'action'=>'index')));
                 }    
             }
         }                      
