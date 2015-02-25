@@ -14,11 +14,11 @@
                         <th class="span1 text-center"><input type="checkbox" /></th>                        
                         <th class="span1">image</th>
                         <th class="span1">Current</th>                        
-                        <th class="span3">Title</th>
-                        <th class="span5">File</th>                        
-                        <th class="span4">Created</th>
-                        <th class="span4">Last time</th>
-                        <th class="span4"></th>
+                        <th class="span2">Title</th>
+                        <th class="span4">File</th>                        
+                        <th class="span3">Created</th>
+                        <th class="span3">Last time</th>
+                        <th class="span5"></th>
                     </tr>
                 </thead>
                 <tbody>
