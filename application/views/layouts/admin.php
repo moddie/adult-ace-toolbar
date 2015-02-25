@@ -43,6 +43,9 @@
                         <li <?php if (Request::$current->controller() == 'Images') echo 'class="active"' ?>>
                             <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Images', 'action' => 'index')) ?>"><?php echo __('Images') ?></a>
                         </li>
+                        <li <?php if (Request::$current->controller() == 'Quotes') echo 'class="active"' ?>>
+                            <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Quotes', 'action' => 'index')) ?>"><?php echo __('Quotes') ?></a>
+                        </li>
                         <li <?php if (Request::$current->controller() == 'Stats') echo 'class="active"' ?>>
                             <a href="<?php echo URL::base() . Route::get('admin')->uri(array('controller' => 'Stats', 'action' => 'index')) ?>"><?php echo __('Stats') ?></a>
                         </li>
