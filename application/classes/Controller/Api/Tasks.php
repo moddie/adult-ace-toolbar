@@ -62,8 +62,9 @@ class Controller_Api_Tasks extends Controller_Api_Auth
                 $task->deadline = $data['deadline']; 
                 $task->date_create = time();       
                 $task->date_update = time();
-                $task->save();            
-                $json['status'] = 1;                   
+                $task->save();                  
+                $json['status'] = 1;
+                $json['task_id'] = $task->id;
             }
             else
             {
