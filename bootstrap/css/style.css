@@ -26,5 +26,13 @@
 .block-user{
     padding: 10px 0 10px 0;
 }
+.error{
+    color: red;
+    padding-bottom: 16px;
+}
+.image-file-url{
+    overflow:hidden; 
+    width: 262px;    
+}
 
 

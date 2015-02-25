@@ -41,91 +41,129 @@ class Controller_Admin_Images extends Controller_Auth
 
     public function action_addedit()
     {
-        $view = View::factory('scripts/admin/users_add');
+        $view = View::factory('scripts/admin/images_add');
         $errors = array();
-        $id = Arr::get($_GET, 'id_user', NULL);
+        $view->debug = 0;
+        $id = Arr::get($_GET, 'id', '');
+        
         if(empty($id))
         {
             $view->action = 'Add';
             $this->template->title = "Add User";
-            $view->user = ORM::factory('Users')->find($id);
+            $view->image = array(
+                'id'=>'', 
+                'title'=>'', 
+                'file'=>'', 
+                'current'=>0
+            );
         }   
         else 
         {
             $view->action = 'Edit';
             $this->template->title = "Edit User";
             
-            $view->user = ORM::factory('Users')->find($id);
-            if(!$view->user)
+            $edit = ORM::factory('Images', $id);
+            if($edit->loaded())
             {
-                 throw HTTP_Exception::factory(404, 'User not found!');
+                 $view->image = array(
+                     'id' => $id,
+                     'title' => $edit->title,
+                     'file' => $edit->file,
+                     'current' => $edit->current,
+                 );
+            }
+            else
+            {
+                throw HTTP_Exception::factory(404, 'Image not found!');
             }
         }
         
         if(!empty($_POST))
-        {   
-            try
-            {  
-                $password = intval(Arr::get($_POST, 'password', 0));
-                $confirm_password = intval(Arr::get($_POST, 'password2', 0));
-                if ($password == $confirm_password) 
-                {
-                    $pwd = Auth::instance()->hash_password($password);
-                    $data = array();
-                    $data['username'] = Arr::get($_POST, 'u_name');
-                    $data['password'] = Arr::get($_POST, $pwd);
-                    $data['email'] = Arr::get($_POST, 'email', null);
-                    $data['created'] = time();                    
-                }
-                else
-                {
-                    $errors['password'] = 'Incorrect password. Please retry';
-                }
-                
-            }
-            catch (ORM_Validation_Exception $e)
+        {               
+            $post = array();
+            $post['id'] = $id;
+            $post['title'] = Arr::get($_POST, 'title', NULL);
+            $post['file'] = empty($_FILES) ? '' : $_FILES['file']['name'];
+            $post['current'] = intval(Arr::get($_POST, 'current', 0));            
+            $view->image = $post;
+            
+            if (empty($post['title']))                
             {
-                $errors = $e->errors('');
+                $errors['title'] = 'Empty title';
             }
+            if ($_FILES['file']['error'] != 0)
+            {                
+                $errors['file'] = 'Please, choose file';
+            }
+            $debug = $_FILES;
             
             if(empty($errors))   
-            {
-                if ($view->action == "Add") 
-                {            
-                    ORM::factory('Users')->values($data)->save();
-                }
-                else
+            {   
+                $uploadPath = '/images/upload/';
+                $uploadFullPath = $_SERVER['DOCUMENT_ROOT'] . $uploadPath;                
+                if (!file_exists($uploadFullPath))
                 {
-                    ORM::factory('Users', $id)->values($data)->save();
-                }
-                Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller' => 'users', 'action' => 'addedit')) . ((!empty($id)?('?id_user='.$id):'')));
+                    mkdir($uploadFullPath);
+                }                
+                
+                $sp = '_';
+                $exp = explode('/', $_FILES['file']['tmp_name']);
+                $tmp = $exp[ count($exp) - 1 ];                
+                $preffix = substr($tmp, 3);
+                
+                $newFileName = $preffix . $sp . $_FILES['file']['name'];
+                
+                $tmpfile = $_FILES['file']['tmp_name'];
+                $newfile = $uploadFullPath . $newFileName;
+                
+                if (move_uploaded_file($tmpfile, $newfile))
+                {
+                    $data = array();
+                    $data['title'] = $post['title'];
+                    $data['file'] = $uploadPath . $newFileName;
+                    $data['status'] = 1;        
+                    $data['current'] = $post['current'];
+                    $data['last_time'] = NULL;               
+                    $data['created_time'] = time();
+                    
+                    $view->debug = $view->action;
+                    
+                    if ($view->action == "Add") 
+                    {    
+                        ORM::factory('Images')->values($data)->save();
+                    }
+                    else
+                    {
+                        ORM::factory('Images', $id)->values($data)->save();
+                    }
+                    //Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller'=>'images', 'action'=>'index')));
+                }    
             }
-        }        
-        
-        $view->errors = $errors;
+        }                      
+        $view->errors = $errors;        
         $this->display($view);
     }
     
-    protected function _delete($idUsers = null)
+    protected function _delete($ids = null)
     {
-        if (!empty($idUsers))
+        if (!empty($ids))
         {
-            $user = ORM::factory('User');
+            $image = ORM::factory('Images');
 
-            if ( is_array($idUsers) )
+            if ( is_array($ids) )
             {
-                $user->where('id', 'in', $idUsers);
+                $image->where('id','in',$ids);
             }
             else
             {
-                $user->where('id', '=', $idUsers);
+                $image->where('id','=',$ids);
             }
-            $userToDelete = $user->find_all();
-            if(count($userToDelete) > 0)
+            $imgToDelete = $image->find_all();
+            if(count($imgToDelete) > 0)
             {
-                foreach ($userToDelete as $usr)
+                foreach ($imgToDelete as $img)
                 {
-                    $usr->delete();
+                    $img->delete();
                 }
             }
             
