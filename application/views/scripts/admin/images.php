@@ -12,7 +12,8 @@
                 <thead>
                     <tr>
                         <th class="span1 text-center"><input type="checkbox" /></th>                        
-                        <th class="span1">Current</th>
+                        <th class="span1">image</th>
+                        <th class="span1">Current</th>                        
                         <th class="span3">Title</th>
                         <th class="span5">File</th>                        
                         <th class="span4">Created</th>
@@ -26,13 +27,14 @@
                     ?>
                         <tr>
                             <td class="text-center"><input type="checkbox" name="delete[<?php echo $img->id; ?>]" img_id="<?php echo $img->id; ?>" /></td>
-                            <td><?php 
+                            <td><img src="<?php echo $img->file; ?>" alt="" /></td>
+                            <td style="text-align:center"><?php 
                                     if ($img->current) {
                                         echo '<i class="icon-ok icon-black">';
                                     }                                    
-                                ?></td>
+                                ?></td>                            
                             <td><?php echo $img->title; ?></td>
-                            <td><div class="image-file-url"><?php echo $img->file; ?></div></td>
+                            <td><div class="image-file-url"><a href="<?php echo $img->file; ?>" title="<?php echo $img->file; ?>" target="_blank"><?php echo $img->file; ?></a></div></td>
                             <td><?php 
                                     if (strlen(strval($img->created_time)) == 10) {
                                         echo date("Y-m-d H:i:s", $img->created_time); 
