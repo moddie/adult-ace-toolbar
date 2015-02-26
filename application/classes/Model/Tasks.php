@@ -23,7 +23,7 @@ class Model_Tasks extends ORM
             'parent_id' => array(
                 array('not_empty')
             ),
-            'title' => array(
+            'text' => array(
                 array('not_empty')
             ),
         );  

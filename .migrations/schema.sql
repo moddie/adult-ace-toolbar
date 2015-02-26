@@ -220,7 +220,6 @@ CREATE TABLE `tasks` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `parent_id` int(11) DEFAULT NULL,
-  `title` varchar(255) NOT NULL,
   `text` varchar(255) NOT NULL,
   `status` varchar(100) NOT NULL,
   `date_create` varchar(10) DEFAULT NULL,

@@ -13,8 +13,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
      * @header
      *      X-Auth-Token: access_token
      * @params 
-     *      is_category   
-     *      title
+     *      is_category        
      *      text     
      *      parent_id
      *      status
@@ -29,8 +28,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         
         if ($user = $this->auth_user())
         {
-            $data = array();            
-            $data['title']       = Arr::get($_POST, 'title', NULL);
+            $data = array();                        
             $data['text']        = Arr::get($_POST, 'text', NULL);            
             $data['is_category'] = Arr::get($_POST, 'is_category', 0);
             $data['parent_id']   = Arr::get($_POST, 'parent_id', 0);
@@ -41,9 +39,9 @@ class Controller_Api_Tasks extends Controller_Api_Auth
 
             // Validation
             $validator = Validation::factory($data);
-            $validator->rule('title', 'not_empty');
+            $validator->rule('text', 'not_empty');
             $validator->rule('parent_id', 'numeric');
-            $validator->rule('user_id', 'numeric');
+            
             if ($isCategory)
             {
                 $validator->rule('text', 'not_empty');
@@ -52,8 +50,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
             if ($validator->check())
             {   
                 $task = ORM::factory('Tasks');   
-                
-                $task->title = $data['title'];
+                                
                 $task->user_id = $user->id;                
                 $task->parent_id = $data['parent_id'];
                 $task->is_category = $data['is_category'];
@@ -105,18 +102,15 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         
         if ($user = $this->auth_user())
         {        
-            $data = array();
-            $data['title']     = Arr::get($_POST, 'title', NULL);        
+            $data = array();            
             $data['text']     = Arr::get($_POST, 'text', NULL);
             $data['status']   = Arr::get($_POST, 'status', NULL);
             $data['deadline'] = Arr::get($_POST, 'deadline', NULL);
 
             // Validation
             $validator = Validation::factory($data);
-            $validator->rule('title','not_empty')
-                      ->rule('text','not_empty')
-                      ->rule('status','not_empty')
-                      ->rule('deadline','not_empty');
+            $validator->rule('text','not_empty')
+                      ->rule('parent_id', 'numeric');
 
             if ($validator->check())
             {   
@@ -126,8 +120,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
                             ->find();
                 
                 if ($task->loaded())
-                {
-                    $task->title = $data['title'];            
+                {                             
                     $task->text = $data['text'];            
                     $task->status = $data['status'];            
                     $task->deadline = $data['deadline'];         
@@ -224,8 +217,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
             {
                 $data = array();                
                 $data['id'] = $task->id;
-                $data['user_id'] = $task->user_id;
-                $data['title'] = $task->title;
+                $data['user_id'] = $task->user_id;                
                 $data['text'] = $task->text;  
                 $data['is_category'] = $task->is_category;
                 $data['parent_id'] = $task->parent_id;

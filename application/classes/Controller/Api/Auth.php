@@ -16,8 +16,7 @@ class Controller_Api_Auth extends Controller_Base {
        }
        else {           
            return false;
-       }
-       var_dump($token);
+       }       
    }
    
    protected function _user_by_token($token)
@@ -33,7 +32,7 @@ class Controller_Api_Auth extends Controller_Base {
   
    protected function _get_auth_token()
    {
-       //$this->_auth_token = $this->request->headers('X-Auth-Token');;
+       $this->_auth_token = $this->request->headers('X-Auth-Token');;
        return $this->_auth_token;
    }
 
