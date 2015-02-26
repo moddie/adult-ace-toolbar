@@ -239,12 +239,16 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         $id = Arr::get($_POST, 'id', NULL);
         
         if ($user = $this->auth_user())
-        {         
-            $task = ORM::factory('Tasks')->where('id','=',$id)->find();        
-            if ($task->loaded())
-            {    
-                $task->delete();
-                $json['status'] = 1;            
+        {   
+            if ($id !== NULL)
+            {
+                $this->_delete($id, $user->id);      
+                $json['status'] = 1;
+            }   
+            else
+            {
+                $json['status'] = 0;
+                $json['message'] = 'Empty id';
             }
         }
         else
@@ -329,7 +333,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         if ($user = $this->auth_user())
         {   
             $items = array();            
-            $this->get_tasks_of_parent_id($items, $parent_id, $user->id);
+            $this->_get_tasks_of_parent_id($items, $parent_id, $user->id);
             
             $json['items'] = $items;            
             $json['status'] = 1;             
@@ -342,7 +346,11 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         $this->display_ajax(json_encode($json));        
     }
     
-    protected function get_tasks_of_parent_id(&$arr, $parent_id, $user_id)
+    /*----------------------------------------------------------------------
+     * Protected functions
+     */
+    
+    protected function _get_tasks_of_parent_id(&$arr, $parent_id, $user_id)
     {
         $categories = array();
         $tasks = ORM::factory('Tasks')
@@ -375,7 +383,27 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         //subcategories
         foreach ($categories as $parentId)
         {
-            $this->get_tasks_of_parent_id($arr, $parentId, $user_id);
+            $this->_get_tasks_of_parent_id($arr, $parentId, $user_id);
+        }
+    }    
+    
+    protected function _delete($id, $user_id)
+    {
+        $task = ORM::factory('Tasks')
+                        ->where('id','=',$id)
+                        ->and_where('user_id','=',$user_id)
+                        ->find();
+        if ($task->loaded())
+        {
+            if ($task->is_category)
+            {
+                $subTasks = ORM::factory('Tasks')->where('parent_id','=',$id)->find_all();                
+                foreach ($subTasks as $sub)
+                {
+                    $this->_delete($sub->id, $user_id);
+                }
+            }
+            $task->delete();
         }
     }    
         
