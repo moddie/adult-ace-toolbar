@@ -165,8 +165,7 @@ class Controller_Api_User extends Controller_Base
                 
                 $data['user'] = $usr;
                 $data['image'] = $this->_get_data_image();
-                $data['quote'] = $this->_get_data_quote();
-                $data['task_categories'] = $this->_get_data_task_categories($user->id);
+                $data['quote'] = $this->_get_data_quote();               
                 $data['task'] = $this->_get_data_task($user->id);
                 $data['bookmarks'] = $this->_get_data_bookmarks($user->id);             
                 
@@ -477,32 +476,17 @@ class Controller_Api_User extends Controller_Base
         {
             $item['id'] = $task->id;
             $item['user_id'] = $task->user_id;
-            $item['category_id'] = $task->category_id;
-            $item['title'] = $task->title;   
+            $item['parent_id'] = $task->parent_id;              
+            $item['is_category'] = $task->is_category;
+            $item['order'] = $task->order;
             $item['text'] = $task->text;   
             $item['status'] = $task->status;   
             $item['date_create'] = $task->date_create;   
-            $item['date_update'] = $task->date_update;   
+            $item['date_update'] = $task->date_update;
             $data[] = $item;
         }
         return $data;
-    }
-    
-    protected function _get_data_task_categories($user_id)
-    {
-        $data = array();        
-        
-        $task_categories = ORM::factory('TaskCategories')->where('user_id','=',$user_id)->find_all()->as_array();
-        foreach ($task_categories as $category) 
-        {
-            $item['id'] = $category->id;
-            $item['user_id'] = $category->user_id;
-            $item['pid'] = $category->pid;
-            $item['name'] = $category->name;            
-            $data[] = $item;
-        }
-        return $data;
-    }
+    }    
     
     protected function _get_data_bookmarks($user_id)
     {

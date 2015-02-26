@@ -35,33 +35,67 @@ class Controller_Api_Tasks extends Controller_Api_Auth
             $data['deadline']    = Arr::get($_POST, 'deadline', 0);
             $data['status']      = Arr::get($_POST, 'status', '');
             
-            $isCategory = $data['is_category'];
-
             // Validation
             $validator = Validation::factory($data);
             $validator->rule('text', 'not_empty');
             $validator->rule('parent_id', 'numeric');
-            
-            if ($isCategory)
-            {
-                $validator->rule('text', 'not_empty');
-            }
 
             if ($validator->check())
             {   
-                $task = ORM::factory('Tasks');   
-                                
-                $task->user_id = $user->id;                
-                $task->parent_id = $data['parent_id'];
-                $task->is_category = $data['is_category'];
-                $task->text = $data['text'];
-                $task->status = $data['status'];            
-                $task->deadline = $data['deadline']; 
-                $task->date_create = time();       
-                $task->date_update = time();
-                $task->save();                  
-                $json['status'] = 1;
-                $json['task_id'] = $task->id;
+                $save = false;
+                if ($data['parent_id'] != 0)
+                {
+                    $parent = ORM::factory('Tasks')->where('id','=',$data['parent_id'])->find();
+                    if ($parent->loaded()) {
+                        if ($parent->is_category) 
+                        {
+                            $save = true;
+                        }
+                    }                    
+                }
+                else 
+                {
+                    $save = true;
+                }                    
+                // Save to database
+                if ($save)
+                {
+                    $lastTask = ORM::factory('Tasks')
+                                    ->where('parent_id','=',$data['parent_id'])
+                                    ->order_by('order','DESC')
+                                    ->limit(1)
+                                    ->find();
+                    if ($lastTask->loaded())
+                    {
+                        $order = intval($lastTask->order) + 1;
+                    }
+                    else
+                    {
+                        $order = 1;
+                    }
+                    
+                    $task = ORM::factory('Tasks');   
+
+                    $task->user_id = $user->id;                
+                    $task->parent_id = $data['parent_id'];
+                    $task->is_category = $data['is_category'];
+                    $task->order = $order;
+                    $task->text = $data['text'];
+                    $task->status = $data['status'];            
+                    $task->deadline = $data['deadline']; 
+                    $task->date_create = time();       
+                    $task->date_update = time();
+                    $task->save();         
+                    
+                    $json['status'] = 1;
+                    $json['task_id'] = $task->id;
+                    $json['order'] = $order;
+                }
+                else
+                {
+                    $json['status'] = 0;
+                    $json['message'] = 'You can not add task to category of parent_id=' . $data['parent_id'];
+                }
             }
             else
             {
@@ -104,34 +138,71 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         {        
             $data = array();            
             $data['text']     = Arr::get($_POST, 'text', NULL);
+            $data['status']   = Arr::get($_POST, 'parent_id', NULL);
+            $data['status']   = Arr::get($_POST, 'order', NULL);
             $data['status']   = Arr::get($_POST, 'status', NULL);
             $data['deadline'] = Arr::get($_POST, 'deadline', NULL);
 
             // Validation
             $validator = Validation::factory($data);
-            $validator->rule('text','not_empty')
-                      ->rule('parent_id', 'numeric');
-
+            $validator->rule('text','not_empty');
             if ($validator->check())
             {   
-                $task = ORM::factory('Tasks')
-                            ->where('id','=',$id)
-                            ->and_where('user_id','=',$user->id)
-                            ->find();
-                
-                if ($task->loaded())
-                {                             
-                    $task->text = $data['text'];            
-                    $task->status = $data['status'];            
-                    $task->deadline = $data['deadline'];         
-                    $task->date_update = time();            
-                    $task->save();            
-                    $json['status'] = 1;
+                $save = false;
+                if ($data['parent_id'] != 0)
+                {
+                    $parent = ORM::factory('Tasks')->where('id','=',$data['parent_id'])->find();
+                    if ($parent->loaded()) {
+                        if ($parent->is_category) 
+                        {
+                            $save = true;
+                        }
+                    }                    
+                }
+                else 
+                {
+                    $save = true;
+                }                    
+                // Save to database
+                if ($save)
+                {
+                    $task = ORM::factory('Tasks')
+                                ->where('id','=',$id)
+                                ->and_where('user_id','=',$user->id)
+                                ->find();
+                    if ($task->loaded())
+                    {   
+                        if ($data['parent_id'] !== NULL)
+                        {
+                            $task->parent_id = $data['parent_id'];
+                        }
+                        if ($data['order'] !== NULL)
+                        {
+                            $task->order = $data['order'];
+                        }
+                        if ($data['status'] !== NULL)
+                        {
+                            $task->status = $data['status'];
+                        }                        
+                        if ($data['deadline'] !== NULL)
+                        {
+                            $task->deadline = $data['deadline'];
+                        }
+                        $task->text = $data['text']; 
+                        $task->date_update = time();            
+                        $task->save();            
+                        $json['status'] = 1;
+                    }
+                    else
+                    {
+                        $json['status'] = 0;
+                        $json['message'] = 'Not found id';
+                    }
                 }
                 else
                 {
                     $json['status'] = 0;
-                    $json['message'] = 'Not found id';
+                    $json['message'] = 'You can not add task to category of parent_id=' . $data['parent_id'];
                 }
             }
             else
@@ -184,6 +255,53 @@ class Controller_Api_Tasks extends Controller_Api_Auth
         $this->display_ajax(json_encode($json));
     }
     
+    
+    /* 
+     * Change orders
+     * @url 
+     *      /api/tasks/reorder
+     * @method
+     *      POST
+     * @header
+     *      X-Auth-Token: access_token
+     * @params 
+     *      orders = array(
+     *                  id => order
+     *               )
+     * @return 
+     *      status  = [0/1]
+     *      message = 'error message';
+     */
+    public function action_reorder()
+    {        
+        $json = array();
+        $orders = Arr::get($_POST, 'orders', array());
+        
+        if ($user = $this->auth_user())
+        {
+            $amount = 0;
+            foreach ($orders as $id=>$order)
+            {
+                $task = ORM::factory('Tasks')->where('id','=',$id)->find();        
+                if ($task->loaded())
+                {    
+                    $task->order = $order;
+                    $task->save();                        
+                    $amount++;
+                }
+            }
+            $json['status'] = 1;
+            $json['amount_of_change'] = $amount;
+        }
+        else
+        {
+            $json['status'] = 0;
+            $json['message'] = 'Access denied';
+        }
+        $this->display_ajax(json_encode($json));
+    }
+    
+    
     /* 
      * List of tasks and category     
      * @url 
@@ -195,47 +313,70 @@ class Controller_Api_Tasks extends Controller_Api_Auth
      * @params 
      *      parent_id     
      * @return 
+     *      items   = array(
+     *                  parent_id => array of tasks and categories
+     *                )
      *      status  = [0/1]
      *      message = 'error message';
      * 
      */     
     public function action_list()
     {
-        $json = array();
-        $json['items'] = array();
+        $json = array();        
         
         $parent_id = Arr::get($_POST, 'parent_id', 0);        
         
         if ($user = $this->auth_user())
         {   
-            $tasks = ORM::factory('Tasks')
-                        ->where('parent_id','=',$parent_id)
-                        ->and_where('user_id','=',$task->user_id)
-                        ->find_all();
+            $items = array();            
+            $this->get_tasks_of_parent_id($items, $parent_id, $user->id);
             
-            foreach ($tasks as $task)
-            {
-                $data = array();                
-                $data['id'] = $task->id;
-                $data['user_id'] = $task->user_id;                
-                $data['text'] = $task->text;  
-                $data['is_category'] = $task->is_category;
-                $data['parent_id'] = $task->parent_id;
-                $data['status'] = $task->status;
-                $data['deadline'] = $task->deadline; 
-                $data['date_create'] = $task->date_create;       
-                $data['date_update'] = $task->date_update;
-                
-                $json['status'] = 1; 
-                $json['items'][] = $data;
-            }  
+            $json['items'] = $items;            
+            $json['status'] = 1;             
         }    
         else
         {
             $json['status'] = 0;
             $json['message'] = 'Access denied';
         }
-        $this->display_ajax(json_encode($json));
+        $this->display_ajax(json_encode($json));        
     }
+    
+    protected function get_tasks_of_parent_id(&$arr, $parent_id, $user_id)
+    {
+        $categories = array();
+        $tasks = ORM::factory('Tasks')
+                        ->where('parent_id','=',$parent_id)
+                        ->and_where('user_id','=',$user_id)
+                        ->order_by('order','ASC')                        
+                        ->find_all();              
+        foreach ($tasks as $task)
+        {
+            $data = array();
+            $data['id'] = $task->id;
+            $data['user_id'] = $task->user_id;            
+            $data['parent_id'] = $task->parent_id;
+            $data['is_category'] = $task->is_category;
+            $data['order'] = $task->order;            
+            $data['text'] = $task->text;
+            $data['status'] = $task->status;
+            $data['deadline'] = $task->deadline;
+            $data['date_create'] = $task->date_create;
+            $data['date_update'] = $task->date_update;
+            
+            //return
+            $arr[$parent_id][] = $data;
+            
+            if ($task->is_category)
+            {
+                $categories[] = $task->id;
+            }
+        }
+        //subcategories
+        foreach ($categories as $parentId)
+        {
+            $this->get_tasks_of_parent_id($arr, $parentId, $user_id);
+        }
+    }    
         
 }

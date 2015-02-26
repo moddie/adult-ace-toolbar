@@ -226,6 +226,7 @@ CREATE TABLE `tasks` (
   `date_update` varchar(10) DEFAULT NULL,
   `deadline` varchar(10) DEFAULT NULL,
   `is_category` tinyint(1) NOT NULL DEFAULT '0',
+  `order` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
