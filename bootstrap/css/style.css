@@ -59,3 +59,15 @@
 .margin-left4{
     margin-left: 4px;
 }
+.margin-left31{
+    margin-left: 31px;  
+}
+.align-right{
+    text-align:right;
+}
+.search-group-btn{
+    display: inline;
+    position: relative;
+    top: -5px;
+    left: -7px;
+}

@@ -34,8 +34,46 @@ class Controller_Admin_Quotes extends Controller_Auth
         $pagination_view->perpage = $per_page;        
         $pagination_view->count_all = ORM::factory('Citates')->count_all();
         $view->pagination = $pagination_view->render();                
-        $view->quotes = ORM::factory('Citates')->order_by('id','asc')->find_all();        
         
+        $view->search = '';
+        $view->quotes = ORM::factory('Citates')
+                                ->order_by('id','asc')
+                                ->find_all();        
+	$this->display($view);
+    }
+    
+    public function action_search()
+    {
+        $q = trim(Arr::get($_GET, 'q', NULL));
+                
+        $view = View::factory('scripts/admin/quotes');
+        $page = intval(Arr::get($_GET, 'page', 1));
+        $view->page = $page;
+        $per_page = 10;        
+        $orm = ORM::factory('Citates');        
+        
+        if ($page < 1)
+        {
+            $page = 1;
+        }
+        if ($per_page)
+        {
+            $orm->limit($per_page)->offset(($page - 1) * $per_page);
+        }
+        
+        $this->template->title = "Quotes";        
+        $pagination_view = new View('pagination/images');
+        $pagination_view->page = $page;
+        $pagination_view->perpage = $per_page;        
+        $pagination_view->count_all = ORM::factory('Citates')->count_all();        
+        $view->pagination = $pagination_view->render();        
+        
+        $view->search = $q;
+        $view->quotes = ORM::factory('Citates')
+                                ->order_by('id','asc')
+                                ->where('text', 'LIKE', '%'.$q.'%')
+                                ->or_where('author', 'LIKE', '%'.$q.'%')
+                                ->find_all();
 	$this->display($view);
     }
 
@@ -128,18 +166,37 @@ class Controller_Admin_Quotes extends Controller_Auth
             $file = $_FILES['upload']['tmp_name'];
             if ($fp = fopen($file, "r")) 
             {
+                $index = 0;
                 while (!feof($fp))
                 {
-                    $line = fgets($fp, 999);
-                    echo $line."<br />";
+                    $line = fgets($fp, 999);                    
+                    if ($index++ == 0) 
+                    {
+                        continue;
+                    }          
+                    $exp = explode('|', $line);
+                    if (is_array($exp) && count($exp) == 2)
+                    {
+                        $author = $exp[0];
+                        $quote = $exp[1];  
+                        
+                        $find = ORM::factory('Citates')->where('text','=',$quote)->find();
+                        if (!$find->loaded())
+                        {
+                            $obj = ORM::factory('Citates');
+                            $obj->text = $quote;
+                            $obj->author = $author;
+                            $obj->status = 1;
+                            $obj->current = 0;
+                            $obj->last_time = NULL;
+                            $obj->save();
+                        }
+                    }
                 }
             }            
-            fclose($fp);            
-            //Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller'=>'citates', 'action'=>'index')));
-        }
-        
-        echo"<pre>";print_r($_FILES);echo"</pre>";
-        //$this->display($view);
+            fclose($fp);
+        }        
+        Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller'=>'quotes', 'action'=>'index')));
     }
     
     

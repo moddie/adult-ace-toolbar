@@ -3,13 +3,22 @@
     <div class="span4" style="width:255px">                
         <a class="btn btn-success" href="/admin/quotes/addedit"><i class="icon-ok icon-white"></i> Add qoute</a>        
         <a class="btn btn-danger remove-btn"><i class="icon-remove icon-white"></i> Delete selected</a>
-    </div>    
-    <div class="span8 margin-left4">
+    </div>
+    <div class="span2 margin-left4">
         <div class="fileform">   
             <form id="import-form" action="/admin/quotes/import" method="POST" enctype="multipart/form-data">
-                <div class="btn btn-default">Import file</div>
+                <div class="btn btn-default">Import CSV</div>
                 <input id="upload" type="file" name="upload" />
             </form>
+        </div>
+    </div>
+    <div class="span6 align-right margin-left31">     
+        <div class="search-group">
+            <form id="search-form" action="/admin/quotes/search" method="GET">
+                <input type="text" class="form-control" placeholder="" name="q" value="<?php echo $search; ?>" />
+                <div class="search-group-btn">
+                    <input class="btn btn-default" type="submit" value="Search" />
+                </div>
         </div>
     </div>
 </div>
@@ -38,8 +47,24 @@
                                         echo '<i class="icon-ok icon-black">';
                                     }
                                 ?></td>                           
-                            <td><?php echo $quote->text; ?></td>                            
-                            <td><?php echo $quote->author; ?></td>                            
+                            <td><?php 
+                                    $text = $quote->text;
+                                    if ($search)
+                                    {
+                                        $replace = '<b>'.$search.'</b>';
+                                        $text = str_replace($search, $replace, $text);                                    
+                                    }
+                                    echo $text;                                    
+                                ?></td>                            
+                            <td><?php 
+                                    $author = $quote->author; 
+                                    if ($search)
+                                    {
+                                        $replace = '<b>'.$search.'</b>';
+                                        $author = str_replace($search, $replace, $author);                                    
+                                    }
+                                    echo $author;
+                                ?></td>
                             <td><?php 
                                     if (strlen(strval($quote->last_time)) == 10) {
                                         echo date("Y-m-d H:i:s", $quote->last_time);
