@@ -34,7 +34,7 @@ class Controller_Api_Tasks extends Controller_Api_Auth
             $data['text']        = Arr::get($_POST, 'text', NULL);            
             $data['is_category'] = Arr::get($_POST, 'is_category', 0);
             $data['parent_id']   = Arr::get($_POST, 'parent_id', 0);
-            $data['deadline']    = Arr::get($_POST, 'deadline', 0);
+            $data['deadline']    = Arr::get($_POST, 'deadline', NULL);
             $data['status']      = Arr::get($_POST, 'status', '');
             
             // Validation
@@ -86,8 +86,15 @@ class Controller_Api_Tasks extends Controller_Api_Auth
                                 $task->status = $data['status'];
                             }                        
                             if( !empty($data['deadline']) )
-                            {
-                                $task->deadline = $data['deadline'];
+                            {                                   
+                                if ($deadline = strtotime($data['deadline']))
+                                {
+                                    $task->deadline = $deadline;
+                                }
+                                else
+                                {
+                                    $json['message'] = 'Wrong date format';
+                                }
                             }
                             if( !empty($data['text']) )
                             {
