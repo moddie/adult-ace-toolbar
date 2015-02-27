@@ -458,8 +458,8 @@ class Controller_Api_User extends Controller_Base
         {
             $item = array();
             $item['id'] = $quote->id;
-            $item['title'] = $quote->text;
-            $item['file'] = $quote->author;
+            $item['text'] = $quote->text;
+            $item['author'] = $quote->author;
             $item['status'] = $quote->status;
             $item['current'] = $quote->current;
             $item['last_time'] = $quote->last_time;
