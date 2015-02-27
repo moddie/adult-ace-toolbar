@@ -467,27 +467,6 @@ class Controller_Api_User extends Controller_Base
         }        
     }
     
-    protected function _get_data_task($user_id)
-    {
-        $data = array();        
-        
-        $tasks = ORM::factory('Tasks')->where('user_id','=',$user_id)->find_all()->as_array();
-        foreach ($tasks as $task) 
-        {
-            $item['id'] = $task->id;
-            $item['user_id'] = $task->user_id;
-            $item['parent_id'] = $task->parent_id;              
-            $item['is_category'] = $task->is_category;
-            $item['order'] = $task->order;
-            $item['text'] = $task->text;   
-            $item['status'] = $task->status;   
-            $item['date_create'] = $task->date_create;   
-            $item['date_update'] = $task->date_update;
-            $data[] = $item;
-        }
-        return $data;
-    }    
-    
     protected function _get_data_bookmarks($user_id)
     {
         $data = array();
@@ -503,6 +482,50 @@ class Controller_Api_User extends Controller_Base
             $data[] = $item;
         }
         return $data;
+    }
+    
+    protected function _get_data_task($user_id)
+    {
+        $data = array();            
+        $this->_get_tasks_of_parent_id($data, 0, $user_id);
+        return $data;
+    } 
+    
+    protected function _get_tasks_of_parent_id(&$arr, $parent_id, $user_id)
+    {
+        $categories = array();
+        $tasks = ORM::factory('Tasks')
+                        ->where('parent_id','=',$parent_id)
+                        ->and_where('user_id','=',$user_id)
+                        ->order_by('order','ASC')                        
+                        ->find_all();              
+        foreach ($tasks as $task)
+        {
+            $data = array();
+            $data['id'] = $task->id;
+            $data['user_id'] = $task->user_id;            
+            $data['parent_id'] = $task->parent_id;
+            $data['is_category'] = $task->is_category;
+            $data['order'] = $task->order;            
+            $data['text'] = $task->text;
+            $data['status'] = $task->status;
+            $data['deadline'] = $task->deadline;
+            $data['date_create'] = $task->date_create;
+            $data['date_update'] = $task->date_update;
+            
+            //return
+            $arr[$parent_id][] = $data;
+            
+            if ($task->is_category)
+            {
+                $categories[] = $task->id;
+            }
+        }
+        //subcategories
+        foreach ($categories as $parentId)
+        {
+            $this->_get_tasks_of_parent_id($arr, $parentId, $user_id);
+        }
     }
 
 }
