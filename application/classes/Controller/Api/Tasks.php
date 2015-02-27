@@ -73,21 +73,29 @@ class Controller_Api_Tasks extends Controller_Api_Auth
                                 ->find();
                         if ($task->loaded())
                         {
-                            if ($data['parent_id'] !== NULL) {
+                            if( !empty($data['parent_id']) )
+                            {
                                 $task->parent_id = $data['parent_id'];
                             }
-                            if ($data['order'] !== NULL) {
+                            if( !empty($data['order']) )
+                            {
                                 $task->order = $data['order'];
                             }
-                            if ($data['status'] !== NULL) {
+                            if( !empty($data['status']) )
+                            {
                                 $task->status = $data['status'];
                             }                        
-                            if ($data['deadline'] !== NULL) {
+                            if( !empty($data['deadline']) )
+                            {
                                 $task->deadline = $data['deadline'];
                             }
-                            $task->text = $data['text'];
+                            if( !empty($data['text']) )
+                            {
+                                $task->text = $data['text'];
+                            }
                             $task->date_update = time();
                             $task->save();
+                            $json['task_id'] = $task->id;
                             $json['status'] = 1;
                         }
                         else
