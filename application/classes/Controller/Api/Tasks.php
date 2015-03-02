@@ -86,15 +86,16 @@ class Controller_Api_Tasks extends Controller_Api_Auth
                                 $task->status = $data['status'];
                             }                        
                             if( !empty($data['deadline']) )
-                            {                                   
-                                if ($deadline = strtotime($data['deadline']))
-                                {
-                                    $task->deadline = $deadline;
-                                }
-                                else
-                                {
-                                    $json['message'] = 'Wrong date format';
-                                }
+                            {
+                                $task->deadline = $data['deadline'];
+//                                if ($deadline = strtotime($data['deadline']))
+//                                {
+//                                    $task->deadline = $deadline;
+//                                }
+//                                else
+//                                {
+//                                    $json['message'] = 'Wrong date format';
+//                                }
                             }
                             if( !empty($data['text']) )
                             {
