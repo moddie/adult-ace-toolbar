@@ -1,7 +1,7 @@
 <h2><?php echo __('Quotes') ?></h2>
 <div class="row space">
     <div class="span4" style="width:255px">                
-        <a class="btn btn-success" href="/admin/quotes/addedit"><i class="icon-ok icon-white"></i> Add qoute</a>        
+        <a class="btn btn-success" href="<?php echo URL::base(true); ?>/admin/quotes/addedit"><i class="icon-ok icon-white"></i> Add qoute</a>        
         <a class="btn btn-danger remove-btn"><i class="icon-remove icon-white"></i> Delete selected</a>
     </div>
     <div class="span2 margin-left4">
@@ -74,7 +74,7 @@
                                     }
                                 ?></td>
                             <td class="text-center">
-                                <a class="btn btn-success" href="/admin/quotes/addedit?id=<?php echo $quote->id ;?>">Edit</a>
+                                <a class="btn btn-success" href="<?php echo URL::base(true); ?>/admin/quotes/addedit?id=<?php echo $quote->id ;?>">Edit</a>
                                 <a class="btn btn-danger remove-image-btn" data-id="<?php echo $quote->id ;?>">Delete</a>
                             </td>
                         </tr>

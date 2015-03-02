@@ -99,7 +99,7 @@ class Controller_Admin_Images extends Controller_Auth
             if(empty($errors))   
             {   
                 $uploadPath = '/images/upload/';
-                $uploadFullPath = $_SERVER['DOCUMENT_ROOT'] . $uploadPath;                
+                $uploadFullPath = DOCROOT . $uploadPath;
                 if (!file_exists($uploadFullPath))
                 {
                     mkdir($uploadFullPath);

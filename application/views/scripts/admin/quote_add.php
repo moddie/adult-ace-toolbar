@@ -1,6 +1,6 @@
 <h2><?php echo $action; ?> quote</h2>
 <div class="span12" style="padding:40px">    
-    <form action="/admin/quotes/addedit?id=<?php echo $quote['id']; ?>" method="post" enctype="multipart/form-data" >
+    <form action="<?php echo URL::base(true); ?>/admin/quotes/addedit?id=<?php echo $quote['id']; ?>" method="post" enctype="multipart/form-data" >
         <input type="hidden" value="<?php echo $quote['current']; ?>" />
         <table>
             <tr>
