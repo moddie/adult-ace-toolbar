@@ -98,8 +98,8 @@ class Controller_Admin_Images extends Controller_Auth
             
             if(empty($errors))   
             {   
-                $uploadPath = '/images/upload/';
-                $uploadFullPath = $_SERVER['DOCUMENT_ROOT'] . $uploadPath;                
+                $uploadPath = 'images/upload/';
+                $uploadFullPath = DOCROOT . '/' . $uploadPath;
                 if (!file_exists($uploadFullPath))
                 {
                     mkdir($uploadFullPath);
@@ -119,7 +119,7 @@ class Controller_Admin_Images extends Controller_Auth
                 {
                     $data = array();
                     $data['title'] = $post['title'];
-                    $data['file'] = $uploadPath . $newFileName;                    
+                    $data['file'] = URL::base(true) . $uploadPath . $newFileName;                    
                     $data['current'] = $post['current'];                    
                     $data['created_time'] = time();
                     

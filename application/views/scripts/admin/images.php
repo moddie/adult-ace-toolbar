@@ -1,7 +1,7 @@
 <h2><?php echo __('Images') ?></h2>
 <div class="row space">
     <div class="span12 ">                
-        <a class="btn btn-success" href="/admin/images/addedit"><i class="icon-ok icon-white"></i> Add image</a>        
+        <a class="btn btn-success" href="<?php echo URL::base(true); ?>admin/images/addedit"><i class="icon-ok icon-white"></i> Add image</a>        
         <a class="btn btn-danger remove-btn"><i class="icon-remove icon-white"></i> Delete selected</a>
     </div>    
 </div>
@@ -52,7 +52,7 @@
                                     } 
                                 ?></td>
                             <td class="text-center">
-                                <a class="btn btn-success" href="/admin/images/addedit?id=<?php echo $img->id ;?>">Edit</a>        
+                                <a class="btn btn-success" href="<?php echo URL::base(true); ?>admin/images/addedit?id=<?php echo $img->id ;?>">Edit</a>        
                                 <a class="btn btn-danger remove-image-btn" img_id="<?php echo $img->id ;?>">Delete</a>
                             </td>
                         </tr>

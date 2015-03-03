@@ -1,6 +1,6 @@
 <h2><?php echo $action; ?> image</h2>
 <div class="span12" style="padding:40px">    
-    <form action="/admin/images/addedit?id=<?php echo $image['id']; ?>" method="post" enctype="multipart/form-data" >
+    <form action="<?php echo URL::base(true); ?>admin/images/addedit?id=<?php echo $image['id']; ?>" method="post" enctype="multipart/form-data" >
         <input type="hidden" value="<?php echo $image['current']; ?>" />
         <table>
             <tr>
