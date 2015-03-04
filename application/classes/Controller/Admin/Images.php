@@ -9,11 +9,23 @@ class Controller_Admin_Images extends Controller_Auth
 
     public function action_index()
     {
-        if (!empty($_POST['delete']))
-        {
-            $this->_delete(array_keys($_POST['delete']));
-        }
         $view = View::factory('scripts/admin/images');
+        
+        //Actions
+        if (!empty($_POST['images']))
+        {
+            $ids = array_keys($_POST['images']);
+            if ($_POST['action'] == 'delete')
+            {
+                $this->_delete($ids);
+            }
+            elseif ($_POST['action'] == 'current')
+            {                
+                $curId = $ids[0];
+                $postw = $this->_set_current($curId);                                
+            }
+        }
+        
         $page = intval(Arr::get($_GET, 'page', 1));
         $view->page = $page;
         $per_page = 10;        
@@ -139,6 +151,24 @@ class Controller_Admin_Images extends Controller_Auth
         }                      
         $view->errors = $errors;        
         $this->display($view);
+    }
+    
+    public function _set_current($id)
+    {        
+        $img = ORM::factory('Images', $id);
+        if ($img->loaded())
+        {
+            $currentImage = ORM::factory('Images')->where('current','=',1)->find();
+            if ($currentImage->loaded())
+            {
+                $currentImage->current = 0;
+                $currentImage->save();
+            }            
+            $img->current = 1;
+            $img->save();
+        }
+        return $id;
+        //Controller::redirect( URL::base(TRUE) . Route::get('admin')->uri(array('controller'=>'images', 'action'=>'index')));
     }
     
     protected function _delete($ids = null)

@@ -1,13 +1,15 @@
 <h2><?php echo __('Images') ?></h2>
 <div class="row space">
     <div class="span12 ">                
-        <a class="btn btn-success" href="<?php echo URL::base(true); ?>admin/images/addedit"><i class="icon-ok icon-white"></i> Add image</a>        
+        <a class="btn btn-success" href="<?php echo URL::base(true); ?>admin/images/addedit"><i class="icon-ok icon-white"></i> Add image</a>
+        <a class="btn btn-info set-current-btn"><i class="icon-ok icon-white"></i> Set current</a>
         <a class="btn btn-danger remove-btn"><i class="icon-remove icon-white"></i> Delete selected</a>
     </div>    
 </div>
 <div class="row space">
     <div class="span12">
         <form id="delete-form" method="POST">
+            <input type="hidden" name="action" value="delete">
             <table class="table table-striped table-hover" id="user-table">
                 <thead>
                     <tr>
@@ -26,7 +28,7 @@
                         foreach ($images as $img){
                     ?>
                         <tr>
-                            <td class="text-center"><input type="checkbox" name="delete[<?php echo $img->id; ?>]" img_id="<?php echo $img->id; ?>" /></td>
+                            <td class="text-center"><input type="checkbox" name="images[<?php echo $img->id; ?>]" img_id="<?php echo $img->id; ?>" /></td>
                             <td><img src="<?php echo $img->file; ?>" alt="" /></td>
                             <td style="text-align:center"><?php 
                                     if ($img->current) {
@@ -80,11 +82,13 @@
             disabling = function(){
                 if (checkboxes.filter(':checked').length === 0){
                     jQuery('.remove-btn').addClass('disabled');
+                    jQuery('.set-current-btn').addClass('disabled');
                     jQuery('.block-btn').addClass('disabled');
                     jQuery('.activate-btn').addClass('disabled');
                 }
                 else {
                     jQuery('.remove-btn').removeClass('disabled');
+                    jQuery('.set-current-btn').removeClass('disabled');
                     jQuery('.block-btn').removeClass('disabled');
                     jQuery('.activate-btn').removeClass('disabled');
                 }                
@@ -109,6 +113,14 @@
         
         jQuery('.remove-btn').on('click', function(){
             if ( !jQuery(this).is('.disabled')) {
+                jQuery('input[name=action]').val('delete');
+                jQuery('#delete-form').submit();
+            }
+        });
+        
+        jQuery('.set-current-btn').on('click', function(){
+            if ( !jQuery(this).is('.disabled')) {
+                jQuery('input[name=action]').val('current');                
                 jQuery('#delete-form').submit();
             }
         });
