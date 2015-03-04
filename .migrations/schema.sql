@@ -32,6 +32,7 @@ CREATE TABLE `bookmarks` (
   `date_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `parent_id` int(11) NOT NULL DEFAULT '0',
   `is_category` tinyint(1) NOT NULL DEFAULT '0',
+  `path` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
