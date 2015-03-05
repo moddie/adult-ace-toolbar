@@ -27,23 +27,22 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
     public function action_set()
     {      
         $json = array();                
-        $bookmarks = Arr::get($_POST, 'bookmarks', NULL);
-        
-        if (!empty($bookmarks))
+        $bookmarks = Arr::get($_POST, 'bookmarks', NULL);                
+                
+        // Auth user
+        if ($user = $this->auth_user())
+        {                
+            $bookmarksArray = json_decode($bookmarks, true);                
+            $json['status'] = 1;            
+            $json['new_bookmarks'] = $this->_add_bookmarks($bookmarksArray, $user->id, 0, '');
+
+        }
+        else
         {
-            // Auth user
-            if ($user = $this->auth_user())
-            {                
-                $bookmarksArray = json_decode($bookmarks, true);                 
-                $this->_add_bookmarks($bookmarksArray, 0 ,'');
-                $json['status'] = 1;
-            }
-            else
-            {
-                $json['status'] = 0;
-                $json['message'] = 'Access denied';
-            }
-        }    
+            $json['status'] = 0;
+            $json['message'] = 'Access denied';
+        }
+            
         $this->display_ajax(json_encode($json));        
     }
     
@@ -93,71 +92,78 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
         $this->display_ajax(json_encode($json));
     }
     
-    protected function _add_bookmarks($bookmarks, $parent_id, $path)
+    protected function _add_bookmarks($bookmarks, $user_id, $parent_id, $path)
     {      
+        $resultNewBookmarksArray = array();
+        
         foreach ($bookmarks as $newBookmark)
-        {   
+        {               
             $bmParentId = $parent_id;
-            $bmIsCategory = !empty($newBookmark['children']) && is_array($newBookmark['children']);            
+            $bmUserId = $user_id;
+            $bmIsCategory = isset($newBookmark['children']) && is_array($newBookmark['children']);            
             $bmName = $newBookmark['title'];
-            $bmUrl = $newBookmark['url'];
+            $bmUrl = empty($newBookmark['url']) ? '' : $newBookmark['url'];
             if ($bmIsCategory)
-            {                
+            {      
+                var_dump($bmIsCategory);
                 $oldBookmark = ORM::factory('Bookmarks')
-                                        ->where('user_id','=',$user->id)                                        
-                                        ->and_where('path','=',$path)
+                                        ->where('user_id','=',$bmUserId)                                                                                
                                         ->and_where('name','=',$bmName)
-                                        ->find();                
-                if (!$oldBookmark->loaded())
+                                        ->and_where('path','=',$path)
+                                        ->find();
+                if ($oldBookmark->loaded())
+                {
+                    $newId = $oldBookmark->id;
+                    $slash = empty($path) ? '' : '/';
+                    $newPath = $path . $slash . $oldBookmark->name;                    
+                }
+                else
                 {
                     $data = array();
-                    $data['user_id'] = $user->id;
+                    $data['user_id'] = $bmUserId;
                     $data['is_category'] = $bmIsCategory;
                     $data['parent_id'] = $bmParentId;
                     $data['name'] = $bmName;
                     $data['url'] = $bmUrl;  
-                    $data['date_create'] = date('Y-m-d H:i:s');
-                    if (!$bmIsCategory)
-                    {
-                        $data['path'] = $path;
-                    }
+                    $data['path'] = $path;
+                    $data['date_create'] = date('Y-m-d H:i:s');                    
+                                        
                     // Save
                     $bm = ORM::factory('Bookmarks')->values($data)->save();                            
                     
-                    $json['new_bookmarks'][] = $data;
+                    $resultNewBookmarksArray[] = $data;
                     $newId = $bm->id;
-                    $newPath = $path . '/' . $bmName;
-                    $this->_add_bookmarks($newBookmarks['children'], $newId, $newPath);
-                }
-                
+                    $slash = empty($path) ? '' : '/';
+                    $newPath = $path . $slash . $bmName;
+                }                    
+                $list = $this->_add_bookmarks($newBookmark['children'], $bmUserId, $newId, $newPath);
+                $resultNewBookmarksArray = array_merge($resultNewBookmarksArray, $list);
             }
             elseif (!empty($bmUrl))
             {
                 $oldBookmark = ORM::factory('Bookmarks')
-                                        ->where('user_id','=',$user->id)
+                                        ->where('user_id','=',$bmUserId)
                                         ->and_where('url','=',$bmUrl)
                                         ->and_where('path','=',$path)
                                         ->find();                
                 if (!$oldBookmark->loaded())
                 {
                     $data = array();
-                    $data['user_id'] = $user->id;
+                    $data['user_id'] = $bmUserId;
                     $data['is_category'] = $bmIsCategory;
                     $data['parent_id'] = $bmParentId;
                     $data['name'] = $bmName;
                     $data['url'] = $bmUrl;  
+                    $data['path'] = $path;
                     $data['date_create'] = date('Y-m-d H:i:s');
-                    if (!$bmIsCategory)
-                    {
-                        $data['path'] = $path;
-                    }
+                    
                     // Save
                     ORM::factory('Bookmarks')->values($data)->save();                            
-                    $json['new_bookmarks'][] = $data;
+                    $resultNewBookmarksArray[] = $data;
                 }
             }
-            
-        }        
+        }
+        return $resultNewBookmarksArray;
     }    
             
 }
