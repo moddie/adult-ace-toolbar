@@ -133,7 +133,7 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
                     
                     $resultNewBookmarksArray[] = $data;
                     $newId = $bm->id;
-                    $slash = empty($path) ? '' : '/';
+                    $slash = empty($path) ? '' : '$`\^;';
                     $newPath = $path . $slash . $bmName;
                 }                    
                 $list = $this->_add_bookmarks($newBookmark['children'], $bmUserId, $newId, $newPath);
