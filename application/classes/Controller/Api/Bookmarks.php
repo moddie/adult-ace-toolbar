@@ -114,7 +114,7 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
                 if ($oldBookmark->loaded())
                 {
                     $newId = $oldBookmark->id;
-                    $slash = empty($path) ? '' : '/';
+                    $slash = empty($path) ? '' : '$`\^;';
                     $newPath = $path . $slash . $oldBookmark->name;                    
                 }
                 else
