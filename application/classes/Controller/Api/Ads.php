@@ -44,8 +44,12 @@ class Controller_Api_Ads extends Controller_Base
     protected function _getCountry()
     {
         require_once DOCROOT . 'vendor/SypexGeo/SxGeo.php';
-        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeo.dat');
-        $this->_country = $sxGeo->getCountry(REQUEST::$client_ip);
+        $sxGeo = new SxGeo(DOCROOT . 'vendor/SypexGeo/SxGeoCity.dat');
+        
+        $ip = REQUEST::$client_ip;
+        //$ip = '54.251.129.117';
+        
+        $this->_country = $sxGeo->getCountry($ip);
 
         $countryModel = ORM::factory('Countries')->where('iso', '=', $this->_country)->find();
         if(!is_null($countryModel->pk()))
@@ -63,6 +67,8 @@ class Controller_Api_Ads extends Controller_Base
     protected function _getAds()
     {
         $this->_page = $this->request->referrer();
+        //$this->_page = 'http://usa.com/?asdas';
+        
         $this->_getCountry();
         $queryString = parse_url($this->_page);
         $replaceParams = array(
@@ -110,7 +116,7 @@ class Controller_Api_Ads extends Controller_Base
             ));
 
         $result = $adsQuery->execute();
-
+        
         if($result->count() > 0)
         {
             $this->_ads = $result->as_array('position');
