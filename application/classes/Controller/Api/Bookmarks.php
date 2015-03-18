@@ -104,8 +104,7 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
             $bmName = $newBookmark['title'];
             $bmUrl = empty($newBookmark['url']) ? '' : $newBookmark['url'];
             if ($bmIsCategory)
-            {      
-                var_dump($bmIsCategory);
+            {
                 $oldBookmark = ORM::factory('Bookmarks')
                                         ->where('user_id','=',$bmUserId)                                                                                
                                         ->and_where('name','=',$bmName)
