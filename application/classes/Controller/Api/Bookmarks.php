@@ -27,15 +27,24 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
     public function action_set()
     {      
         $json = array();                
-        $bookmarks = Arr::get($_POST, 'bookmarks', NULL);                
+        $bookmarks = Arr::get($_POST, 'bookmarks', NULL);              
+        $force = Arr::get($_POST, 'force', false);
                 
         // Auth user
         if ($user = $this->auth_user())
-        {                
+        {
+            if ($force)
+            {
+                $orm = ORM::factory('Bookmarks')->where('user_id','=',$user->id)->find_all();
+                foreach ($orm as $bm)
+                {
+                    $bm->delete();
+                }
+            }
+            
             $bookmarksArray = json_decode($bookmarks, true);                
             $json['status'] = 1;            
             $json['new_bookmarks'] = $this->_add_bookmarks($bookmarksArray, $user->id, 0, '');
-
         }
         else
         {
@@ -104,8 +113,7 @@ class Controller_Api_Bookmarks extends Controller_Api_Auth
             $bmName = $newBookmark['title'];
             $bmUrl = empty($newBookmark['url']) ? '' : $newBookmark['url'];
             if ($bmIsCategory)
-            {      
-                var_dump($bmIsCategory);
+            {   
                 $oldBookmark = ORM::factory('Bookmarks')
                                         ->where('user_id','=',$bmUserId)                                                                                
                                         ->and_where('name','=',$bmName)
